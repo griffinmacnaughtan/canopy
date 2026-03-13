@@ -5,6 +5,7 @@ This is the main entry point for the API. Routes are organized into modules
 under app/routes/ for maintainability.
 """
 
+import asyncio
 from contextlib import asynccontextmanager
 import structlog
 
@@ -36,13 +37,16 @@ async def lifespan(app: FastAPI):
     logger.info("startup_begin", env=settings.app_env)
 
     try:
-        await init_db()
+        async with asyncio.timeout(20):
+            await init_db()
 
-        # Seed with initial data if empty
-        async with async_session_factory() as session:
-            await seed_database(session)
+            # Seed with initial data if empty
+            async with async_session_factory() as session:
+                await seed_database(session)
 
         logger.info("startup_complete", database="ready")
+    except TimeoutError:
+        logger.error("startup_db_timeout", message="DB init timed out after 20s, continuing without DB")
     except Exception as exc:
         logger.error("startup_db_error", error=str(exc), error_type=type(exc).__name__)
         logger.warning("startup_continuing_without_db")
