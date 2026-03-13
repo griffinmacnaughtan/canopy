@@ -1,0 +1,156 @@
+export interface Asset {
+  id: string;
+  name: string;
+  sector: string;
+  region: string;
+  revenue_usd_m: number;
+  scope1_tco2e: number;
+  scope2_tco2e: number;
+  green_revenue_pct: number;
+  controversies: number;
+}
+
+export interface Portfolio {
+  id: string;
+  name: string;
+  description?: string;
+  assets: Asset[];
+}
+
+export interface PortfolioSummary {
+  id: string;
+  name: string;
+  description: string;
+  asset_count: number;
+}
+
+export interface PortfolioListResponse {
+  portfolios: PortfolioSummary[];
+}
+
+export interface ScoreResponse {
+  portfolio_id: string;
+  overall_score: number;
+  climate_risk: number;
+  transition_risk: number;
+  physical_risk: number;
+  opportunity_score: number;
+  top_risks: string[];
+  quick_wins: string[];
+  sector_breakdown: Record<string, number>;
+}
+
+export interface ScenarioRequest {
+  portfolio_id: string;
+  scenario: string;
+  carbon_price_usd?: number;
+  revenue_shock_pct?: number;
+}
+
+export interface ScenarioResponse {
+  portfolio_id: string;
+  scenario: string;
+  impact_summary: string;
+  est_ebitda_impact_pct: number;
+  emissions_delta_pct: number;
+  hotspots: string[];
+}
+
+export interface Scenario {
+  carbon_price: number;
+  revenue_shock: number;
+}
+
+export type Scenarios = Record<string, Scenario>;
+
+export interface CopilotRequest {
+  portfolio_id: string;
+  question: string;
+}
+
+export interface CopilotResponse {
+  portfolio_id: string;
+  answer: string;
+  citations: string[];
+}
+
+export interface CopilotStreamRequest {
+  question: string;
+  portfolio_id?: string;
+}
+
+export interface HealthResponse {
+  status: string;
+  version?: string;
+  checks?: {
+    database: boolean;
+    llm: boolean;
+  };
+}
+
+export interface CreatePortfolioRequest {
+  name: string;
+  description?: string;
+  assets: Asset[];
+}
+
+export interface CreatePortfolioResponse {
+  success: boolean;
+  portfolio: PortfolioSummary;
+  message: string;
+}
+
+// Pipeline Data Types
+export interface EmissionsFacility {
+  facility_id: string;
+  facility_name: string | null;
+  city: string | null;
+  state: string | null;
+  sector: string | null;
+  reporting_year: number | null;
+  total_emissions_mt_co2e: number | null;
+}
+
+export interface ClimateObservation {
+  location_id: string | null;
+  country_code: string | null;
+  region: string | null;
+  year: number | null;
+  month: number | null;
+  metric_name: string | null;
+  value: number | null;
+  unit: string | null;
+  scenario: string | null;
+  source: string;
+}
+
+export interface SectorEmissionsSummary {
+  sector: string;
+  total_emissions_mt_co2e: number;
+  facility_count: number;
+  avg_emissions_per_facility: number;
+}
+
+export interface PipelineStats {
+  total_emissions_records: number;
+  total_climate_records: number;
+  emissions_by_sector: SectorEmissionsSummary[];
+  latest_emissions_year: number | null;
+  states_covered: number;
+  data_sources: string[];
+  last_updated: string | null;
+}
+
+export interface PipelineRunInfo {
+  run_id: string;
+  status: string;
+  started_at: string;
+  completed_at: string | null;
+  records_extracted: number;
+  records_loaded: number;
+}
+
+export interface SectorInfo {
+  sector: string;
+  facility_count: number;
+}

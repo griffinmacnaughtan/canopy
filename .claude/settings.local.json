@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs:*)",
+      "Bash(python:*)",
+      "Bash(npx tsc:*)",
+      "Bash(cat /c/code/esg-copilot/.github/workflows/*.yml)"
+    ]
+  }
+}
