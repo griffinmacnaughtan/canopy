@@ -35,13 +35,18 @@ async def lifespan(app: FastAPI):
     """Initialize database on startup."""
     logger.info("startup_begin", env=settings.app_env)
 
-    await init_db()
+    try:
+        await init_db()
 
-    # Seed with initial data if empty
-    async with async_session_factory() as session:
-        await seed_database(session)
+        # Seed with initial data if empty
+        async with async_session_factory() as session:
+            await seed_database(session)
 
-    logger.info("startup_complete", database="ready")
+        logger.info("startup_complete", database="ready")
+    except Exception as exc:
+        logger.error("startup_db_error", error=str(exc), error_type=type(exc).__name__)
+        logger.warning("startup_continuing_without_db")
+
     yield
     logger.info("shutdown_complete")
 

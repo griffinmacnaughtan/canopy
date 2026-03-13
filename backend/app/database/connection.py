@@ -57,19 +57,9 @@ async_session_factory = async_sessionmaker(
 async def init_db():
     """Initialize the database on startup.
 
-    SQLite (local dev): creates all tables directly via SQLAlchemy metadata so
-    the project works out-of-the-box with zero configuration.
-
-    PostgreSQL (production): schema is owned exclusively by Alembic migrations
-    (``alembic upgrade head`` runs before the server starts via railway.toml /
-    Dockerfile CMD). Calling create_all against a live PostgreSQL instance would
-    risk schema drift between ORM metadata and migration history, so this
-    function is a no-op for any non-SQLite database.
+    Creates all tables using SQLAlchemy metadata (checkfirst=True, so existing
+    tables are left untouched). Works for both SQLite and PostgreSQL.
     """
-    if not settings.is_sqlite:
-        # PostgreSQL schema is managed by Alembic — never touch it here.
-        return
-
     from .models import Base
     # Import pipeline models to ensure their tables are created
     from . import pipeline_models  # noqa: F401
