@@ -51,10 +51,13 @@ class Settings(BaseSettings):
 
     @property
     def effective_database_url(self) -> str:
-        """Async database URL, normalizing bare postgresql:// from Railway."""
+        """Async database URL, normalizing bare postgresql:// or postgres:// from Railway."""
         url = self.database_url
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgres://"):
+            # Railway sometimes provides postgres:// (SQLAlchemy 2.x removed this alias)
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
         return url
 
     @property
@@ -65,10 +68,12 @@ class Settings(BaseSettings):
         if self.is_sqlite:
             # Convert async sqlite URL to sync
             return self.database_url.replace("sqlite+aiosqlite", "sqlite")
-        # Normalise bare postgresql:// from Railway, then swap driver
+        # Normalise bare postgresql:// or postgres:// from Railway, then swap driver
         url = self.database_url
         if url.startswith("postgresql://"):
             url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+psycopg2://", 1)
         return url.replace("postgresql+asyncpg", "postgresql+psycopg2")
 
     # LLM Provider

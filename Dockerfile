@@ -21,5 +21,8 @@ RUN groupadd -r esgcopilot && useradd -r -g esgcopilot esgcopilot
 RUN chown -R esgcopilot:esgcopilot /app
 USER esgcopilot
 
+# Build-time smoke test: if this fails the build log shows the exact traceback
+RUN python -c "from app.main import app; print('Import OK')"
+
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
