@@ -1,6 +1,6 @@
 """Prompt engineering for ESG Copilot."""
 
-from typing import List, Dict, Any
+from typing import Any
 
 SYSTEM_PROMPT = """You are an ESG and climate risk analyst copilot for institutional investors and finance teams. Your role is to provide actionable insights on portfolio climate risk, regulatory readiness, and transition opportunities.
 
@@ -59,9 +59,9 @@ Keep responses focused and executive-ready. Finance teams need insights they can
 
 
 def build_portfolio_context(
-    assets: List[Dict[str, Any]],
-    scores: Dict[str, Any],
-    scenarios: Dict[str, Any],
+    assets: list[dict[str, Any]],
+    scores: dict[str, Any],
+    scenarios: dict[str, Any],
 ) -> str:
     """Build portfolio context string for RAG injection.
 
@@ -107,8 +107,12 @@ def build_portfolio_context(
 
     # Asset details
     lines.append("### Portfolio Holdings\n")
-    lines.append("| Asset | Sector | Region | Revenue ($M) | Scope1+2 (tCO2e) | Intensity | Green Rev % | Controversies |")
-    lines.append("|-------|--------|--------|--------------|------------------|-----------|-------------|---------------|")
+    lines.append(
+        "| Asset | Sector | Region | Revenue ($M) | Scope1+2 (tCO2e) | Intensity | Green Rev % | Controversies |"
+    )
+    lines.append(
+        "|-------|--------|--------|--------------|------------------|-----------|-------------|---------------|"
+    )
 
     total_revenue = 0
     total_emissions = 0
@@ -136,7 +140,9 @@ def build_portfolio_context(
 
     # Portfolio totals
     avg_intensity = round(total_emissions / total_revenue, 2) if total_revenue > 0 else 0
-    lines.append(f"**Portfolio Totals:** ${total_revenue:,.0f}M revenue, {total_emissions:,.0f} tCO2e emissions, {avg_intensity} tCO2e/$M intensity")
+    lines.append(
+        f"**Portfolio Totals:** ${total_revenue:,.0f}M revenue, {total_emissions:,.0f} tCO2e emissions, {avg_intensity} tCO2e/$M intensity"
+    )
     lines.append("")
 
     # Scenarios
@@ -169,9 +175,13 @@ def build_user_message(
     parts = [f"Here is the current portfolio data:\n\n{context}"]
 
     if document_context:
-        parts.append(f"\n\n## Uploaded Documents\n\nThe user has uploaded the following documents for analysis:\n\n{document_context}")
+        parts.append(
+            f"\n\n## Uploaded Documents\n\nThe user has uploaded the following documents for analysis:\n\n{document_context}"
+        )
 
     parts.append(f"\n\n## User Question\n\n{question}")
-    parts.append("\n\nPlease provide a focused, actionable response based on the portfolio data and any uploaded documents above.")
+    parts.append(
+        "\n\nPlease provide a focused, actionable response based on the portfolio data and any uploaded documents above."
+    )
 
     return "".join(parts)

@@ -1,12 +1,12 @@
 """PostgreSQL loader for production data."""
 
-from dataclasses import dataclass, field
+import contextlib
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type
+from typing import Any
+
 import structlog
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from .staging import LoadResult
 
@@ -44,7 +44,7 @@ class PostgresLoader:
 
     async def load_climate_data(
         self,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
         upsert: bool = True,
     ) -> LoadResult:
         """
@@ -64,7 +64,7 @@ class PostgresLoader:
 
                 # Load in batches
                 for i in range(0, len(records), self.batch_size):
-                    batch = records[i:i + self.batch_size]
+                    batch = records[i : i + self.batch_size]
                     try:
                         if upsert:
                             await self._upsert_climate_batch(session, batch)
@@ -73,7 +73,7 @@ class PostgresLoader:
                         loaded += len(batch)
                     except Exception as e:
                         failed += len(batch)
-                        errors.append(f"Batch {i//self.batch_size}: {str(e)}")
+                        errors.append(f"Batch {i // self.batch_size}: {str(e)}")
 
                 await session.commit()
 
@@ -109,7 +109,7 @@ class PostgresLoader:
 
     async def load_emissions_data(
         self,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
         upsert: bool = True,
     ) -> LoadResult:
         """Load emissions data to production table."""
@@ -123,7 +123,7 @@ class PostgresLoader:
                 await self._ensure_emissions_table(session)
 
                 for i in range(0, len(records), self.batch_size):
-                    batch = records[i:i + self.batch_size]
+                    batch = records[i : i + self.batch_size]
                     try:
                         if upsert:
                             await self._upsert_emissions_batch(session, batch)
@@ -132,7 +132,7 @@ class PostgresLoader:
                         loaded += len(batch)
                     except Exception as e:
                         failed += len(batch)
-                        errors.append(f"Batch {i//self.batch_size}: {str(e)}")
+                        errors.append(f"Batch {i // self.batch_size}: {str(e)}")
 
                 await session.commit()
 
@@ -159,7 +159,8 @@ class PostgresLoader:
 
     async def _ensure_climate_table(self, session: AsyncSession) -> None:
         """Create climate_data table if it doesn't exist."""
-        await session.execute(text("""
+        await session.execute(
+            text("""
             CREATE TABLE IF NOT EXISTS climate_data (
                 id SERIAL PRIMARY KEY,
                 observation_date DATE,
@@ -182,22 +183,30 @@ class PostgresLoader:
                 loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(location_id, observation_date, metric_type, source)
             )
-        """))
+        """)
+        )
 
         # Create indexes
-        await session.execute(text("""
+        await session.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_climate_date ON climate_data(observation_date)
-        """))
-        await session.execute(text("""
+        """)
+        )
+        await session.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_climate_location ON climate_data(location_id)
-        """))
-        await session.execute(text("""
+        """)
+        )
+        await session.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_climate_metric ON climate_data(metric_name)
-        """))
+        """)
+        )
 
     async def _ensure_emissions_table(self, session: AsyncSession) -> None:
         """Create emissions_data table if it doesn't exist."""
-        await session.execute(text("""
+        await session.execute(
+            text("""
             CREATE TABLE IF NOT EXISTS emissions_data (
                 id SERIAL PRIMARY KEY,
                 facility_id VARCHAR(100),
@@ -221,30 +230,40 @@ class PostgresLoader:
                 loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(facility_id, reporting_year, source)
             )
-        """))
+        """)
+        )
 
         # Create indexes
-        await session.execute(text("""
+        await session.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_emissions_facility ON emissions_data(facility_id)
-        """))
-        await session.execute(text("""
+        """)
+        )
+        await session.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_emissions_sector ON emissions_data(sector)
-        """))
-        await session.execute(text("""
+        """)
+        )
+        await session.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_emissions_year ON emissions_data(reporting_year)
-        """))
-        await session.execute(text("""
+        """)
+        )
+        await session.execute(
+            text("""
             CREATE INDEX IF NOT EXISTS idx_emissions_state ON emissions_data(state)
-        """))
+        """)
+        )
 
     async def _upsert_climate_batch(
         self,
         session: AsyncSession,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
     ) -> None:
         """Upsert climate records (insert or update on conflict)."""
         for record in records:
-            await session.execute(text("""
+            await session.execute(
+                text("""
                 INSERT INTO climate_data (
                     observation_date, year, month, metric_name, metric_type,
                     value, unit, station_id, location_id, state_code, region,
@@ -259,35 +278,38 @@ class PostgresLoader:
                     value = EXCLUDED.value,
                     transformed_at = EXCLUDED.transformed_at,
                     loaded_at = CURRENT_TIMESTAMP
-            """), {
-                "observation_date": record.get("observation_date"),
-                "year": record.get("year"),
-                "month": record.get("month"),
-                "metric_name": record.get("metric_name"),
-                "metric_type": record.get("metric_type"),
-                "value": record.get("value") or record.get("annual_mean"),
-                "unit": record.get("unit"),
-                "station_id": record.get("station_id"),
-                "location_id": record.get("location_id") or record.get("country_code"),
-                "state_code": record.get("state_code"),
-                "region": record.get("region"),
-                "country_code": record.get("country_code"),
-                "scenario": record.get("scenario"),
-                "period_start": record.get("period_start"),
-                "period_end": record.get("period_end"),
-                "source": record.get("source"),
-                "transformed_at": record.get("transformed_at"),
-            })
+            """),
+                {
+                    "observation_date": record.get("observation_date"),
+                    "year": record.get("year"),
+                    "month": record.get("month"),
+                    "metric_name": record.get("metric_name"),
+                    "metric_type": record.get("metric_type"),
+                    "value": record.get("value") or record.get("annual_mean"),
+                    "unit": record.get("unit"),
+                    "station_id": record.get("station_id"),
+                    "location_id": record.get("location_id") or record.get("country_code"),
+                    "state_code": record.get("state_code"),
+                    "region": record.get("region"),
+                    "country_code": record.get("country_code"),
+                    "scenario": record.get("scenario"),
+                    "period_start": record.get("period_start"),
+                    "period_end": record.get("period_end"),
+                    "source": record.get("source"),
+                    "transformed_at": record.get("transformed_at"),
+                },
+            )
 
     async def _insert_climate_batch(
         self,
         session: AsyncSession,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
     ) -> None:
         """Insert climate records (ignore conflicts)."""
         for record in records:
-            try:
-                await session.execute(text("""
+            with contextlib.suppress(Exception):  # Skip duplicates
+                await session.execute(
+                    text("""
                     INSERT INTO climate_data (
                         observation_date, year, month, metric_name, metric_type,
                         value, unit, station_id, location_id, state_code, region,
@@ -298,18 +320,19 @@ class PostgresLoader:
                         :source, :transformed_at
                     )
                     ON CONFLICT DO NOTHING
-                """), record)
-            except Exception:
-                pass  # Skip duplicates
+                """),
+                    record,
+                )
 
     async def _upsert_emissions_batch(
         self,
         session: AsyncSession,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
     ) -> None:
         """Upsert emissions records."""
         for record in records:
-            await session.execute(text("""
+            await session.execute(
+                text("""
                 INSERT INTO emissions_data (
                     facility_id, facility_name, state, city, region,
                     industry_type, sector, reporting_year,
@@ -331,36 +354,39 @@ class PostgresLoader:
                     total_emissions_mt_co2e = EXCLUDED.total_emissions_mt_co2e,
                     transformed_at = EXCLUDED.transformed_at,
                     loaded_at = CURRENT_TIMESTAMP
-            """), {
-                "facility_id": record.get("facility_id"),
-                "facility_name": record.get("facility_name"),
-                "state": record.get("state"),
-                "city": record.get("city"),
-                "region": record.get("region"),
-                "industry_type": record.get("industry_type"),
-                "sector": record.get("sector"),
-                "reporting_year": record.get("reporting_year"),
-                "total_emissions_mt_co2e": record.get("total_emissions_mt_co2e"),
-                "co2_emissions_mt": record.get("co2_emissions_mt"),
-                "methane_emissions_mt_co2e": record.get("methane_emissions_mt_co2e"),
-                "n2o_emissions_mt_co2e": record.get("n2o_emissions_mt_co2e"),
-                "emissions_scope": record.get("emissions_scope"),
-                "latitude": record.get("latitude"),
-                "longitude": record.get("longitude"),
-                "naics_code": record.get("naics_code"),
-                "source": record.get("source"),
-                "transformed_at": record.get("transformed_at"),
-            })
+            """),
+                {
+                    "facility_id": record.get("facility_id"),
+                    "facility_name": record.get("facility_name"),
+                    "state": record.get("state"),
+                    "city": record.get("city"),
+                    "region": record.get("region"),
+                    "industry_type": record.get("industry_type"),
+                    "sector": record.get("sector"),
+                    "reporting_year": record.get("reporting_year"),
+                    "total_emissions_mt_co2e": record.get("total_emissions_mt_co2e"),
+                    "co2_emissions_mt": record.get("co2_emissions_mt"),
+                    "methane_emissions_mt_co2e": record.get("methane_emissions_mt_co2e"),
+                    "n2o_emissions_mt_co2e": record.get("n2o_emissions_mt_co2e"),
+                    "emissions_scope": record.get("emissions_scope"),
+                    "latitude": record.get("latitude"),
+                    "longitude": record.get("longitude"),
+                    "naics_code": record.get("naics_code"),
+                    "source": record.get("source"),
+                    "transformed_at": record.get("transformed_at"),
+                },
+            )
 
     async def _insert_emissions_batch(
         self,
         session: AsyncSession,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
     ) -> None:
         """Insert emissions records."""
         for record in records:
-            try:
-                await session.execute(text("""
+            with contextlib.suppress(Exception):
+                await session.execute(
+                    text("""
                     INSERT INTO emissions_data (
                         facility_id, facility_name, state, city, region,
                         industry_type, sector, reporting_year,
@@ -371,21 +397,19 @@ class PostgresLoader:
                         :total_emissions_mt_co2e, :source, :transformed_at
                     )
                     ON CONFLICT DO NOTHING
-                """), record)
-            except Exception:
-                pass
+                """),
+                    record,
+                )
 
-    async def get_latest_year(self, table: str) -> Optional[int]:
+    async def get_latest_year(self, table: str) -> int | None:
         """Get the latest reporting year in a table (for incremental loading)."""
         async with self.session_factory() as session:
             if table == "emissions_data":
-                result = await session.execute(text(
-                    "SELECT MAX(reporting_year) FROM emissions_data"
-                ))
+                result = await session.execute(
+                    text("SELECT MAX(reporting_year) FROM emissions_data")
+                )
             elif table == "climate_data":
-                result = await session.execute(text(
-                    "SELECT MAX(year) FROM climate_data"
-                ))
+                result = await session.execute(text("SELECT MAX(year) FROM climate_data"))
             else:
                 return None
 

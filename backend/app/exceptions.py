@@ -3,7 +3,7 @@
 Provides structured error handling with consistent error codes and messages.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class CanopyError(Exception):
@@ -15,14 +15,14 @@ class CanopyError(Exception):
 
     def __init__(
         self,
-        message: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
+        message: str | None = None,
+        details: dict[str, Any] | None = None,
     ):
         self.message = message or self.__class__.message
         self.details = details or {}
         super().__init__(self.message)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert exception to API response format."""
         result = {
             "error": self.error_code,

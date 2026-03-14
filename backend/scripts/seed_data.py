@@ -1,6 +1,5 @@
 """Seed script to populate the database with initial data."""
 
-import asyncio
 import sys
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.database.models import Base, AssetDB, PortfolioDB, ScenarioDB, UserDB
+from app.database.models import AssetDB, PortfolioDB, ScenarioDB, UserDB
 
 
 def seed_database():
@@ -129,9 +128,9 @@ def seed_database():
 
         session.commit()
         print("Database seeded successfully!")
-        print(f"  - Created 1 demo user")
+        print("  - Created 1 demo user")
         print(f"  - Created {len(assets)} assets")
-        print(f"  - Created 1 portfolio")
+        print("  - Created 1 portfolio")
         print(f"  - Created {len(scenarios)} scenarios")
 
 

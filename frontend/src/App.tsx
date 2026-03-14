@@ -16,6 +16,7 @@ import {
   PipelineExplorer,
 } from "@/components/dashboard";
 import { CopilotWorkspace } from "@/components/copilot";
+import { ErrorBoundary } from "@/components/ui";
 import { usePortfolio } from "@/hooks";
 import { PortfolioProvider } from "@/contexts/PortfolioContext";
 
@@ -106,56 +107,80 @@ function Dashboard() {
         </motion.div>
       </motion.section>
 
-      {/* Impact Summary - NEW prominent placement */}
+      {/* Impact Summary */}
       <section>
-        <ImpactSummary />
+        <ErrorBoundary name="Impact Summary">
+          <ImpactSummary />
+        </ErrorBoundary>
       </section>
 
       {/* Portfolio Signal - Key Metrics */}
       <section>
-        <PortfolioSignal />
+        <ErrorBoundary name="Portfolio Signal">
+          <PortfolioSignal />
+        </ErrorBoundary>
       </section>
 
       {/* AI Copilot - Full Width & Prominent */}
       <section>
-        <CopilotWorkspace />
+        <ErrorBoundary name="AI Copilot">
+          <CopilotWorkspace />
+        </ErrorBoundary>
       </section>
 
       {/* Portfolio Insights */}
       <section>
-        <PortfolioInsights />
+        <ErrorBoundary name="Portfolio Insights">
+          <PortfolioInsights />
+        </ErrorBoundary>
       </section>
 
       {/* Scenario Engine - Full Width */}
       <section>
-        <ScenarioEngine />
+        <ErrorBoundary name="Scenario Engine">
+          <ScenarioEngine />
+        </ErrorBoundary>
       </section>
 
       {/* Data Pipeline Explorer - Real EPA/Climate Data */}
       <section>
-        <PipelineExplorer />
+        <ErrorBoundary name="Pipeline Explorer">
+          <PipelineExplorer />
+        </ErrorBoundary>
       </section>
 
       {/* Regulatory Readiness - Full Width */}
       <section id="analysis-section">
-        <RegulatoryReadiness />
+        <ErrorBoundary name="Regulatory Readiness">
+          <RegulatoryReadiness />
+        </ErrorBoundary>
       </section>
 
       {/* Three Column: Emissions, Net Zero, Risk Narrative */}
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <EmissionsBreakdown />
-        <NetZeroPathway />
-        <RiskNarrative />
+        <ErrorBoundary name="Emissions Breakdown">
+          <EmissionsBreakdown />
+        </ErrorBoundary>
+        <ErrorBoundary name="Net Zero Pathway">
+          <NetZeroPathway />
+        </ErrorBoundary>
+        <ErrorBoundary name="Risk Narrative">
+          <RiskNarrative />
+        </ErrorBoundary>
       </section>
 
       {/* Sector Breakdown */}
       <section>
-        <SectorBreakdown />
+        <ErrorBoundary name="Sector Breakdown">
+          <SectorBreakdown />
+        </ErrorBoundary>
       </section>
 
       {/* Asset Inventory Table */}
       <section>
-        <AssetTable />
+        <ErrorBoundary name="Asset Table">
+          <AssetTable />
+        </ErrorBoundary>
       </section>
     </div>
   );

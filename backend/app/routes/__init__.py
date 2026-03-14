@@ -1,13 +1,11 @@
 """API routes for Canopy."""
 
-from fastapi import APIRouter
-
+from .copilot import router as copilot_router
+from .documents import router as documents_router
 from .health import router as health_router
+from .pipeline import router as pipeline_router
 from .portfolios import router as portfolios_router
 from .scoring import router as scoring_router
-from .documents import router as documents_router
-from .copilot import router as copilot_router
-from .pipeline import router as pipeline_router
 
 
 def register_routes(app):

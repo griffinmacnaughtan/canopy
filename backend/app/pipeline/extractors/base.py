@@ -3,7 +3,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -14,12 +15,12 @@ class ExtractionResult:
     """Result from a data extraction operation."""
 
     source: str
-    records: List[Dict[str, Any]]
+    records: list[dict[str, Any]]
     extracted_at: datetime = field(default_factory=datetime.utcnow)
     record_count: int = 0
-    watermark: Optional[str] = None  # For incremental loading
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
+    watermark: str | None = None  # For incremental loading
+    metadata: dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         self.record_count = len(self.records)
@@ -41,8 +42,8 @@ class BaseExtractor(ABC):
     @abstractmethod
     async def extract(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
         **kwargs,
     ) -> ExtractionResult:
         """

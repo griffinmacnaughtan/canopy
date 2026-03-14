@@ -1,11 +1,12 @@
 """EPA Envirofacts API extractor for emissions data."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import httpx
 
+from ..config import PipelineConfig
 from .base import BaseExtractor, ExtractionResult
-from ..config import PipelineConfig, SECTOR_EPA_MAPPING
 
 
 class EPAExtractor(BaseExtractor):
@@ -34,9 +35,7 @@ class EPAExtractor(BaseExtractor):
         try:
             async with httpx.AsyncClient(timeout=10) as client:
                 # Test with a simple query
-                response = await client.get(
-                    f"{self.base_url}/ghg_emitter_sector/rows/0:1/json"
-                )
+                response = await client.get(f"{self.base_url}/ghg_emitter_sector/rows/0:1/json")
                 return response.status_code == 200
         except Exception as e:
             self.logger.error("health_check_failed", error=str(e))
@@ -44,10 +43,10 @@ class EPAExtractor(BaseExtractor):
 
     async def extract(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        sectors: Optional[List[str]] = None,
-        states: Optional[List[str]] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        sectors: list[str] | None = None,
+        states: list[str] | None = None,
         **kwargs,
     ) -> ExtractionResult:
         """
@@ -71,9 +70,7 @@ class EPAExtractor(BaseExtractor):
             ("ghg_emitter_facilities", self._extract_facilities),
         ]
 
-        async with httpx.AsyncClient(
-            timeout=self.config.request_timeout_seconds
-        ) as client:
+        async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
             for table_name, extract_fn in tables:
                 try:
                     records = await extract_fn(
@@ -117,11 +114,11 @@ class EPAExtractor(BaseExtractor):
     async def _extract_ghg_emitters(
         self,
         client: httpx.AsyncClient,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        sectors: Optional[List[str]] = None,
-        states: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        sectors: list[str] | None = None,
+        states: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """Extract GHG emitter data by sector."""
         records = []
         offset = 0
@@ -194,11 +191,11 @@ class EPAExtractor(BaseExtractor):
     async def _extract_facilities(
         self,
         client: httpx.AsyncClient,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        sectors: Optional[List[str]] = None,
-        states: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        sectors: list[str] | None = None,
+        states: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """Extract facility-level details."""
         records = []
         offset = 0
@@ -219,9 +216,8 @@ class EPAExtractor(BaseExtractor):
 
             for record in data:
                 # Apply filters
-                if states:
-                    if record.get("state") not in states:
-                        continue
+                if states and record.get("state") not in states:
+                    continue
 
                 normalized = {
                     "facility_id": record.get("facility_id"),
@@ -248,7 +244,7 @@ class EPAExtractor(BaseExtractor):
 
         return records
 
-    def _parse_float(self, value: Any) -> Optional[float]:
+    def _parse_float(self, value: Any) -> float | None:
         """Safely parse float values."""
         if value is None:
             return None
@@ -260,7 +256,7 @@ class EPAExtractor(BaseExtractor):
     async def extract_by_sector(
         self,
         sector: str,
-        states: Optional[List[str]] = None,
+        states: list[str] | None = None,
     ) -> ExtractionResult:
         """
         Extract emissions data for a specific sector.

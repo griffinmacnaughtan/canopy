@@ -1,6 +1,7 @@
 export interface Asset {
   id: string;
   name: string;
+  ticker?: string | null;
   sector: string;
   region: string;
   revenue_usd_m: number;
@@ -20,8 +21,85 @@ export interface Portfolio {
 export interface PortfolioSummary {
   id: string;
   name: string;
-  description: string;
+  description?: string | null;
   asset_count: number;
+  is_sample?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Delete
+// ---------------------------------------------------------------------------
+
+export interface DeletePortfolioResponse {
+  success: boolean;
+  message: string;
+}
+
+// ---------------------------------------------------------------------------
+// Comparison
+// ---------------------------------------------------------------------------
+
+export interface PortfolioScoreSummary {
+  portfolio_id: string;
+  portfolio_name: string;
+  overall_score: number;
+  climate_risk: number;
+  transition_risk: number;
+  physical_risk: number;
+  opportunity_score: number;
+  asset_count: number;
+  total_emissions_tco2e: number;
+  avg_green_revenue_pct: number;
+  sector_breakdown: Record<string, number>;
+}
+
+export interface ComparePortfoliosResponse {
+  portfolio_a: PortfolioScoreSummary;
+  portfolio_b: PortfolioScoreSummary;
+  delta: Record<string, number>;
+  recommendation: string;
+}
+
+// ---------------------------------------------------------------------------
+// Export / Report
+// ---------------------------------------------------------------------------
+
+export interface ScenarioImpactItem {
+  scenario: string;
+  est_ebitda_impact_pct: number;
+  emissions_delta_pct: number;
+  hotspots: string[];
+}
+
+export interface PortfolioExportReport {
+  generated_at: string;
+  portfolio_id: string;
+  portfolio_name: string;
+  description?: string | null;
+  asset_count: number;
+  overall_score: number;
+  climate_risk: number;
+  transition_risk: number;
+  physical_risk: number;
+  opportunity_score: number;
+  top_risks: string[];
+  quick_wins: string[];
+  sector_breakdown: Record<string, number>;
+  assets: Record<string, unknown>[];
+  scenario_impacts: ScenarioImpactItem[];
+}
+
+// ---------------------------------------------------------------------------
+// CSV Import
+// ---------------------------------------------------------------------------
+
+export interface CsvImportResponse {
+  success: boolean;
+  portfolio: PortfolioSummary;
+  rows_imported: number;
+  rows_skipped: number;
+  warnings: string[];
+  message: string;
 }
 
 export interface PortfolioListResponse {

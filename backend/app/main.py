@@ -6,22 +6,22 @@ under app/routes/ for maintainability.
 """
 
 import asyncio
-from contextlib import asynccontextmanager
-import structlog
+from contextlib import asynccontextmanager, suppress
 
+import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
-from .database.connection import init_db, async_session_factory
-from .database.init import seed_database
 from .config import get_settings
-from .routes import register_routes
+from .database.connection import async_session_factory, init_db
+from .database.init import seed_database
 from .exceptions import CanopyError
+from .routes import register_routes
 
 # Initialize
 settings = get_settings()
@@ -51,7 +51,9 @@ async def lifespan(app: FastAPI):
     waiting for the database.  DB initialisation runs concurrently in the
     background — the /health endpoint succeeds right away regardless of DB state.
     """
-    logger.info("startup", env=settings.app_env, db_url_type="sqlite" if settings.is_sqlite else "postgres")
+    logger.info(
+        "startup", env=settings.app_env, db_url_type="sqlite" if settings.is_sqlite else "postgres"
+    )
     # Fire-and-forget: DB init must not block port binding
     asyncio.create_task(_init_db_background())
     yield
@@ -129,11 +131,24 @@ async def generic_error_handler(request: Request, exc: Exception):
 
 
 @app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    """Attach a unique request ID to every request for distributed tracing."""
+    import uuid as _uuid
+
+    request_id = request.headers.get("X-Request-ID") or str(_uuid.uuid4())
+    # Make the request ID available downstream via request.state
+    request.state.request_id = request_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
+
+
+@app.middleware("http")
 async def request_logging_middleware(request: Request, call_next):
     """Log all requests with timing."""
     import time
 
-    # Skip health check logging
+    # Skip health check logging to avoid noise
     if request.url.path.startswith("/health"):
         return await call_next(request)
 
@@ -148,6 +163,7 @@ async def request_logging_middleware(request: Request, call_next):
         status=response.status_code,
         duration_ms=round(duration_ms, 2),
         client_ip=get_remote_address(request),
+        request_id=getattr(request.state, "request_id", None),
     )
 
     return response
@@ -176,23 +192,17 @@ register_routes(app)
 
 
 # =============================================================================
-# Static Files
-# =============================================================================
-
-# Mount static files last to avoid route conflicts
-try:
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
-except Exception:
-    pass  # Static files directory may not exist in Docker/dev
-
-
-# =============================================================================
 # Application Info
 # =============================================================================
 
-@app.get("/info")
+# NOTE: Registered BEFORE the static-files mount — Starlette evaluates mounts
+# before decorated routes when both would match a path, so API routes must come
+# first to avoid the static handler returning a 404 for /info.
+
+
+@app.get("/info", tags=["Meta"])
 async def app_info():
-    """Get application info (useful for debugging)."""
+    """Return application metadata (version, environment, LLM provider)."""
     return {
         "name": "Canopy",
         "version": "2.2.0",
@@ -200,3 +210,12 @@ async def app_info():
         "llm_provider": settings.llm_provider,
         "debug": settings.debug,
     }
+
+
+# =============================================================================
+# Static Files
+# =============================================================================
+
+# Mounted last so API routes always take precedence over static file serving.
+with suppress(Exception):  # Static files directory may not exist in Docker/dev
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")

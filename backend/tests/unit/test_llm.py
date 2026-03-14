@@ -1,6 +1,5 @@
 """Unit tests for LLM prompt building."""
 
-import pytest
 from app.llm.prompts import (
     SYSTEM_PROMPT,
     build_portfolio_context,
@@ -59,9 +58,7 @@ class TestBuildPortfolioContext:
             "quick_wins": ["Improve efficiency"],
             "sector_breakdown": {"Utilities": 65.0},
         }
-        scenarios = {
-            "Net Zero": {"carbon_price": 120, "revenue_shock": -1.8}
-        }
+        scenarios = {"Net Zero": {"carbon_price": 120, "revenue_shock": -1.8}}
 
         context = build_portfolio_context(assets, scores, scenarios)
 

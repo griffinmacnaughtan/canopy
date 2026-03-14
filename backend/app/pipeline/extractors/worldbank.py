@@ -1,11 +1,12 @@
 """World Bank Climate API extractor."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import httpx
 
+from ..config import PipelineConfig
 from .base import BaseExtractor, ExtractionResult
-from ..config import PipelineConfig, CLIMATE_REGIONS
 
 
 class WorldBankClimateExtractor(BaseExtractor):
@@ -38,9 +39,7 @@ class WorldBankClimateExtractor(BaseExtractor):
         """Check World Bank Climate API availability."""
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(
-                    f"{self.base_url}/country/USA/mavg/tas/1980/2000"
-                )
+                response = await client.get(f"{self.base_url}/country/USA/mavg/tas/1980/2000")
                 return response.status_code == 200
         except Exception as e:
             self.logger.error("health_check_failed", error=str(e))
@@ -48,11 +47,11 @@ class WorldBankClimateExtractor(BaseExtractor):
 
     async def extract(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        countries: Optional[List[str]] = None,
-        variables: Optional[List[str]] = None,
-        scenarios: Optional[List[str]] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        countries: list[str] | None = None,
+        variables: list[str] | None = None,
+        scenarios: list[str] | None = None,
         **kwargs,
     ) -> ExtractionResult:
         """
@@ -86,9 +85,7 @@ class WorldBankClimateExtractor(BaseExtractor):
         all_records = []
         errors = []
 
-        async with httpx.AsyncClient(
-            timeout=self.config.request_timeout_seconds
-        ) as client:
+        async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
             for country in countries:
                 for variable in variables:
                     for scenario in scenarios:
@@ -137,7 +134,7 @@ class WorldBankClimateExtractor(BaseExtractor):
         scenario: str,
         start_year: int,
         end_year: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Fetch climate projection for a specific combination."""
         records = []
 
@@ -171,7 +168,9 @@ class WorldBankClimateExtractor(BaseExtractor):
                                 "period_start": period_start,
                                 "period_end": period_end,
                                 "gcm": item.get("gcm"),  # Global Climate Model
-                                "annual_mean": item.get("annualData", [None])[0] if item.get("annualData") else None,
+                                "annual_mean": item.get("annualData", [None])[0]
+                                if item.get("annualData")
+                                else None,
                                 "monthly_data": item.get("monthVals"),
                                 "_source": self.source_name,
                                 "_extracted_at": datetime.utcnow().isoformat(),
@@ -190,7 +189,7 @@ class WorldBankClimateExtractor(BaseExtractor):
 
     async def extract_historical_baseline(
         self,
-        countries: Optional[List[str]] = None,
+        countries: list[str] | None = None,
     ) -> ExtractionResult:
         """
         Extract historical climate baseline (1980-2000).
@@ -203,9 +202,7 @@ class WorldBankClimateExtractor(BaseExtractor):
         all_records = []
         errors = []
 
-        async with httpx.AsyncClient(
-            timeout=self.config.request_timeout_seconds
-        ) as client:
+        async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
             for country in countries:
                 for variable in ["tas", "pr"]:
                     try:
@@ -241,7 +238,7 @@ class WorldBankClimateExtractor(BaseExtractor):
 
     async def extract_temperature_anomalies(
         self,
-        countries: Optional[List[str]] = None,
+        countries: list[str] | None = None,
         scenario: str = "rcp85",
     ) -> ExtractionResult:
         """
@@ -274,23 +271,24 @@ class WorldBankClimateExtractor(BaseExtractor):
             if baseline_temps and record.get("annual_mean") is not None:
                 # Average baseline temperature
                 baseline_avg = sum(
-                    sum(b.get("monthly_data", [0]) or [0]) / 12
-                    for b in baseline_temps
+                    sum(b.get("monthly_data", [0]) or [0]) / 12 for b in baseline_temps
                 ) / len(baseline_temps)
 
                 anomaly = record["annual_mean"] - baseline_avg
 
-                anomaly_records.append({
-                    "country": country,
-                    "scenario": scenario,
-                    "period_start": record["period_start"],
-                    "period_end": record["period_end"],
-                    "temperature_anomaly_c": round(anomaly, 2),
-                    "baseline_temp_c": round(baseline_avg, 2),
-                    "projected_temp_c": record["annual_mean"],
-                    "_source": self.source_name,
-                    "_extracted_at": datetime.utcnow().isoformat(),
-                })
+                anomaly_records.append(
+                    {
+                        "country": country,
+                        "scenario": scenario,
+                        "period_start": record["period_start"],
+                        "period_end": record["period_end"],
+                        "temperature_anomaly_c": round(anomaly, 2),
+                        "baseline_temp_c": round(baseline_avg, 2),
+                        "projected_temp_c": record["annual_mean"],
+                        "_source": self.source_name,
+                        "_extracted_at": datetime.utcnow().isoformat(),
+                    }
+                )
 
         return ExtractionResult(
             source=self.source_name,

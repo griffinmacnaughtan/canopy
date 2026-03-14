@@ -1,12 +1,11 @@
 """Pipeline data endpoints - exposes real climate and emissions data."""
 
-from typing import Optional, List
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc
 
 from ..database.connection import get_db
 from ..database.pipeline_models import ClimateData, EmissionsData, PipelineRun
@@ -21,14 +20,15 @@ router = APIRouter(prefix="/pipeline", tags=["Pipeline Data"])
 
 class EmissionsFacility(BaseModel):
     """EPA facility emissions data."""
+
     facility_id: str
-    facility_name: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    sector: Optional[str]
-    reporting_year: Optional[int]
-    total_emissions_mt_co2e: Optional[float]
-    emissions_intensity: Optional[float] = None  # Computed if revenue available
+    facility_name: str | None
+    city: str | None
+    state: str | None
+    sector: str | None
+    reporting_year: int | None
+    total_emissions_mt_co2e: float | None
+    emissions_intensity: float | None = None  # Computed if revenue available
 
     class Config:
         from_attributes = True
@@ -36,15 +36,16 @@ class EmissionsFacility(BaseModel):
 
 class ClimateObservation(BaseModel):
     """Climate data point."""
-    location_id: Optional[str]
-    country_code: Optional[str]
-    region: Optional[str]
-    year: Optional[int]
-    month: Optional[int]
-    metric_name: Optional[str]
-    value: Optional[float]
-    unit: Optional[str]
-    scenario: Optional[str]
+
+    location_id: str | None
+    country_code: str | None
+    region: str | None
+    year: int | None
+    month: int | None
+    metric_name: str | None
+    value: float | None
+    unit: str | None
+    scenario: str | None
     source: str
 
     class Config:
@@ -53,6 +54,7 @@ class ClimateObservation(BaseModel):
 
 class SectorEmissionsSummary(BaseModel):
     """Aggregated emissions by sector."""
+
     sector: str
     total_emissions_mt_co2e: float
     facility_count: int
@@ -61,21 +63,23 @@ class SectorEmissionsSummary(BaseModel):
 
 class PipelineStats(BaseModel):
     """Pipeline data statistics."""
+
     total_emissions_records: int
     total_climate_records: int
-    emissions_by_sector: List[SectorEmissionsSummary]
-    latest_emissions_year: Optional[int]
+    emissions_by_sector: list[SectorEmissionsSummary]
+    latest_emissions_year: int | None
     states_covered: int
-    data_sources: List[str]
-    last_updated: Optional[datetime]
+    data_sources: list[str]
+    last_updated: datetime | None
 
 
 class PipelineRunInfo(BaseModel):
     """Pipeline run information."""
+
     run_id: str
     status: str
     started_at: datetime
-    completed_at: Optional[datetime]
+    completed_at: datetime | None
     records_extracted: int
     records_loaded: int
 
@@ -93,15 +97,11 @@ async def get_pipeline_stats(db: AsyncSession = Depends(get_db)):
     """Get overall pipeline data statistics."""
 
     # Count emissions records
-    emissions_count = await db.execute(
-        select(func.count()).select_from(EmissionsData)
-    )
+    emissions_count = await db.execute(select(func.count()).select_from(EmissionsData))
     total_emissions = emissions_count.scalar() or 0
 
     # Count climate records
-    climate_count = await db.execute(
-        select(func.count()).select_from(ClimateData)
-    )
+    climate_count = await db.execute(select(func.count()).select_from(ClimateData))
     total_climate = climate_count.scalar() or 0
 
     # Emissions by sector
@@ -128,34 +128,24 @@ async def get_pipeline_stats(db: AsyncSession = Depends(get_db)):
     ]
 
     # Latest year
-    latest_year_query = await db.execute(
-        select(func.max(EmissionsData.reporting_year))
-    )
+    latest_year_query = await db.execute(select(func.max(EmissionsData.reporting_year)))
     latest_year = latest_year_query.scalar()
 
     # States covered
-    states_query = await db.execute(
-        select(func.count(func.distinct(EmissionsData.state)))
-    )
+    states_query = await db.execute(select(func.count(func.distinct(EmissionsData.state))))
     states_covered = states_query.scalar() or 0
 
     # Data sources
-    sources_query = await db.execute(
-        select(func.distinct(EmissionsData.source))
-    )
+    sources_query = await db.execute(select(func.distinct(EmissionsData.source)))
     emissions_sources = [row[0] for row in sources_query.all() if row[0]]
 
-    climate_sources_query = await db.execute(
-        select(func.distinct(ClimateData.source))
-    )
+    climate_sources_query = await db.execute(select(func.distinct(ClimateData.source)))
     climate_sources = [row[0] for row in climate_sources_query.all() if row[0]]
 
     all_sources = list(set(emissions_sources + climate_sources))
 
     # Last updated
-    last_updated_query = await db.execute(
-        select(func.max(EmissionsData.loaded_at))
-    )
+    last_updated_query = await db.execute(select(func.max(EmissionsData.loaded_at)))
     last_updated = last_updated_query.scalar()
 
     return PipelineStats(
@@ -169,11 +159,11 @@ async def get_pipeline_stats(db: AsyncSession = Depends(get_db)):
     )
 
 
-@router.get("/emissions", response_model=List[EmissionsFacility])
+@router.get("/emissions", response_model=list[EmissionsFacility])
 async def get_emissions_data(
-    sector: Optional[str] = Query(None, description="Filter by sector"),
-    state: Optional[str] = Query(None, description="Filter by state"),
-    year: Optional[int] = Query(None, description="Filter by reporting year"),
+    sector: str | None = Query(None, description="Filter by sector"),
+    state: str | None = Query(None, description="Filter by state"),
+    year: int | None = Query(None, description="Filter by reporting year"),
     limit: int = Query(50, le=500, description="Max records to return"),
     offset: int = Query(0, description="Offset for pagination"),
     db: AsyncSession = Depends(get_db),
@@ -209,7 +199,7 @@ async def get_emissions_data(
     ]
 
 
-@router.get("/emissions/top-emitters", response_model=List[EmissionsFacility])
+@router.get("/emissions/top-emitters", response_model=list[EmissionsFacility])
 async def get_top_emitters(
     limit: int = Query(10, le=100),
     db: AsyncSession = Depends(get_db),
@@ -238,11 +228,11 @@ async def get_top_emitters(
     ]
 
 
-@router.get("/climate", response_model=List[ClimateObservation])
+@router.get("/climate", response_model=list[ClimateObservation])
 async def get_climate_data(
-    country: Optional[str] = Query(None, description="Filter by country code"),
-    metric: Optional[str] = Query(None, description="Filter by metric name"),
-    scenario: Optional[str] = Query(None, description="Filter by climate scenario"),
+    country: str | None = Query(None, description="Filter by country code"),
+    metric: str | None = Query(None, description="Filter by metric name"),
+    scenario: str | None = Query(None, description="Filter by climate scenario"),
     limit: int = Query(50, le=500),
     offset: int = Query(0),
     db: AsyncSession = Depends(get_db),
@@ -281,7 +271,7 @@ async def get_climate_data(
     ]
 
 
-@router.get("/runs", response_model=List[PipelineRunInfo])
+@router.get("/runs", response_model=list[PipelineRunInfo])
 async def get_pipeline_runs(
     limit: int = Query(10, le=50),
     db: AsyncSession = Depends(get_db),
@@ -289,9 +279,7 @@ async def get_pipeline_runs(
     """Get recent pipeline run history."""
 
     result = await db.execute(
-        select(PipelineRun)
-        .order_by(desc(PipelineRun.started_at))
-        .limit(limit)
+        select(PipelineRun).order_by(desc(PipelineRun.started_at)).limit(limit)
     )
     runs = result.scalars().all()
 
@@ -323,7 +311,4 @@ async def get_available_sectors(db: AsyncSession = Depends(get_db)):
     )
     rows = result.all()
 
-    return [
-        {"sector": row.sector, "facility_count": row.facility_count}
-        for row in rows
-    ]
+    return [{"sector": row.sector, "facility_count": row.facility_count} for row in rows]

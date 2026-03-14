@@ -1,8 +1,8 @@
 """Climate data transformers."""
 
-from datetime import datetime
-from typing import Any, Dict, List
 import statistics
+from datetime import datetime
+from typing import Any
 
 from .base import BaseTransformer, TransformResult
 
@@ -43,7 +43,7 @@ class ClimateDataTransformer(BaseTransformer):
         "53": "West",  # Washington
     }
 
-    def transform(self, records: List[Dict[str, Any]]) -> TransformResult:
+    def transform(self, records: list[dict[str, Any]]) -> TransformResult:
         """Transform climate records."""
         input_count = len(records)
         transformed = []
@@ -78,7 +78,7 @@ class ClimateDataTransformer(BaseTransformer):
             dropped_count=dropped,
         )
 
-    def _transform_noaa_record(self, record: Dict[str, Any]) -> Dict[str, Any] | None:
+    def _transform_noaa_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform NOAA climate observation."""
         data_type = record.get("datatype")
         value = record.get("value")
@@ -119,7 +119,7 @@ class ClimateDataTransformer(BaseTransformer):
             "transformed_at": datetime.utcnow().isoformat(),
         }
 
-    def _transform_worldbank_record(self, record: Dict[str, Any]) -> Dict[str, Any] | None:
+    def _transform_worldbank_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform World Bank climate projection."""
         country = record.get("country")
         variable = record.get("variable")
@@ -144,9 +144,11 @@ class ClimateDataTransformer(BaseTransformer):
 
         # Calculate annual average if only monthly data available
         if annual_mean is None and monthly_data:
-            annual_mean = statistics.mean(
-                v for v in monthly_data if v is not None
-            ) if any(v is not None for v in monthly_data) else None
+            annual_mean = (
+                statistics.mean(v for v in monthly_data if v is not None)
+                if any(v is not None for v in monthly_data)
+                else None
+            )
 
         return {
             "country_code": country,
@@ -163,7 +165,7 @@ class ClimateDataTransformer(BaseTransformer):
             "transformed_at": datetime.utcnow().isoformat(),
         }
 
-    def _transform_generic_record(self, record: Dict[str, Any]) -> Dict[str, Any] | None:
+    def _transform_generic_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Generic transformation for unknown sources."""
         # Pass through with basic cleanup
         cleaned = {}
@@ -182,8 +184,8 @@ class ClimateDataTransformer(BaseTransformer):
 
     def aggregate_monthly(
         self,
-        records: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        records: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """
         Aggregate daily climate observations to monthly summaries.
 
@@ -212,17 +214,19 @@ class ClimateDataTransformer(BaseTransformer):
             if not values:
                 continue
 
-            aggregated.append({
-                "location_id": location_id,
-                "year": year,
-                "month": month,
-                "metric_name": metric_name,
-                "mean_value": round(statistics.mean(values), 2),
-                "min_value": round(min(values), 2),
-                "max_value": round(max(values), 2),
-                "observation_count": len(values),
-                "aggregation": "monthly",
-                "aggregated_at": datetime.utcnow().isoformat(),
-            })
+            aggregated.append(
+                {
+                    "location_id": location_id,
+                    "year": year,
+                    "month": month,
+                    "metric_name": metric_name,
+                    "mean_value": round(statistics.mean(values), 2),
+                    "min_value": round(min(values), 2),
+                    "max_value": round(max(values), 2),
+                    "observation_count": len(values),
+                    "aggregation": "monthly",
+                    "aggregated_at": datetime.utcnow().isoformat(),
+                }
+            )
 
         return aggregated

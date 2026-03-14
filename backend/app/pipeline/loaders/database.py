@@ -1,11 +1,10 @@
 """Database loader using SQLAlchemy ORM - works with SQLite and PostgreSQL."""
 
-from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Any, Dict, List, Optional
 import json
-import structlog
+from datetime import datetime
+from typing import Any
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,7 +28,7 @@ class DatabaseLoader:
 
     async def load_emissions(
         self,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
     ) -> LoadResult:
         """Load emissions records to database."""
         start_time = datetime.utcnow()
@@ -107,7 +106,7 @@ class DatabaseLoader:
 
     async def load_climate(
         self,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
     ) -> LoadResult:
         """Load climate records to database."""
         start_time = datetime.utcnow()
@@ -171,9 +170,9 @@ class DatabaseLoader:
         records_extracted: int = 0,
         records_transformed: int = 0,
         records_loaded: int = 0,
-        sources: Optional[List[str]] = None,
-        errors: Optional[List[str]] = None,
-        started_at: Optional[datetime] = None,
+        sources: list[str] | None = None,
+        errors: list[str] | None = None,
+        started_at: datetime | None = None,
     ) -> PipelineRun:
         """Record a pipeline run in the database."""
         run = PipelineRun(
@@ -194,7 +193,7 @@ class DatabaseLoader:
 
         return run
 
-    def _parse_datetime(self, value: Any) -> Optional[datetime]:
+    def _parse_datetime(self, value: Any) -> datetime | None:
         """Parse datetime from various formats."""
         if value is None:
             return None

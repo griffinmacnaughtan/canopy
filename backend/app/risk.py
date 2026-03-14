@@ -1,6 +1,4 @@
-from typing import List, Dict, Tuple, Optional
 from .models import Asset
-
 
 # Default baselines if none provided
 DEFAULT_SECTOR_BASELINES = {
@@ -23,7 +21,7 @@ def _emissions_intensity(asset: Asset) -> float:
     return total / asset.revenue_usd_m if asset.revenue_usd_m > 0 else 0
 
 
-def _sector_weight(sector: str, key: str, sector_baselines: Dict) -> float:
+def _sector_weight(sector: str, key: str, sector_baselines: dict) -> float:
     """Get sector weight for transition or physical risk."""
     base = sector_baselines.get(sector, {"transition_risk": 0.5, "physical_risk": 0.5})
     # Support both old ("transition") and new ("transition_risk") key formats
@@ -32,9 +30,9 @@ def _sector_weight(sector: str, key: str, sector_baselines: Dict) -> float:
 
 
 def score_portfolio(
-    assets: List[Asset],
-    sector_baselines: Optional[Dict] = None,
-) -> Tuple[float, float, float, float, float, List[str], List[str], Dict[str, float]]:
+    assets: list[Asset],
+    sector_baselines: dict | None = None,
+) -> tuple[float, float, float, float, float, list[str], list[str], dict[str, float]]:
     if not assets:
         return 0, 0, 0, 0, 0, [], [], {}
 
@@ -43,7 +41,7 @@ def score_portfolio(
     transition_scores = []
     physical_scores = []
     opportunity_scores = []
-    sector_breakdown: Dict[str, List[float]] = {}
+    sector_breakdown: dict[str, list[float]] = {}
 
     for asset in assets:
         intensity = _emissions_intensity(asset)
@@ -54,13 +52,20 @@ def score_portfolio(
         # weight (0.5) scores ≈ 48/100, while high-carbon sectors (Energy at 0.9
         # weight) can reach 80+ before the cap. Intensity data aligned with
         # TCFD Annex 2 normalisation (revenue-based denominator).
-        transition = min(100, intensity * 0.08 * _sector_weight(asset.sector, "transition", baselines) * 100)
+        transition = min(
+            100, intensity * 0.08 * _sector_weight(asset.sector, "transition", baselines) * 100
+        )
 
         # Physical risk: controversy-adjusted sector baseline, mapped to 0-100.
         # Each controversy count adds 8% to the sector baseline — consistent with
         # MSCI ESG Ratings methodology, where governance controversies are the
         # strongest leading indicator of unmanaged physical climate exposure.
-        physical = min(100, (1 + asset.controversies * 0.08) * _sector_weight(asset.sector, "physical", baselines) * 100)
+        physical = min(
+            100,
+            (1 + asset.controversies * 0.08)
+            * _sector_weight(asset.sector, "physical", baselines)
+            * 100,
+        )
 
         # Opportunity: green revenue share converted to a 0-100 score.
         # The 1.6× multiplier reflects the valuation premium that NGFS Orderly
@@ -106,7 +111,9 @@ def score_portfolio(
     )
 
 
-def _build_top_risks(assets: List[Asset], transition_risk: float, physical_risk: float) -> List[str]:
+def _build_top_risks(
+    assets: list[Asset], transition_risk: float, physical_risk: float
+) -> list[str]:
     risks = []
     if transition_risk > 65:
         risks.append("High exposure to carbon pricing in Utilities and Materials")
@@ -118,7 +125,7 @@ def _build_top_risks(assets: List[Asset], transition_risk: float, physical_risk:
     return risks[:4]
 
 
-def _build_quick_wins(assets: List[Asset]) -> List[str]:
+def _build_quick_wins(assets: list[Asset]) -> list[str]:
     wins = []
     for asset in assets:
         if asset.green_revenue_pct < 10:
@@ -128,7 +135,9 @@ def _build_quick_wins(assets: List[Asset]) -> List[str]:
     return wins[:4]
 
 
-def scenario_impact(assets: List[Asset], carbon_price: float, revenue_shock_pct: float) -> Tuple[float, float, List[str]]:
+def scenario_impact(
+    assets: list[Asset], carbon_price: float, revenue_shock_pct: float
+) -> tuple[float, float, list[str]]:
     if not assets:
         return 0, 0, []
 
@@ -139,10 +148,10 @@ def scenario_impact(assets: List[Asset], carbon_price: float, revenue_shock_pct:
 
     hotspots = []
     for asset in sorted(assets, key=_emissions_intensity, reverse=True)[:3]:
-        hotspots.append(f"{asset.name} drives {round(_emissions_intensity(asset), 2)} tCO2e/$M revenue")
+        hotspots.append(
+            f"{asset.name} drives {round(_emissions_intensity(asset), 2)} tCO2e/$M revenue"
+        )
 
     emissions_delta = -min(12, carbon_price * 0.04)
 
     return round(ebitda_impact, 2), round(emissions_delta, 2), hotspots
-
-

@@ -3,7 +3,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -12,13 +13,14 @@ logger = structlog.get_logger()
 @dataclass
 class TransformResult:
     """Result from a data transformation."""
-    records: List[Dict[str, Any]]
+
+    records: list[dict[str, Any]]
     source: str
     transformed_at: datetime = field(default_factory=datetime.utcnow)
     input_count: int = 0
     output_count: int = 0
     dropped_count: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.output_count = len(self.records)
@@ -37,7 +39,7 @@ class BaseTransformer(ABC):
         pass
 
     @abstractmethod
-    def transform(self, records: List[Dict[str, Any]]) -> TransformResult:
+    def transform(self, records: list[dict[str, Any]]) -> TransformResult:
         """
         Transform a list of records.
 
@@ -91,7 +93,7 @@ class BaseTransformer(ABC):
             ]
             for fmt in formats:
                 try:
-                    return datetime.strptime(value[:len(fmt) + 2], fmt)
+                    return datetime.strptime(value[: len(fmt) + 2], fmt)
                 except (ValueError, IndexError):
                     continue
 

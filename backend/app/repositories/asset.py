@@ -1,6 +1,5 @@
 """Asset repository for database operations."""
 
-from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -15,24 +14,24 @@ class AssetRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_all(self) -> List[AssetDB]:
+    async def get_all(self) -> list[AssetDB]:
         """Get all assets."""
         result = await self.session.execute(select(AssetDB).order_by(AssetDB.name))
         return list(result.scalars().all())
 
-    async def get_by_id(self, asset_id: UUID) -> Optional[AssetDB]:
+    async def get_by_id(self, asset_id: UUID) -> AssetDB | None:
         """Get an asset by ID."""
         result = await self.session.execute(select(AssetDB).where(AssetDB.id == asset_id))
         return result.scalar_one_or_none()
 
-    async def get_by_sector(self, sector: str) -> List[AssetDB]:
+    async def get_by_sector(self, sector: str) -> list[AssetDB]:
         """Get assets by sector."""
         result = await self.session.execute(
             select(AssetDB).where(AssetDB.sector == sector).order_by(AssetDB.name)
         )
         return list(result.scalars().all())
 
-    async def get_by_region(self, region: str) -> List[AssetDB]:
+    async def get_by_region(self, region: str) -> list[AssetDB]:
         """Get assets by region."""
         result = await self.session.execute(
             select(AssetDB).where(AssetDB.region == region).order_by(AssetDB.name)
@@ -45,7 +44,7 @@ class AssetRepository:
         await self.session.flush()
         return asset
 
-    async def create_many(self, assets: List[AssetDB]) -> List[AssetDB]:
+    async def create_many(self, assets: list[AssetDB]) -> list[AssetDB]:
         """Create multiple assets."""
         self.session.add_all(assets)
         await self.session.flush()

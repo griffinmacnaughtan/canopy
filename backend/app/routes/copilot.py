@@ -1,25 +1,25 @@
 """AI Copilot endpoints with streaming and RAG."""
 
-from typing import AsyncIterator, Optional
-import structlog
+from collections.abc import AsyncIterator
 
+import structlog
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from sqlalchemy import desc, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..database.connection import get_db, async_session_factory
+from ..database.connection import async_session_factory, get_db
+from ..database.pipeline_models import EmissionsData
 from ..database.seed import SECTOR_BASELINES
-from ..database.pipeline_models import EmissionsData, ClimateData
+from ..documents import get_combined_document_text
+from ..exceptions import LLMError, ValidationError
+from ..llm import SYSTEM_PROMPT, build_portfolio_context, get_llm_client
+from ..llm.prompts import build_user_message
 from ..models import CopilotRequest, CopilotResponse, CopilotStreamRequest
 from ..risk import score_portfolio
-from ..documents import get_combined_document_text
-from ..llm import get_llm_client, SYSTEM_PROMPT, build_portfolio_context
-from ..llm.prompts import build_user_message
-from ..exceptions import ValidationError, LLMError
-from .portfolios import get_portfolio_by_id, db_asset_to_pydantic
+from .portfolios import db_asset_to_pydantic, get_portfolio_by_id
 from .scoring import get_scenarios_dict
 
 router = APIRouter()
@@ -27,7 +27,7 @@ logger = structlog.get_logger()
 limiter = Limiter(key_func=get_remote_address)
 
 
-async def get_pipeline_context(db: AsyncSession) -> Optional[str]:
+async def get_pipeline_context(db: AsyncSession) -> str | None:
     """Get summary of pipeline data for copilot context."""
     try:
         # Get emissions summary by sector
@@ -155,8 +155,8 @@ async def copilot(
     scenarios = await get_scenarios_dict(db)
 
     # Build the same rich context as the streaming endpoint
-    overall, climate, transition, physical, opportunity, top_risks, quick_wins, sector = score_portfolio(
-        pydantic_assets, SECTOR_BASELINES
+    overall, climate, transition, physical, opportunity, top_risks, quick_wins, sector = (
+        score_portfolio(pydantic_assets, SECTOR_BASELINES)
     )
 
     scores = {
@@ -204,7 +204,7 @@ async def copilot(
         answer = response.content
     except Exception as e:
         logger.error("copilot_llm_error", error=str(e))
-        raise LLMError(f"LLM request failed: {str(e)[:200]}")
+        raise LLMError(f"LLM request failed: {str(e)[:200]}") from e
 
     has_pipeline = pipeline_context is not None
     confidence = calculate_confidence_score(
@@ -229,7 +229,7 @@ async def copilot(
 
 async def generate_stream(
     question: str,
-    portfolio_id: Optional[str] = None,
+    portfolio_id: str | None = None,
 ) -> AsyncIterator[str]:
     """Generate streaming response from LLM with RAG context."""
     async with async_session_factory() as db:
@@ -238,8 +238,8 @@ async def generate_stream(
         scenarios = await get_scenarios_dict(db)
 
         # Build portfolio context
-        overall, climate, transition, physical, opportunity, top_risks, quick_wins, sector = score_portfolio(
-            pydantic_assets, SECTOR_BASELINES
+        overall, climate, transition, physical, opportunity, top_risks, quick_wins, sector = (
+            score_portfolio(pydantic_assets, SECTOR_BASELINES)
         )
 
         scores = {
@@ -284,7 +284,7 @@ async def generate_stream(
         )
 
         # Emit metadata event
-        yield f"event: metadata\ndata: {{\"confidence\": {confidence}, \"portfolio\": \"{portfolio.name}\"}}\n\n"
+        yield f'event: metadata\ndata: {{"confidence": {confidence}, "portfolio": "{portfolio.name}"}}\n\n'
 
         # Log context info
         doc_size = len(document_context) if document_context else 0
@@ -321,7 +321,7 @@ async def generate_stream(
 
     except Exception as e:
         logger.error("copilot_stream_error", error=str(e))
-        yield f"event: error\ndata: {{\"error\": \"{str(e)[:200]}\"}}\n\n"
+        yield f'event: error\ndata: {{"error": "{str(e)[:200]}"}}\n\n'
 
     yield "data: [DONE]\n\n"
 

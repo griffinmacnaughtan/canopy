@@ -1,16 +1,17 @@
 """Abstract base class for LLM clients."""
 
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import AsyncIterator, List, Optional
 
 
 @dataclass
 class LLMResponse:
     """Response from an LLM completion."""
+
     content: str
     model: str
-    usage: Optional[dict] = None
+    usage: dict | None = None
 
 
 class LLMClient(ABC):
@@ -19,8 +20,8 @@ class LLMClient(ABC):
     @abstractmethod
     async def complete(
         self,
-        messages: List[dict],
-        system_prompt: Optional[str] = None,
+        messages: list[dict],
+        system_prompt: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.7,
     ) -> LLMResponse:
@@ -40,8 +41,8 @@ class LLMClient(ABC):
     @abstractmethod
     async def stream(
         self,
-        messages: List[dict],
-        system_prompt: Optional[str] = None,
+        messages: list[dict],
+        system_prompt: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.7,
     ) -> AsyncIterator[str]:

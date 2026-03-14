@@ -14,6 +14,10 @@ import type {
   PortfolioListResponse,
   CreatePortfolioRequest,
   CreatePortfolioResponse,
+  DeletePortfolioResponse,
+  ComparePortfoliosResponse,
+  PortfolioExportReport,
+  CsvImportResponse,
   PipelineStats,
   EmissionsFacility,
   ClimateObservation,
@@ -385,6 +389,103 @@ export const api = {
     }
     const response = await fetch(`${API_BASE}/pipeline/sectors`);
     return handleResponse<SectorInfo[]>(response);
+  },
+
+  // -------------------------------------------------------------------------
+  // Portfolio management — delete, compare, export, CSV import
+  // -------------------------------------------------------------------------
+
+  async deletePortfolio(portfolioId: string): Promise<DeletePortfolioResponse> {
+    if (isDemoMode()) {
+      return { success: true, message: "Demo mode: Portfolio deleted (not persisted)" };
+    }
+    const response = await fetch(`${API_BASE}/portfolios/${portfolioId}`, {
+      method: "DELETE",
+    });
+    return handleResponse<DeletePortfolioResponse>(response);
+  },
+
+  async comparePortfolios(
+    aId: string,
+    bId: string
+  ): Promise<ComparePortfoliosResponse> {
+    if (isDemoMode()) {
+      // Return a minimal demo comparison
+      const score = MOCK_SCORE;
+      const stub = {
+        portfolio_id: aId,
+        portfolio_name: "Portfolio A",
+        overall_score: score.overall_score,
+        climate_risk: score.climate_risk,
+        transition_risk: score.transition_risk,
+        physical_risk: score.physical_risk,
+        opportunity_score: score.opportunity_score,
+        asset_count: MOCK_PORTFOLIO.assets.length,
+        total_emissions_tco2e: 0,
+        avg_green_revenue_pct: 20,
+        sector_breakdown: score.sector_breakdown,
+      };
+      return {
+        portfolio_a: stub,
+        portfolio_b: { ...stub, portfolio_id: bId, portfolio_name: "Portfolio B" },
+        delta: { overall_score: 0, climate_risk: 0, transition_risk: 0, physical_risk: 0, opportunity_score: 0, total_emissions_tco2e: 0 },
+        recommendation: "Demo mode: comparison not available.",
+      };
+    }
+    const response = await fetch(
+      `${API_BASE}/portfolios/compare/diff?a=${aId}&b=${bId}`
+    );
+    return handleResponse<ComparePortfoliosResponse>(response);
+  },
+
+  async exportPortfolio(portfolioId: string): Promise<PortfolioExportReport> {
+    if (isDemoMode()) {
+      return {
+        generated_at: new Date().toISOString(),
+        portfolio_id: portfolioId,
+        portfolio_name: MOCK_PORTFOLIO.name,
+        description: null,
+        asset_count: MOCK_PORTFOLIO.assets.length,
+        overall_score: MOCK_SCORE.overall_score,
+        climate_risk: MOCK_SCORE.climate_risk,
+        transition_risk: MOCK_SCORE.transition_risk,
+        physical_risk: MOCK_SCORE.physical_risk,
+        opportunity_score: MOCK_SCORE.opportunity_score,
+        top_risks: MOCK_SCORE.top_risks,
+        quick_wins: MOCK_SCORE.quick_wins,
+        sector_breakdown: MOCK_SCORE.sector_breakdown,
+        assets: MOCK_PORTFOLIO.assets.map((a) => ({ ...a })),
+        scenario_impacts: [],
+      };
+    }
+    const response = await fetch(`${API_BASE}/portfolios/${portfolioId}/export`);
+    return handleResponse<PortfolioExportReport>(response);
+  },
+
+  async importCsv(file: File, name?: string): Promise<CsvImportResponse> {
+    if (isDemoMode()) {
+      return {
+        success: true,
+        portfolio: {
+          id: "demo-csv-import",
+          name: name || file.name.replace(".csv", ""),
+          description: "Demo import",
+          asset_count: 3,
+          is_sample: false,
+        },
+        rows_imported: 3,
+        rows_skipped: 0,
+        warnings: [],
+        message: "Demo mode: CSV import simulated (not persisted)",
+      };
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    const url = name
+      ? `${API_BASE}/portfolios/import/csv?name=${encodeURIComponent(name)}`
+      : `${API_BASE}/portfolios/import/csv`;
+    const response = await fetch(url, { method: "POST", body: formData });
+    return handleResponse<CsvImportResponse>(response);
   },
 };
 

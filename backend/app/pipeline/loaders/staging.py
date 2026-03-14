@@ -1,10 +1,11 @@
 """Staging loader for temporary data storage before production load."""
 
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-import json
 from pathlib import Path
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -13,13 +14,14 @@ logger = structlog.get_logger()
 @dataclass
 class LoadResult:
     """Result from a data load operation."""
+
     success: bool
     records_loaded: int
     records_failed: int
     destination: str
     load_time_seconds: float = 0
-    errors: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class StagingLoader:
@@ -36,16 +38,16 @@ class StagingLoader:
     In production, this would be a staging schema in Postgres.
     """
 
-    def __init__(self, staging_dir: Optional[Path] = None):
+    def __init__(self, staging_dir: Path | None = None):
         self.staging_dir = staging_dir or Path(__file__).parent.parent.parent / "data" / "staging"
         self.staging_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logger.bind(loader="staging")
 
     def load(
         self,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
         source: str,
-        batch_id: Optional[str] = None,
+        batch_id: str | None = None,
     ) -> LoadResult:
         """
         Load records to staging area.
@@ -121,7 +123,7 @@ class StagingLoader:
                 errors=[str(e)],
             )
 
-    def _update_watermark(self, source: str, records: List[Dict[str, Any]]) -> None:
+    def _update_watermark(self, source: str, records: list[dict[str, Any]]) -> None:
         """Update the watermark file for incremental loading."""
         watermark_file = self.staging_dir / "watermarks.json"
 
@@ -154,7 +156,7 @@ class StagingLoader:
             with open(watermark_file, "w") as f:
                 json.dump(watermarks, f, indent=2)
 
-    def get_watermark(self, source: str) -> Optional[str]:
+    def get_watermark(self, source: str) -> str | None:
         """Get the last watermark for a source (for incremental loading)."""
         watermark_file = self.staging_dir / "watermarks.json"
 
@@ -167,7 +169,7 @@ class StagingLoader:
         source_wm = watermarks.get(source, {})
         return source_wm.get("last_value")
 
-    def get_staged_batches(self, source: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_staged_batches(self, source: str | None = None) -> list[dict[str, Any]]:
         """List all staged batches, optionally filtered by source."""
         batches = []
 
@@ -182,26 +184,28 @@ class StagingLoader:
                 if source and data.get("source") != source:
                     continue
 
-                batches.append({
-                    "file": str(file),
-                    "batch_id": data.get("batch_id"),
-                    "source": data.get("source"),
-                    "staged_at": data.get("staged_at"),
-                    "record_count": data.get("record_count"),
-                })
+                batches.append(
+                    {
+                        "file": str(file),
+                        "batch_id": data.get("batch_id"),
+                        "source": data.get("source"),
+                        "staged_at": data.get("staged_at"),
+                        "record_count": data.get("record_count"),
+                    }
+                )
 
             except (json.JSONDecodeError, KeyError):
                 continue
 
         return sorted(batches, key=lambda x: x.get("staged_at", ""), reverse=True)
 
-    def load_staged_batch(self, batch_file: str) -> List[Dict[str, Any]]:
+    def load_staged_batch(self, batch_file: str) -> list[dict[str, Any]]:
         """Load records from a staged batch file."""
         with open(batch_file) as f:
             data = json.load(f)
         return data.get("records", [])
 
-    def clear_staged(self, source: Optional[str] = None, before_date: Optional[datetime] = None) -> int:
+    def clear_staged(self, source: str | None = None, before_date: datetime | None = None) -> int:
         """Clear staged files, optionally filtered by source or date."""
         cleared = 0
 

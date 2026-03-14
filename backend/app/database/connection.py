@@ -1,9 +1,8 @@
 """Async SQLAlchemy database connection."""
 
+from collections.abc import AsyncGenerator
 from pathlib import Path
-from typing import AsyncGenerator
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool, StaticPool
 
@@ -70,12 +69,14 @@ async def _run_ddl(sql: str) -> None:
     safe to call repeatedly.
     """
     from sqlalchemy import text
+
     try:
         async with engine.begin() as conn:
             await conn.execute(text(sql))
     except Exception as exc:
         # Log and swallow — column/constraint probably already exists
         import logging
+
         logging.getLogger(__name__).warning("DDL skipped: %s | reason: %s", sql[:80], exc)
 
 
@@ -87,9 +88,9 @@ async def init_db():
     After create_all, runs lightweight idempotent column migrations so that
     schema changes added after the initial deploy are applied automatically.
     """
-    from .models import Base
     # Import pipeline models to ensure their tables are created
     from . import pipeline_models  # noqa: F401
+    from .models import Base
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -98,7 +99,9 @@ async def init_db():
         # Each statement runs in its own transaction — one failure can't undo
         # the others.  DO $$ blocks are avoided (asyncpg quirks in some envs).
         await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS description TEXT")
-        await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS is_sample BOOLEAN NOT NULL DEFAULT FALSE")
+        await _run_ddl(
+            "ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS is_sample BOOLEAN NOT NULL DEFAULT FALSE"
+        )
         await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS user_id UUID")
         await _run_ddl("ALTER TABLE assets ADD COLUMN IF NOT EXISTS ticker VARCHAR(20)")
 

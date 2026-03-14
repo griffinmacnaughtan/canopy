@@ -1,14 +1,12 @@
 """Factory for creating LLM clients."""
 
-from typing import Optional
-
 from ..config import get_settings
+from .anthropic_client import AnthropicClient
 from .base import LLMClient
 from .openai_client import OpenAIClient
-from .anthropic_client import AnthropicClient
 
 
-def get_llm_client(provider: Optional[str] = None) -> LLMClient:
+def get_llm_client(provider: str | None = None) -> LLMClient:
     """Get an LLM client based on configuration.
 
     Args:
