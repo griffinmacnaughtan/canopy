@@ -23,8 +23,16 @@ def _get_engine_kwargs():
         # SQLite needs StaticPool for async and check_same_thread=False
         kwargs["poolclass"] = StaticPool
         kwargs["connect_args"] = {"check_same_thread": False}
-    elif settings.is_development:
-        kwargs["poolclass"] = NullPool
+    else:
+        # PostgreSQL via asyncpg: enforce a hard connect timeout at the driver
+        # level.  asyncio.timeout() alone cannot interrupt an OS-level TCP
+        # connect() call inside asyncpg, which means the lifespan can stall
+        # indefinitely and uvicorn never binds the port within Railway's 100 s
+        # healthcheck window.  asyncpg's native `timeout` parameter does not
+        # depend on asyncio task cancellation.
+        kwargs["connect_args"] = {"timeout": 10}  # seconds
+        if settings.is_development:
+            kwargs["poolclass"] = NullPool
 
     return kwargs
 
