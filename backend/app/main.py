@@ -154,10 +154,14 @@ async def request_logging_middleware(request: Request, call_next):
 
 
 # CORS
+# allow_credentials=True is incompatible with allow_origins=["*"] — browsers
+# refuse to expose credentialled responses with a wildcard origin.  Use
+# allow_credentials only when specific origins are listed.
+_allow_creds = settings.allowed_origins != ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
-    allow_credentials=True,
+    allow_credentials=_allow_creds,
     allow_methods=["*"],
     allow_headers=["*"],
 )

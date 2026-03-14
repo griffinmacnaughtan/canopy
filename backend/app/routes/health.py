@@ -57,6 +57,9 @@ async def health_ready(db: AsyncSession = Depends(get_db)):
 async def force_seed():
     """Manually trigger database seeding. Safe to call multiple times."""
     from ..database.init import seed_database
-    async with async_session_factory() as session:
-        seeded = await seed_database(session)
-    return {"seeded": seeded, "message": "Seed complete" if seeded else "Already seeded"}
+    try:
+        async with async_session_factory() as session:
+            seeded = await seed_database(session)
+        return {"seeded": seeded, "message": "Seed complete" if seeded else "Already seeded"}
+    except Exception as exc:
+        return {"seeded": False, "error": str(exc), "type": type(exc).__name__}

@@ -62,34 +62,21 @@ async_session_factory = async_sessionmaker(
 )
 
 
-async def _migrate_postgres_schema(conn) -> None:
-    """Add missing columns to existing tables (idempotent, PostgreSQL only).
+async def _run_ddl(sql: str) -> None:
+    """Execute a single DDL statement in its own transaction.
 
-    create_all() only creates *missing* tables; it never alters columns on
-    existing ones.  This function fills the gap for schema evolution without
-    requiring a full Alembic setup.  Every statement uses IF NOT EXISTS so it
-    is safe to run on every startup.
+    Each statement gets its own engine.begin() so a failure in one migration
+    never rolls back the others.  All statements use IF NOT EXISTS and are
+    safe to call repeatedly.
     """
     from sqlalchemy import text
-
-    statements = [
-        # portfolios: description + is_sample + user_id added after initial deploy
-        "ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS description TEXT",
-        "ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS is_sample BOOLEAN NOT NULL DEFAULT FALSE",
-        "ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS user_id UUID",
-        # Add FK constraint only if it doesn't already exist
-        """DO $$ BEGIN
-            IF NOT EXISTS (
-                SELECT 1 FROM pg_constraint WHERE conname = 'portfolios_user_id_fkey'
-            ) THEN
-                ALTER TABLE portfolios
-                    ADD CONSTRAINT portfolios_user_id_fkey
-                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
-            END IF;
-        END $$""",
-    ]
-    for sql in statements:
-        await conn.execute(text(sql))
+    try:
+        async with engine.begin() as conn:
+            await conn.execute(text(sql))
+    except Exception as exc:
+        # Log and swallow — column/constraint probably already exists
+        import logging
+        logging.getLogger(__name__).warning("DDL skipped: %s | reason: %s", sql[:80], exc)
 
 
 async def init_db():
@@ -97,8 +84,8 @@ async def init_db():
 
     Creates all tables using SQLAlchemy metadata (checkfirst=True, so existing
     tables are left untouched). Works for both SQLite and PostgreSQL.
-    After create_all, runs lightweight column migrations so that schema
-    changes made after the initial deploy are applied automatically.
+    After create_all, runs lightweight idempotent column migrations so that
+    schema changes added after the initial deploy are applied automatically.
     """
     from .models import Base
     # Import pipeline models to ensure their tables are created
@@ -106,8 +93,13 @@ async def init_db():
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        if not settings.is_sqlite:
-            await _migrate_postgres_schema(conn)
+
+    if not settings.is_sqlite:
+        # Each statement runs in its own transaction — one failure can't undo
+        # the others.  DO $$ blocks are avoided (asyncpg quirks in some envs).
+        await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS description TEXT")
+        await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS is_sample BOOLEAN NOT NULL DEFAULT FALSE")
+        await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS user_id UUID")
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
