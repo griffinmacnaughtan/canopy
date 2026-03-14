@@ -1,4 +1,5 @@
 export { Button, buttonVariants } from "./button";
+export { ErrorBoundary } from "./ErrorBoundary";
 export {
   Card,
   CardHeader,

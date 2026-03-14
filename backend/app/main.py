@@ -129,11 +129,24 @@ async def generic_error_handler(request: Request, exc: Exception):
 
 
 @app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    """Attach a unique request ID to every request for distributed tracing."""
+    import uuid as _uuid
+
+    request_id = request.headers.get("X-Request-ID") or str(_uuid.uuid4())
+    # Make the request ID available downstream via request.state
+    request.state.request_id = request_id
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
+
+
+@app.middleware("http")
 async def request_logging_middleware(request: Request, call_next):
     """Log all requests with timing."""
     import time
 
-    # Skip health check logging
+    # Skip health check logging to avoid noise
     if request.url.path.startswith("/health"):
         return await call_next(request)
 
@@ -148,6 +161,7 @@ async def request_logging_middleware(request: Request, call_next):
         status=response.status_code,
         duration_ms=round(duration_ms, 2),
         client_ip=get_remote_address(request),
+        request_id=getattr(request.state, "request_id", None),
     )
 
     return response
@@ -176,23 +190,16 @@ register_routes(app)
 
 
 # =============================================================================
-# Static Files
-# =============================================================================
-
-# Mount static files last to avoid route conflicts
-try:
-    app.mount("/", StaticFiles(directory="static", html=True), name="static")
-except Exception:
-    pass  # Static files directory may not exist in Docker/dev
-
-
-# =============================================================================
 # Application Info
 # =============================================================================
 
-@app.get("/info")
+# NOTE: Registered BEFORE the static-files mount — Starlette evaluates mounts
+# before decorated routes when both would match a path, so API routes must come
+# first to avoid the static handler returning a 404 for /info.
+
+@app.get("/info", tags=["Meta"])
 async def app_info():
-    """Get application info (useful for debugging)."""
+    """Return application metadata (version, environment, LLM provider)."""
     return {
         "name": "Canopy",
         "version": "2.2.0",
@@ -200,3 +207,14 @@ async def app_info():
         "llm_provider": settings.llm_provider,
         "debug": settings.debug,
     }
+
+
+# =============================================================================
+# Static Files
+# =============================================================================
+
+# Mounted last so API routes always take precedence over static file serving.
+try:
+    app.mount("/", StaticFiles(directory="static", html=True), name="static")
+except Exception:
+    pass  # Static files directory may not exist in Docker/dev

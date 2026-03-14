@@ -1,16 +1,20 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from datetime import datetime
+from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional, Dict, Any
+
 
 class Asset(BaseModel):
     id: str
     name: str
+    ticker: Optional[str] = None
     sector: str
     region: str
-    revenue_usd_m: float = Field(..., gt=0)
-    scope1_tco2e: float = Field(..., ge=0)
-    scope2_tco2e: float = Field(..., ge=0)
-    green_revenue_pct: float = Field(..., ge=0, le=100)
-    controversies: int = Field(0, ge=0, le=5)
+    revenue_usd_m: float = Field(..., gt=0, description="Annual revenue in USD millions")
+    scope1_tco2e: float = Field(..., ge=0, description="Scope 1 emissions in tCO2e")
+    scope2_tco2e: float = Field(..., ge=0, description="Scope 2 emissions in tCO2e")
+    green_revenue_pct: float = Field(..., ge=0, le=100, description="Percentage of green revenue (0-100)")
+    controversies: int = Field(0, ge=0, le=5, description="ESG controversy score (0-5)")
+
 
 class Portfolio(BaseModel):
     id: str
@@ -23,13 +27,15 @@ class PortfolioSummary(BaseModel):
     """Summary of a portfolio without asset details."""
     id: str
     name: str
-    description: str
+    description: Optional[str] = None
     asset_count: int
+    is_sample: bool = False
 
 
 class PortfolioListResponse(BaseModel):
     """Response listing all available portfolios."""
     portfolios: List[PortfolioSummary]
+
 
 class ScoreResponse(BaseModel):
     portfolio_id: str
@@ -42,11 +48,13 @@ class ScoreResponse(BaseModel):
     quick_wins: List[str]
     sector_breakdown: Dict[str, float]
 
+
 class ScenarioRequest(BaseModel):
     portfolio_id: Optional[str] = None
     scenario: str
-    carbon_price_usd: Optional[float] = None
-    revenue_shock_pct: Optional[float] = None
+    carbon_price_usd: Optional[float] = Field(None, gt=0)
+    revenue_shock_pct: Optional[float] = Field(None, ge=-100, le=100)
+
 
 class ScenarioResponse(BaseModel):
     portfolio_id: str
@@ -56,9 +64,11 @@ class ScenarioResponse(BaseModel):
     emissions_delta_pct: float
     hotspots: List[str]
 
+
 class CopilotRequest(BaseModel):
     portfolio_id: Optional[str] = None
-    question: str
+    question: str = Field(..., min_length=3, max_length=2000)
+
 
 class CopilotResponse(BaseModel):
     portfolio_id: str
@@ -69,7 +79,7 @@ class CopilotResponse(BaseModel):
 
 class CopilotStreamRequest(BaseModel):
     """Request for streaming copilot endpoint."""
-    question: str
+    question: str = Field(..., min_length=3, max_length=2000)
     portfolio_id: Optional[str] = None
 
 
@@ -94,13 +104,101 @@ class DocumentListResponse(BaseModel):
 
 class CreatePortfolioRequest(BaseModel):
     """Request to create a custom portfolio."""
-    name: str
-    description: Optional[str] = None
-    assets: List[Asset]
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=500)
+    assets: List[Asset] = Field(..., min_length=1)
+
+    @field_validator("name")
+    @classmethod
+    def name_must_not_be_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Portfolio name cannot be blank")
+        return v.strip()
 
 
 class CreatePortfolioResponse(BaseModel):
     """Response after creating a portfolio."""
     success: bool
     portfolio: PortfolioSummary
+    message: str
+
+
+class DeletePortfolioResponse(BaseModel):
+    """Response after deleting a portfolio."""
+    success: bool
+    message: str
+
+
+# ---------------------------------------------------------------------------
+# Portfolio Comparison
+# ---------------------------------------------------------------------------
+
+class PortfolioScoreSummary(BaseModel):
+    """Compact score summary used in comparisons."""
+    portfolio_id: str
+    portfolio_name: str
+    overall_score: float
+    climate_risk: float
+    transition_risk: float
+    physical_risk: float
+    opportunity_score: float
+    asset_count: int
+    total_emissions_tco2e: float
+    avg_green_revenue_pct: float
+    sector_breakdown: Dict[str, float]
+
+
+class ComparePortfoliosResponse(BaseModel):
+    """Side-by-side comparison of two portfolios."""
+    portfolio_a: PortfolioScoreSummary
+    portfolio_b: PortfolioScoreSummary
+    delta: Dict[str, float]  # portfolio_b minus portfolio_a for numeric fields
+    recommendation: str
+
+
+# ---------------------------------------------------------------------------
+# Portfolio Export / Report
+# ---------------------------------------------------------------------------
+
+class ScenarioImpactItem(BaseModel):
+    scenario: str
+    est_ebitda_impact_pct: float
+    emissions_delta_pct: float
+    hotspots: List[str]
+
+
+class PortfolioExportReport(BaseModel):
+    """Comprehensive risk report exported from a portfolio."""
+    generated_at: str  # ISO-8601 timestamp
+    portfolio_id: str
+    portfolio_name: str
+    description: Optional[str]
+    asset_count: int
+    # Scores
+    overall_score: float
+    climate_risk: float
+    transition_risk: float
+    physical_risk: float
+    opportunity_score: float
+    # Narrative
+    top_risks: List[str]
+    quick_wins: List[str]
+    sector_breakdown: Dict[str, float]
+    # Holdings
+    assets: List[Dict[str, Any]]
+    # Scenarios
+    scenario_impacts: List[ScenarioImpactItem]
+
+
+# ---------------------------------------------------------------------------
+# CSV Import
+# ---------------------------------------------------------------------------
+
+class CsvImportResponse(BaseModel):
+    """Response after importing a portfolio from CSV."""
+    success: bool
+    portfolio: PortfolioSummary
+    rows_imported: int
+    rows_skipped: int
+    warnings: List[str]
     message: str
