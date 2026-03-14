@@ -12,11 +12,14 @@ async def seed_database(session: AsyncSession) -> bool:
     """Seed the database with initial data if empty.
 
     Returns True if seeding was performed, False if data already exists.
+    Checks each entity type independently so a partially-seeded DB
+    (e.g. scenarios exist but portfolios don't) never causes a unique-
+    constraint violation that silently rolls back the whole commit.
     """
-    # Check if we already have data
+    # Check portfolios (primary seeding gate)
     result = await session.execute(select(PortfolioDB).limit(1))
     if result.scalar_one_or_none() is not None:
-        return False  # Data already exists
+        return False  # Already fully seeded
 
     print("[INIT] Seeding database with real company data...")
 
@@ -46,24 +49,26 @@ async def seed_database(session: AsyncSession) -> bool:
             description=portfolio_data["description"],
             is_sample=True,
         )
-        # Add assets to portfolio
         for asset_name in portfolio_data["asset_names"]:
             if asset_name in asset_map:
                 portfolio.assets.append(asset_map[asset_name])
         session.add(portfolio)
 
-    # Create climate scenarios
-    for scenario_data in CLIMATE_SCENARIOS:
-        scenario = ScenarioDB(
-            id=uuid.uuid4(),
-            name=scenario_data["name"],
-            description=scenario_data["description"],
-            carbon_price=scenario_data["carbon_price"],
-            revenue_shock=scenario_data["revenue_shock"],
-            is_default=scenario_data["is_default"],
-        )
-        session.add(scenario)
+    # Only insert scenarios if none exist — scenarios.name has a unique
+    # constraint and a previous partial run may have already committed them.
+    result = await session.execute(select(ScenarioDB).limit(1))
+    if result.scalar_one_or_none() is None:
+        for scenario_data in CLIMATE_SCENARIOS:
+            scenario = ScenarioDB(
+                id=uuid.uuid4(),
+                name=scenario_data["name"],
+                description=scenario_data["description"],
+                carbon_price=scenario_data["carbon_price"],
+                revenue_shock=scenario_data["revenue_shock"],
+                is_default=scenario_data["is_default"],
+            )
+            session.add(scenario)
 
     await session.commit()
-    print(f"[INIT] Seeded {len(REAL_ASSETS)} assets, {len(SAMPLE_PORTFOLIOS)} portfolios, {len(CLIMATE_SCENARIOS)} scenarios")
+    print(f"[INIT] Seeded {len(REAL_ASSETS)} assets, {len(SAMPLE_PORTFOLIOS)} portfolios")
     return True
