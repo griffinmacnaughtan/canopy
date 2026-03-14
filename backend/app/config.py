@@ -2,7 +2,7 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List, Literal
+from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -23,7 +23,9 @@ class Settings(BaseSettings):
     )
 
     # Application
-    app_env: Literal["development", "staging", "production"] = "development"
+    # Use plain str (not Literal) so unexpected Railway values like "Production"
+    # or "prod" don't cause a Pydantic ValidationError crash at startup.
+    app_env: str = "development"
     debug: bool = True
     api_host: str = "0.0.0.0"
     api_port: int = 8000
@@ -77,7 +79,7 @@ class Settings(BaseSettings):
         return url.replace("postgresql+asyncpg", "postgresql+psycopg2")
 
     # LLM Provider
-    llm_provider: Literal["anthropic", "openai"] = "anthropic"
+    llm_provider: str = "anthropic"
     anthropic_api_key: str = ""
     openai_api_key: str = ""
 
@@ -87,7 +89,7 @@ class Settings(BaseSettings):
 
     # Logging
     log_level: str = "INFO"
-    log_format: Literal["json", "console"] = "json"
+    log_format: str = "json"
 
     @property
     def is_production(self) -> bool:

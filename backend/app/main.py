@@ -31,28 +31,31 @@ logger = structlog.get_logger()
 limiter = Limiter(key_func=get_remote_address)
 
 
+async def _init_db_background() -> None:
+    """Run database init + seed in a background task so it never blocks port binding."""
+    try:
+        logger.info("db_init_start")
+        await init_db()
+        async with async_session_factory() as session:
+            await seed_database(session)
+        logger.info("db_init_complete")
+    except Exception as exc:
+        # Log but don't crash — the app still serves requests; DB-dependent
+        # endpoints will return 500s until the database becomes reachable.
+        logger.error("db_init_failed", error=str(exc), error_type=type(exc).__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database on startup."""
-    logger.info("startup_begin", env=settings.app_env)
-
-    try:
-        async with asyncio.timeout(20):
-            await init_db()
-
-            # Seed with initial data if empty
-            async with async_session_factory() as session:
-                await seed_database(session)
-
-        logger.info("startup_complete", database="ready")
-    except TimeoutError:
-        logger.error("startup_db_timeout", message="DB init timed out after 20s, continuing without DB")
-    except Exception as exc:
-        logger.error("startup_db_error", error=str(exc), error_type=type(exc).__name__)
-        logger.warning("startup_continuing_without_db")
-
+    """Application lifespan: yield immediately so uvicorn binds the port without
+    waiting for the database.  DB initialisation runs concurrently in the
+    background — the /health endpoint succeeds right away regardless of DB state.
+    """
+    logger.info("startup", env=settings.app_env, db_url_type="sqlite" if settings.is_sqlite else "postgres")
+    # Fire-and-forget: DB init must not block port binding
+    asyncio.create_task(_init_db_background())
     yield
-    logger.info("shutdown_complete")
+    logger.info("shutdown")
 
 
 # Create app
