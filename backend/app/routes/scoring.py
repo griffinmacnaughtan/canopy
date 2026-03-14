@@ -1,17 +1,15 @@
 """Scoring and scenario endpoints."""
 
-from typing import Optional
-
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.connection import get_db
 from ..database.models import ScenarioDB
 from ..database.seed import SECTOR_BASELINES
-from ..models import ScoreResponse, ScenarioRequest, ScenarioResponse
-from ..risk import score_portfolio, scenario_impact
-from .portfolios import get_portfolio_by_id, db_asset_to_pydantic
+from ..models import ScenarioRequest, ScenarioResponse, ScoreResponse
+from ..risk import scenario_impact, score_portfolio
+from .portfolios import db_asset_to_pydantic, get_portfolio_by_id
 
 router = APIRouter()
 
@@ -31,15 +29,15 @@ async def get_scenarios_dict(db: AsyncSession) -> dict:
 
 @router.get("/score", response_model=ScoreResponse)
 async def portfolio_score(
-    portfolio_id: Optional[str] = Query(None, description="Portfolio ID"),
+    portfolio_id: str | None = Query(None, description="Portfolio ID"),
     db: AsyncSession = Depends(get_db),
 ):
     """Calculate and return portfolio risk scores."""
     portfolio = await get_portfolio_by_id(portfolio_id, db)
     pydantic_assets = [db_asset_to_pydantic(a) for a in portfolio.assets]
 
-    overall, climate, transition, physical, opportunity, top_risks, quick_wins, sector = score_portfolio(
-        pydantic_assets, SECTOR_BASELINES
+    overall, climate, transition, physical, opportunity, top_risks, quick_wins, sector = (
+        score_portfolio(pydantic_assets, SECTOR_BASELINES)
     )
 
     return ScoreResponse(
@@ -75,12 +73,18 @@ async def run_scenario(
 
     if baseline:
         carbon_price = request.carbon_price_usd or baseline["carbon_price"]
-        revenue_shock = request.revenue_shock_pct if request.revenue_shock_pct is not None else baseline["revenue_shock"]
+        revenue_shock = (
+            request.revenue_shock_pct
+            if request.revenue_shock_pct is not None
+            else baseline["revenue_shock"]
+        )
     else:
         carbon_price = request.carbon_price_usd or 100
         revenue_shock = request.revenue_shock_pct or -2.5
 
-    ebitda_impact, emissions_delta, hotspots = scenario_impact(pydantic_assets, carbon_price, revenue_shock)
+    ebitda_impact, emissions_delta, hotspots = scenario_impact(
+        pydantic_assets, carbon_price, revenue_shock
+    )
     summary = (
         f"Scenario '{request.scenario}' applies a ${carbon_price}/tCO2e price and {revenue_shock}% revenue shock. "
         f"Estimated EBITDA impact {ebitda_impact}% with emissions change {emissions_delta}%."

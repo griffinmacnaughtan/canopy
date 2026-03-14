@@ -1,14 +1,13 @@
 """Tests for custom exception handling."""
 
-import pytest
 from app.exceptions import (
     CanopyError,
-    ValidationError,
-    PortfolioNotFoundError,
     FileTooLargeError,
-    UnsupportedFileTypeError,
-    RateLimitExceededError,
     LLMError,
+    PortfolioNotFoundError,
+    RateLimitExceededError,
+    UnsupportedFileTypeError,
+    ValidationError,
 )
 
 
@@ -31,10 +30,7 @@ class TestCanopyError:
 
     def test_to_dict(self):
         """Test error serialization."""
-        error = CanopyError(
-            message="Test error",
-            details={"field": "value"}
-        )
+        error = CanopyError(message="Test error", details={"field": "value"})
 
         result = error.to_dict()
 

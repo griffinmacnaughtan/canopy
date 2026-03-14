@@ -1,9 +1,9 @@
 """Schema validation for extracted data."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Type
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -11,6 +11,7 @@ logger = structlog.get_logger()
 
 class FieldType(Enum):
     """Supported field types for validation."""
+
     STRING = "string"
     INTEGER = "integer"
     FLOAT = "float"
@@ -24,25 +25,27 @@ class FieldType(Enum):
 @dataclass
 class FieldSchema:
     """Schema definition for a single field."""
+
     name: str
     field_type: FieldType
     required: bool = True
     nullable: bool = True
-    min_value: Optional[float] = None
-    max_value: Optional[float] = None
-    allowed_values: Optional[Set[Any]] = None
-    pattern: Optional[str] = None
+    min_value: float | None = None
+    max_value: float | None = None
+    allowed_values: set[Any] | None = None
+    pattern: str | None = None
 
 
 @dataclass
 class ValidationResult:
     """Result of schema validation."""
+
     is_valid: bool
-    valid_records: List[Dict[str, Any]]
-    invalid_records: List[Dict[str, Any]]
-    errors: List[str]
-    warnings: List[str] = field(default_factory=list)
-    stats: Dict[str, Any] = field(default_factory=dict)
+    valid_records: list[dict[str, Any]]
+    invalid_records: list[dict[str, Any]]
+    errors: list[str]
+    warnings: list[str] = field(default_factory=list)
+    stats: dict[str, Any] = field(default_factory=dict)
 
     @property
     def valid_count(self) -> int:
@@ -77,7 +80,9 @@ EPA_EMISSIONS_SCHEMA = [
     FieldSchema("facility_id", FieldType.STRING, required=True),
     FieldSchema("facility_name", FieldType.STRING, required=True),
     FieldSchema("state", FieldType.STRING, required=True),
-    FieldSchema("reporting_year", FieldType.INTEGER, required=False, min_value=1990, max_value=2030),
+    FieldSchema(
+        "reporting_year", FieldType.INTEGER, required=False, min_value=1990, max_value=2030
+    ),
     FieldSchema("total_emissions_mt_co2e", FieldType.FLOAT, required=False, min_value=0),
     FieldSchema("_source", FieldType.STRING, required=True),
     FieldSchema("_extracted_at", FieldType.STRING, required=True),
@@ -106,11 +111,11 @@ class SchemaValidator:
     - Null handling
     """
 
-    def __init__(self, schema: List[FieldSchema]):
+    def __init__(self, schema: list[FieldSchema]):
         self.schema = {field.name: field for field in schema}
         self.logger = logger.bind(validator="schema")
 
-    def validate(self, records: List[Dict[str, Any]]) -> ValidationResult:
+    def validate(self, records: list[dict[str, Any]]) -> ValidationResult:
         """
         Validate a list of records against the schema.
 
@@ -124,7 +129,7 @@ class SchemaValidator:
         invalid_records = []
         all_errors = []
         warnings = []
-        field_error_counts: Dict[str, int] = {}
+        field_error_counts: dict[str, int] = {}
 
         for i, record in enumerate(records):
             record_errors = self._validate_record(record, i)
@@ -144,7 +149,7 @@ class SchemaValidator:
         for field_name, count in field_error_counts.items():
             if count > len(records) * 0.1:  # More than 10% errors
                 warnings.append(
-                    f"Field '{field_name}' has errors in {count}/{len(records)} records ({count/len(records)*100:.1f}%)"
+                    f"Field '{field_name}' has errors in {count}/{len(records)} records ({count / len(records) * 100:.1f}%)"
                 )
 
         is_valid = len(invalid_records) == 0
@@ -171,7 +176,7 @@ class SchemaValidator:
             },
         )
 
-    def _validate_record(self, record: Dict[str, Any], index: int) -> List[str]:
+    def _validate_record(self, record: dict[str, Any], index: int) -> list[str]:
         """Validate a single record."""
         errors = []
 
@@ -199,22 +204,19 @@ class SchemaValidator:
                 continue
 
             # Range validation
-            if field_schema.min_value is not None:
-                if isinstance(value, (int, float)) and value < field_schema.min_value:
-                    errors.append(
-                        f"Record {index}: Field '{field_name}' value {value} below minimum {field_schema.min_value}"
-                    )
+            if field_schema.min_value is not None and isinstance(value, (int, float)) and value < field_schema.min_value:
+                errors.append(
+                    f"Record {index}: Field '{field_name}' value {value} below minimum {field_schema.min_value}"
+                )
 
-            if field_schema.max_value is not None:
-                if isinstance(value, (int, float)) and value > field_schema.max_value:
-                    errors.append(
-                        f"Record {index}: Field '{field_name}' value {value} above maximum {field_schema.max_value}"
-                    )
+            if field_schema.max_value is not None and isinstance(value, (int, float)) and value > field_schema.max_value:
+                errors.append(
+                    f"Record {index}: Field '{field_name}' value {value} above maximum {field_schema.max_value}"
+                )
 
             # Allowed values validation
-            if field_schema.allowed_values is not None:
-                if value not in field_schema.allowed_values:
-                    errors.append(
+            if field_schema.allowed_values is not None and value not in field_schema.allowed_values:
+                errors.append(
                         f"Record {index}: Field '{field_name}' value '{value}' not in allowed values"
                     )
 
@@ -225,7 +227,7 @@ class SchemaValidator:
         value: Any,
         field_schema: FieldSchema,
         index: int,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Validate field type."""
         expected = field_schema.field_type
         field_name = field_schema.name

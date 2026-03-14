@@ -1,11 +1,12 @@
 """NOAA Climate Data Online API extractor."""
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import httpx
 
+from ..config import PipelineConfig
 from .base import BaseExtractor, ExtractionResult
-from ..config import PipelineConfig, NOAA_DATASETS
 
 
 class NOAAExtractor(BaseExtractor):
@@ -30,7 +31,7 @@ class NOAAExtractor(BaseExtractor):
     def source_name(self) -> str:
         return "NOAA_CDO"
 
-    def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self) -> dict[str, str]:
         """Get request headers with API token."""
         return {"token": self.token}
 
@@ -50,11 +51,11 @@ class NOAAExtractor(BaseExtractor):
 
     async def extract(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
         dataset_id: str = "GHCND",
-        location_ids: Optional[List[str]] = None,
-        data_types: Optional[List[str]] = None,
+        location_ids: list[str] | None = None,
+        data_types: list[str] | None = None,
         **kwargs,
     ) -> ExtractionResult:
         """
@@ -92,9 +93,7 @@ class NOAAExtractor(BaseExtractor):
         all_records = []
         errors = []
 
-        async with httpx.AsyncClient(
-            timeout=self.config.request_timeout_seconds
-        ) as client:
+        async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
             for location_id in location_ids:
                 try:
                     records = await self._fetch_data(
@@ -137,8 +136,8 @@ class NOAAExtractor(BaseExtractor):
         location_id: str,
         start_date: datetime,
         end_date: datetime,
-        data_types: List[str],
-    ) -> List[Dict[str, Any]]:
+        data_types: list[str],
+    ) -> list[dict[str, Any]]:
         """Fetch data with pagination."""
         records = []
         offset = 0
@@ -192,8 +191,8 @@ class NOAAExtractor(BaseExtractor):
 
     async def extract_extreme_events(
         self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
     ) -> ExtractionResult:
         """
         Extract extreme weather events for physical risk modeling.

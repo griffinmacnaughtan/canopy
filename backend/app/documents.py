@@ -1,21 +1,22 @@
 """In-memory document store for uploaded PDFs."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
-import pdfplumber
 from io import BytesIO
+
+import pdfplumber
 
 
 @dataclass
 class Document:
     """Stored document with extracted text."""
+
     filename: str
     text: str
     char_count: int
 
 
 # Global in-memory store: portfolio_id -> list of documents
-_document_store: Dict[str, List[Document]] = {}
+_document_store: dict[str, list[Document]] = {}
 
 # Default portfolio ID for documents without a specific portfolio
 DEFAULT_PORTFOLIO = "default"
@@ -44,7 +45,7 @@ def extract_text_from_pdf(file_content: bytes) -> str:
 def store_document(
     filename: str,
     file_content: bytes,
-    portfolio_id: Optional[str] = None,
+    portfolio_id: str | None = None,
 ) -> Document:
     """Store a document after extracting its text.
 
@@ -72,7 +73,7 @@ def store_document(
     return doc
 
 
-def get_documents(portfolio_id: Optional[str] = None) -> List[Document]:
+def get_documents(portfolio_id: str | None = None) -> list[Document]:
     """Get all documents for a portfolio.
 
     Args:
@@ -85,7 +86,7 @@ def get_documents(portfolio_id: Optional[str] = None) -> List[Document]:
     return _document_store.get(portfolio_key, [])
 
 
-def clear_documents(portfolio_id: Optional[str] = None) -> int:
+def clear_documents(portfolio_id: str | None = None) -> int:
     """Clear all documents for a portfolio.
 
     Args:
@@ -107,7 +108,7 @@ def clear_documents(portfolio_id: Optional[str] = None) -> int:
 MAX_CONTEXT_CHARS = 15000  # ~3750 tokens, conservative limit
 
 
-def get_combined_document_text(portfolio_id: Optional[str] = None) -> Optional[str]:
+def get_combined_document_text(portfolio_id: str | None = None) -> str | None:
     """Get combined text from all documents for context injection.
 
     Args:

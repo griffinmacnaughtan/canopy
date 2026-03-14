@@ -3,37 +3,36 @@
 import csv
 import io
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 import structlog
-from fastapi import APIRouter, Depends, Query, UploadFile, File
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.connection import get_db
-from ..database.models import PortfolioDB, AssetDB
+from ..database.models import AssetDB, PortfolioDB
 from ..database.seed import SECTOR_BASELINES
-from ..models import (
-    PortfolioSummary,
-    PortfolioListResponse,
-    CreatePortfolioRequest,
-    CreatePortfolioResponse,
-    DeletePortfolioResponse,
-    ComparePortfoliosResponse,
-    PortfolioScoreSummary,
-    PortfolioExportReport,
-    ScenarioImpactItem,
-    CsvImportResponse,
-    Portfolio,
-    Asset,
-)
 from ..exceptions import (
-    PortfolioNotFoundError,
     InvalidPortfolioIdError,
+    PortfolioNotFoundError,
     ValidationError,
 )
-from ..risk import score_portfolio, scenario_impact
+from ..models import (
+    Asset,
+    ComparePortfoliosResponse,
+    CreatePortfolioRequest,
+    CreatePortfolioResponse,
+    CsvImportResponse,
+    DeletePortfolioResponse,
+    Portfolio,
+    PortfolioExportReport,
+    PortfolioListResponse,
+    PortfolioScoreSummary,
+    PortfolioSummary,
+    ScenarioImpactItem,
+)
+from ..risk import scenario_impact, score_portfolio
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -43,15 +42,28 @@ logger = structlog.get_logger()
 # ---------------------------------------------------------------------------
 
 CSV_REQUIRED_COLUMNS = {
-    "name", "sector", "region",
-    "revenue_usd_m", "scope1_tco2e", "scope2_tco2e",
-    "green_revenue_pct", "controversies",
+    "name",
+    "sector",
+    "region",
+    "revenue_usd_m",
+    "scope1_tco2e",
+    "scope2_tco2e",
+    "green_revenue_pct",
+    "controversies",
 }
 
 VALID_SECTORS = {
-    "Information Technology", "Energy", "Utilities", "Materials",
-    "Industrials", "Consumer Discretionary", "Consumer Staples",
-    "Healthcare", "Financials", "Real Estate", "Communication Services",
+    "Information Technology",
+    "Energy",
+    "Utilities",
+    "Materials",
+    "Industrials",
+    "Consumer Discretionary",
+    "Consumer Staples",
+    "Healthcare",
+    "Financials",
+    "Real Estate",
+    "Communication Services",
 }
 
 # ---------------------------------------------------------------------------
@@ -86,19 +98,17 @@ def db_portfolio_to_pydantic(portfolio: PortfolioDB) -> Portfolio:
 
 
 async def get_portfolio_by_id(
-    portfolio_id: Optional[str],
+    portfolio_id: str | None,
     db: AsyncSession,
 ) -> PortfolioDB:
     """Get portfolio by ID, falling back to first portfolio if not specified."""
     if portfolio_id:
         try:
             pid = uuid.UUID(portfolio_id)
-        except ValueError:
-            raise InvalidPortfolioIdError(portfolio_id)
+        except ValueError as e:
+            raise InvalidPortfolioIdError(portfolio_id) from e
 
-        result = await db.execute(
-            select(PortfolioDB).where(PortfolioDB.id == pid)
-        )
+        result = await db.execute(select(PortfolioDB).where(PortfolioDB.id == pid))
         portfolio = result.scalar_one_or_none()
         if not portfolio:
             raise PortfolioNotFoundError(portfolio_id)
@@ -119,9 +129,7 @@ def _build_score_summary(portfolio: PortfolioDB) -> PortfolioScoreSummary:
         assets, SECTOR_BASELINES
     )
     total_emissions = sum(a.scope1_tco2e + a.scope2_tco2e for a in assets)
-    avg_green = (
-        sum(a.green_revenue_pct for a in assets) / len(assets) if assets else 0.0
-    )
+    avg_green = sum(a.green_revenue_pct for a in assets) / len(assets) if assets else 0.0
     return PortfolioScoreSummary(
         portfolio_id=str(portfolio.id),
         portfolio_name=portfolio.name,
@@ -173,7 +181,7 @@ async def get_portfolio_by_id_endpoint(
 
 @router.get("/portfolio")
 async def get_portfolio(
-    portfolio_id: Optional[str] = Query(None, description="Portfolio ID"),
+    portfolio_id: str | None = Query(None, description="Portfolio ID"),
     db: AsyncSession = Depends(get_db),
 ):
     """Get the full portfolio with all assets (legacy endpoint)."""
@@ -183,7 +191,7 @@ async def get_portfolio(
 
 @router.get("/assets")
 async def list_assets(
-    portfolio_id: Optional[str] = Query(None, description="Portfolio ID"),
+    portfolio_id: str | None = Query(None, description="Portfolio ID"),
     db: AsyncSession = Depends(get_db),
 ):
     """List all portfolio assets."""
@@ -385,9 +393,7 @@ async def export_portfolio_report(
 
     scenario_impacts: list[ScenarioImpactItem] = []
     for s in scenarios:
-        ebitda, emissions_delta, hotspots = scenario_impact(
-            assets, s.carbon_price, s.revenue_shock
-        )
+        ebitda, emissions_delta, hotspots = scenario_impact(assets, s.carbon_price, s.revenue_shock)
         scenario_impacts.append(
             ScenarioImpactItem(
                 scenario=s.name,
@@ -410,7 +416,9 @@ async def export_portfolio_report(
             "total_emissions_tco2e": a.scope1_tco2e + a.scope2_tco2e,
             "emissions_intensity_tco2e_per_m_revenue": round(
                 (a.scope1_tco2e + a.scope2_tco2e) / a.revenue_usd_m, 4
-            ) if a.revenue_usd_m > 0 else 0,
+            )
+            if a.revenue_usd_m > 0
+            else 0,
             "green_revenue_pct": a.green_revenue_pct,
             "controversies": a.controversies,
         }
@@ -418,7 +426,7 @@ async def export_portfolio_report(
     ]
 
     return PortfolioExportReport(
-        generated_at=datetime.now(timezone.utc).isoformat(),
+        generated_at=datetime.now(UTC).isoformat(),
         portfolio_id=str(portfolio.id),
         portfolio_name=portfolio.name,
         description=portfolio.description,
@@ -444,7 +452,7 @@ async def export_portfolio_report(
 @router.post("/portfolios/import/csv", response_model=CsvImportResponse)
 async def import_portfolio_from_csv(
     file: UploadFile = File(..., description="CSV file with asset data"),
-    name: Optional[str] = Query(None, description="Portfolio name (defaults to filename)"),
+    name: str | None = Query(None, description="Portfolio name (defaults to filename)"),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -475,8 +483,8 @@ async def import_portfolio_from_csv(
 
     try:
         text = content.decode("utf-8-sig")  # handle BOM from Excel exports
-    except UnicodeDecodeError:
-        raise ValidationError("CSV file must be UTF-8 encoded.")
+    except UnicodeDecodeError as e:
+        raise ValidationError("CSV file must be UTF-8 encoded.") from e
 
     reader = csv.DictReader(io.StringIO(text))
     if reader.fieldnames is None:
@@ -515,9 +523,7 @@ async def import_portfolio_from_csv(
             continue
 
         if revenue <= 0:
-            warnings.append(
-                f"Row {row_num} ({asset_name!r}): skipped — revenue_usd_m must be > 0."
-            )
+            warnings.append(f"Row {row_num} ({asset_name!r}): skipped — revenue_usd_m must be > 0.")
             rows_skipped += 1
             continue
 
@@ -555,9 +561,11 @@ async def import_portfolio_from_csv(
             + (f"First warning: {warnings[0]}" if warnings else "Check the column format.")
         )
 
-    portfolio_name = (name or "").strip() or (
-        file.filename.replace(".csv", "").replace("_", " ").strip()
-    ) or "Imported Portfolio"
+    portfolio_name = (
+        (name or "").strip()
+        or (file.filename.replace(".csv", "").replace("_", " ").strip())
+        or "Imported Portfolio"
+    )
 
     portfolio_id = uuid.uuid4()
     db_portfolio = PortfolioDB(

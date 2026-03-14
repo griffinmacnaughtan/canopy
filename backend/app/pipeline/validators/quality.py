@@ -1,9 +1,10 @@
 """Data quality validation and anomaly detection."""
 
+import statistics
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
-import statistics
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -12,23 +13,25 @@ logger = structlog.get_logger()
 @dataclass
 class QualityReport:
     """Comprehensive data quality report."""
+
     passed: bool
     total_records: int
     quality_score: float  # 0-100
-    checks: Dict[str, "QualityCheckResult"]
-    recommendations: List[str]
+    checks: dict[str, "QualityCheckResult"]
+    recommendations: list[str]
     timestamp: datetime = field(default_factory=datetime.utcnow)
 
 
 @dataclass
 class QualityCheckResult:
     """Result of a single quality check."""
+
     name: str
     passed: bool
     score: float  # 0-100
     details: str
     affected_records: int = 0
-    affected_fields: List[str] = field(default_factory=list)
+    affected_fields: list[str] = field(default_factory=list)
 
 
 class DataQualityValidator:
@@ -56,10 +59,10 @@ class DataQualityValidator:
 
     def validate(
         self,
-        records: List[Dict[str, Any]],
-        key_fields: Optional[List[str]] = None,
-        numeric_fields: Optional[List[str]] = None,
-        date_field: Optional[str] = None,
+        records: list[dict[str, Any]],
+        key_fields: list[str] | None = None,
+        numeric_fields: list[str] | None = None,
+        date_field: str | None = None,
     ) -> QualityReport:
         """
         Run all quality checks on the data.
@@ -127,7 +130,7 @@ class DataQualityValidator:
             recommendations=recommendations,
         )
 
-    def _check_completeness(self, records: List[Dict[str, Any]]) -> QualityCheckResult:
+    def _check_completeness(self, records: list[dict[str, Any]]) -> QualityCheckResult:
         """Check for null/missing values."""
         if not records:
             return QualityCheckResult(
@@ -138,12 +141,12 @@ class DataQualityValidator:
             )
 
         # Collect all field names
-        all_fields: Set[str] = set()
+        all_fields: set[str] = set()
         for record in records:
             all_fields.update(record.keys())
 
         # Count nulls per field
-        null_counts: Dict[str, int] = {field: 0 for field in all_fields}
+        null_counts: dict[str, int] = dict.fromkeys(all_fields, 0)
         total_records = len(records)
 
         for record in records:
@@ -153,14 +156,12 @@ class DataQualityValidator:
                     null_counts[field_name] += 1
 
         # Calculate null rates
-        null_rates = {
-            field: count / total_records
-            for field, count in null_counts.items()
-        }
+        null_rates = {field: count / total_records for field, count in null_counts.items()}
 
         # Find problematic fields (excluding internal fields)
         problem_fields = [
-            field for field, rate in null_rates.items()
+            field
+            for field, rate in null_rates.items()
             if rate > self.max_null_rate and not field.startswith("_")
         ]
 
@@ -184,11 +185,11 @@ class DataQualityValidator:
 
     def _check_uniqueness(
         self,
-        records: List[Dict[str, Any]],
-        key_fields: List[str],
+        records: list[dict[str, Any]],
+        key_fields: list[str],
     ) -> QualityCheckResult:
         """Check for duplicate records."""
-        seen_keys: Set[tuple] = set()
+        seen_keys: set[tuple] = set()
         duplicates = 0
 
         for record in records:
@@ -213,8 +214,8 @@ class DataQualityValidator:
 
     def _check_anomalies(
         self,
-        records: List[Dict[str, Any]],
-        numeric_fields: List[str],
+        records: list[dict[str, Any]],
+        numeric_fields: list[str],
     ) -> QualityCheckResult:
         """Detect statistical anomalies using z-score method."""
         anomaly_count = 0
@@ -224,8 +225,7 @@ class DataQualityValidator:
             values = [
                 r.get(field_name)
                 for r in records
-                if r.get(field_name) is not None
-                and isinstance(r.get(field_name), (int, float))
+                if r.get(field_name) is not None and isinstance(r.get(field_name), (int, float))
             ]
 
             if len(values) < 10:  # Need enough data for statistics
@@ -240,8 +240,7 @@ class DataQualityValidator:
 
                 # Count anomalies (values beyond threshold standard deviations)
                 field_anomalies = sum(
-                    1 for v in values
-                    if abs((v - mean) / stdev) > self.anomaly_threshold
+                    1 for v in values if abs((v - mean) / stdev) > self.anomaly_threshold
                 )
 
                 if field_anomalies > 0:
@@ -270,7 +269,7 @@ class DataQualityValidator:
 
     def _check_timeliness(
         self,
-        records: List[Dict[str, Any]],
+        records: list[dict[str, Any]],
         date_field: str,
     ) -> QualityCheckResult:
         """Check data freshness."""
@@ -317,24 +316,25 @@ class DataQualityValidator:
             affected_fields=[date_field],
         )
 
-    def _check_consistency(self, records: List[Dict[str, Any]]) -> QualityCheckResult:
+    def _check_consistency(self, records: list[dict[str, Any]]) -> QualityCheckResult:
         """Check for value consistency (format, range)."""
         issues = []
 
         # Check for mixed types in fields
-        field_types: Dict[str, Set[str]] = {}
+        field_types: dict[str, set[str]] = {}
         for record in records:
-            for field, value in record.items():
+            for field_name, value in record.items():
                 if value is not None:
                     type_name = type(value).__name__
-                    if field not in field_types:
-                        field_types[field] = set()
-                    field_types[field].add(type_name)
+                    if field_name not in field_types:
+                        field_types[field_name] = set()
+                    field_types[field_name].add(type_name)
 
         # Fields with mixed types (excluding internal fields)
         mixed_type_fields = [
-            field for field, types in field_types.items()
-            if len(types) > 1 and not field.startswith("_")
+            field_name
+            for field_name, types in field_types.items()
+            if len(types) > 1 and not field_name.startswith("_")
         ]
 
         if mixed_type_fields:
@@ -343,11 +343,10 @@ class DataQualityValidator:
         # Check for negative values in typically positive fields
         positive_fields = ["emissions", "revenue", "count", "population"]
         for record in records:
-            for field, value in record.items():
-                if any(pf in field.lower() for pf in positive_fields):
-                    if isinstance(value, (int, float)) and value < 0:
-                        issues.append(f"Negative value in positive field: {field}")
-                        break
+            for field_name, value in record.items():
+                if any(pf in field_name.lower() for pf in positive_fields) and isinstance(value, (int, float)) and value < 0:
+                    issues.append(f"Negative value in positive field: {field_name}")
+                    break
 
         score = max(0, 100 - len(issues) * 10)
         passed = len(issues) == 0
@@ -364,8 +363,8 @@ class DataQualityValidator:
 
     def _generate_recommendations(
         self,
-        checks: Dict[str, QualityCheckResult],
-    ) -> List[str]:
+        checks: dict[str, QualityCheckResult],
+    ) -> list[str]:
         """Generate actionable recommendations based on check results."""
         recommendations = []
 
@@ -384,9 +383,7 @@ class DataQualityValidator:
                         "Review outliers for data entry errors or genuine edge cases"
                     )
                 elif check_name == "timeliness":
-                    recommendations.append(
-                        "Consider increasing data refresh frequency"
-                    )
+                    recommendations.append("Consider increasing data refresh frequency")
                 elif check_name == "consistency":
                     recommendations.append(
                         "Standardize data types and add validation at extraction"

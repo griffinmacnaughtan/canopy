@@ -1,10 +1,12 @@
 """SQLAlchemy ORM models for ESG Copilot."""
 
-from datetime import datetime
-from typing import List, Optional
 import uuid
+from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import (
+    CHAR,
+    Boolean,
     Column,
     DateTime,
     Float,
@@ -13,9 +15,7 @@ from sqlalchemy import (
     String,
     Table,
     Text,
-    Boolean,
     TypeDecorator,
-    CHAR,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -26,6 +26,7 @@ class UUID(TypeDecorator):
 
     Uses PostgreSQL's UUID type when available, otherwise stores as CHAR(36).
     """
+
     impl = CHAR(36)
     cache_ok = True
 
@@ -53,6 +54,7 @@ class UUID(TypeDecorator):
 
 class Base(DeclarativeBase):
     """Base class for all ORM models."""
+
     pass
 
 
@@ -60,7 +62,9 @@ class Base(DeclarativeBase):
 portfolio_assets = Table(
     "portfolio_assets",
     Base.metadata,
-    Column("portfolio_id", UUID(), ForeignKey("portfolios.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "portfolio_id", UUID(), ForeignKey("portfolios.id", ondelete="CASCADE"), primary_key=True
+    ),
     Column("asset_id", UUID(), ForeignKey("assets.id", ondelete="CASCADE"), primary_key=True),
 )
 
@@ -79,7 +83,9 @@ class UserDB(Base):
     )
 
     # Relationships
-    portfolios: Mapped[List["PortfolioDB"]] = relationship("PortfolioDB", back_populates="user", cascade="all, delete-orphan")
+    portfolios: Mapped[list["PortfolioDB"]] = relationship(
+        "PortfolioDB", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class AssetDB(Base):
@@ -89,7 +95,7 @@ class AssetDB(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    ticker: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, index=True)
+    ticker: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
     sector: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     region: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     revenue_usd_m: Mapped[float] = mapped_column(Float, nullable=False)
@@ -103,7 +109,7 @@ class AssetDB(Base):
     )
 
     # Relationships
-    portfolios: Mapped[List["PortfolioDB"]] = relationship(
+    portfolios: Mapped[list["PortfolioDB"]] = relationship(
         "PortfolioDB", secondary=portfolio_assets, back_populates="assets"
     )
 
@@ -115,9 +121,9 @@ class PortfolioDB(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_sample: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
@@ -127,7 +133,7 @@ class PortfolioDB(Base):
 
     # Relationships
     user: Mapped[Optional["UserDB"]] = relationship("UserDB", back_populates="portfolios")
-    assets: Mapped[List["AssetDB"]] = relationship(
+    assets: Mapped[list["AssetDB"]] = relationship(
         "AssetDB", secondary=portfolio_assets, back_populates="portfolios", lazy="selectin"
     )
 
@@ -139,7 +145,7 @@ class ScenarioDB(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     carbon_price: Mapped[float] = mapped_column(Float, nullable=False)
     revenue_shock: Mapped[float] = mapped_column(Float, nullable=False)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

@@ -2,13 +2,12 @@
 
 import asyncio
 import os
-from typing import AsyncGenerator, Generator, List
+from collections.abc import AsyncGenerator, Generator
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from app.models import Asset
-
 
 # ---------------------------------------------------------------------------
 # Environment — must be set before any app module is imported.
@@ -44,6 +43,7 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 def settings():
     """Application settings (test overrides applied via env vars above)."""
     from app.config import get_settings
+
     return get_settings()
 
 
@@ -53,7 +53,7 @@ def settings():
 
 
 @pytest.fixture
-def sample_assets() -> List[Asset]:
+def sample_assets() -> list[Asset]:
     """Multi-sector asset set for unit tests."""
     return [
         Asset(
@@ -107,9 +107,9 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
     This prevents the "database is locked" errors that occur when a background
     asyncio.Task writes to SQLite at the same time as a test write.
     """
-    from app.main import app
-    from app.database.connection import init_db, async_session_factory
+    from app.database.connection import async_session_factory, init_db
     from app.database.init import seed_database
+    from app.main import app
 
     # Eagerly initialise and seed — no background task
     await init_db()

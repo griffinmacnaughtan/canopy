@@ -1,15 +1,15 @@
 """Unit tests for risk scoring algorithms."""
 
 import pytest
+
+from app.models import Asset
 from app.risk import (
-    score_portfolio,
-    scenario_impact,
+    DEFAULT_SECTOR_BASELINES,
     _emissions_intensity,
     _sector_weight,
-    DEFAULT_SECTOR_BASELINES,
+    scenario_impact,
+    score_portfolio,
 )
-from app.models import Asset
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -18,17 +18,17 @@ from app.models import Asset
 
 def make_asset(**kwargs) -> Asset:
     """Create an Asset with sensible defaults; override with kwargs."""
-    defaults: dict = dict(
-        id="test",
-        name="Test Co",
-        sector="Information Technology",
-        region="North America",
-        revenue_usd_m=1000.0,
-        scope1_tco2e=10_000,
-        scope2_tco2e=5_000,
-        green_revenue_pct=20.0,
-        controversies=0,
-    )
+    defaults: dict = {
+        "id": "test",
+        "name": "Test Co",
+        "sector": "Information Technology",
+        "region": "North America",
+        "revenue_usd_m": 1000.0,
+        "scope1_tco2e": 10_000,
+        "scope2_tco2e": 5_000,
+        "green_revenue_pct": 20.0,
+        "controversies": 0,
+    }
     defaults.update(kwargs)
     return Asset(**defaults)
 
@@ -55,15 +55,11 @@ class TestEmissionsIntensity:
         assert _emissions_intensity(asset) == pytest.approx(100.0)
 
     def test_low_emissions(self):
-        asset = make_asset(
-            revenue_usd_m=100_000, scope1_tco2e=1_000, scope2_tco2e=500
-        )
+        asset = make_asset(revenue_usd_m=100_000, scope1_tco2e=1_000, scope2_tco2e=500)
         assert _emissions_intensity(asset) == pytest.approx(0.015)
 
     def test_combined_scope_emissions(self):
-        asset = make_asset(
-            revenue_usd_m=1_000, scope1_tco2e=300_000, scope2_tco2e=200_000
-        )
+        asset = make_asset(revenue_usd_m=1_000, scope1_tco2e=300_000, scope2_tco2e=200_000)
         assert _emissions_intensity(asset) == pytest.approx(500.0)
 
 

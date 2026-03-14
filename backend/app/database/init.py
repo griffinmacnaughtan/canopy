@@ -1,11 +1,12 @@
 """Database initialization and seeding."""
 
 import uuid
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import AssetDB, PortfolioDB, ScenarioDB
-from .seed import REAL_ASSETS, SAMPLE_PORTFOLIOS, CLIMATE_SCENARIOS
+from .seed import CLIMATE_SCENARIOS, REAL_ASSETS, SAMPLE_PORTFOLIOS
 
 
 async def seed_database(session: AsyncSession) -> bool:

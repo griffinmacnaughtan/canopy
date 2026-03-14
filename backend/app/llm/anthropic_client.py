@@ -1,6 +1,6 @@
 """Anthropic LLM client implementation."""
 
-from typing import AsyncIterator, List, Optional
+from collections.abc import AsyncIterator
 
 from anthropic import AsyncAnthropic
 
@@ -11,7 +11,7 @@ from .base import LLMClient, LLMResponse
 class AnthropicClient(LLMClient):
     """Anthropic Claude API client with streaming support."""
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         settings = get_settings()
         self.api_key = api_key or settings.anthropic_api_key
         self.model = model or settings.anthropic_model
@@ -19,8 +19,8 @@ class AnthropicClient(LLMClient):
 
     async def complete(
         self,
-        messages: List[dict],
-        system_prompt: Optional[str] = None,
+        messages: list[dict],
+        system_prompt: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.7,
     ) -> LLMResponse:
@@ -51,8 +51,8 @@ class AnthropicClient(LLMClient):
 
     async def stream(
         self,
-        messages: List[dict],
-        system_prompt: Optional[str] = None,
+        messages: list[dict],
+        system_prompt: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.7,
     ) -> AsyncIterator[str]:
@@ -77,7 +77,7 @@ class AnthropicClient(LLMClient):
         """
         return len(text) // 4 + 1
 
-    def _format_messages(self, messages: List[dict]) -> List[dict]:
+    def _format_messages(self, messages: list[dict]) -> list[dict]:
         """Format messages for Anthropic API."""
         formatted = []
 
@@ -89,9 +89,11 @@ class AnthropicClient(LLMClient):
             if role not in ("user", "assistant"):
                 role = "user"
 
-            formatted.append({
-                "role": role,
-                "content": msg.get("content", ""),
-            })
+            formatted.append(
+                {
+                    "role": role,
+                    "content": msg.get("content", ""),
+                }
+            )
 
         return formatted

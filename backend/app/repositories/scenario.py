@@ -1,6 +1,5 @@
 """Scenario repository for database operations."""
 
-from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -15,25 +14,25 @@ class ScenarioRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_all(self) -> List[ScenarioDB]:
+    async def get_all(self) -> list[ScenarioDB]:
         """Get all scenarios."""
         result = await self.session.execute(select(ScenarioDB).order_by(ScenarioDB.name))
         return list(result.scalars().all())
 
-    async def get_by_id(self, scenario_id: UUID) -> Optional[ScenarioDB]:
+    async def get_by_id(self, scenario_id: UUID) -> ScenarioDB | None:
         """Get a scenario by ID."""
         result = await self.session.execute(select(ScenarioDB).where(ScenarioDB.id == scenario_id))
         return result.scalar_one_or_none()
 
-    async def get_by_name(self, name: str) -> Optional[ScenarioDB]:
+    async def get_by_name(self, name: str) -> ScenarioDB | None:
         """Get a scenario by name."""
         result = await self.session.execute(select(ScenarioDB).where(ScenarioDB.name == name))
         return result.scalar_one_or_none()
 
-    async def get_defaults(self) -> List[ScenarioDB]:
+    async def get_defaults(self) -> list[ScenarioDB]:
         """Get all default scenarios."""
         result = await self.session.execute(
-            select(ScenarioDB).where(ScenarioDB.is_default == True).order_by(ScenarioDB.name)
+            select(ScenarioDB).where(ScenarioDB.is_default).order_by(ScenarioDB.name)
         )
         return list(result.scalars().all())
 
@@ -43,7 +42,7 @@ class ScenarioRepository:
         await self.session.flush()
         return scenario
 
-    async def create_many(self, scenarios: List[ScenarioDB]) -> List[ScenarioDB]:
+    async def create_many(self, scenarios: list[ScenarioDB]) -> list[ScenarioDB]:
         """Create multiple scenarios."""
         self.session.add_all(scenarios)
         await self.session.flush()

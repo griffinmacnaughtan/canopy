@@ -1,9 +1,9 @@
 """Integration tests for API endpoints."""
 
 import io
+
 import pytest
 from httpx import AsyncClient
-
 
 # ---------------------------------------------------------------------------
 # Health
@@ -36,9 +36,7 @@ class TestHealthEndpoints:
     async def test_request_id_echoed_back(self, async_client: AsyncClient):
         """If the client sends X-Request-ID the same value is echoed."""
         custom_id = "test-trace-abc123"
-        response = await async_client.get(
-            "/health/live", headers={"X-Request-ID": custom_id}
-        )
+        response = await async_client.get("/health/live", headers={"X-Request-ID": custom_id})
         assert response.headers["x-request-id"] == custom_id
 
 
@@ -98,7 +96,15 @@ class TestPortfolioListGet:
         assert isinstance(assets, list)
         assert len(assets) > 0
         first = assets[0]
-        for field in ("id", "name", "sector", "region", "revenue_usd_m", "scope1_tco2e", "scope2_tco2e"):
+        for field in (
+            "id",
+            "name",
+            "sector",
+            "region",
+            "revenue_usd_m",
+            "scope1_tco2e",
+            "scope2_tco2e",
+        ):
             assert field in first
 
 
@@ -147,10 +153,15 @@ class TestPortfolioCrud:
                 "name": "   ",
                 "assets": [
                     {
-                        "id": "a1", "name": "X", "sector": "Energy",
-                        "region": "EU", "revenue_usd_m": 1000,
-                        "scope1_tco2e": 0, "scope2_tco2e": 0,
-                        "green_revenue_pct": 0, "controversies": 0,
+                        "id": "a1",
+                        "name": "X",
+                        "sector": "Energy",
+                        "region": "EU",
+                        "revenue_usd_m": 1000,
+                        "scope1_tco2e": 0,
+                        "scope2_tco2e": 0,
+                        "green_revenue_pct": 0,
+                        "controversies": 0,
                     }
                 ],
             },
@@ -166,10 +177,15 @@ class TestPortfolioCrud:
                 "name": "Temp Delete Portfolio",
                 "assets": [
                     {
-                        "id": "a1", "name": "DeleteMe", "sector": "Healthcare",
-                        "region": "EU", "revenue_usd_m": 500,
-                        "scope1_tco2e": 1000, "scope2_tco2e": 500,
-                        "green_revenue_pct": 10, "controversies": 0,
+                        "id": "a1",
+                        "name": "DeleteMe",
+                        "sector": "Healthcare",
+                        "region": "EU",
+                        "revenue_usd_m": 500,
+                        "scope1_tco2e": 1000,
+                        "scope2_tco2e": 500,
+                        "green_revenue_pct": 10,
+                        "controversies": 0,
                     }
                 ],
             },
@@ -233,8 +249,15 @@ class TestScoring:
         score = response.json()
 
         for field in (
-            "portfolio_id", "overall_score", "climate_risk", "transition_risk",
-            "physical_risk", "opportunity_score", "top_risks", "quick_wins", "sector_breakdown",
+            "portfolio_id",
+            "overall_score",
+            "climate_risk",
+            "transition_risk",
+            "physical_risk",
+            "opportunity_score",
+            "top_risks",
+            "quick_wins",
+            "sector_breakdown",
         ):
             assert field in score
 
@@ -284,9 +307,7 @@ class TestPortfolioComparison:
         a_id = portfolios[0]["id"]
         b_id = portfolios[1]["id"]
 
-        response = await async_client.get(
-            f"/portfolios/compare/diff?a={a_id}&b={b_id}"
-        )
+        response = await async_client.get(f"/portfolios/compare/diff?a={a_id}&b={b_id}")
         assert response.status_code == 200
         data = response.json()
 
@@ -329,15 +350,21 @@ class TestPortfolioExport:
         report = response.json()
 
         required_fields = (
-            "generated_at", "portfolio_id", "portfolio_name",
-            "asset_count", "overall_score", "climate_risk",
-            "assets", "scenario_impacts",
+            "generated_at",
+            "portfolio_id",
+            "portfolio_name",
+            "asset_count",
+            "overall_score",
+            "climate_risk",
+            "assets",
+            "scenario_impacts",
         )
         for field in required_fields:
             assert field in report, f"Missing field: {field}"
 
         # generated_at should be a valid ISO timestamp
         from datetime import datetime
+
         datetime.fromisoformat(report["generated_at"].replace("Z", "+00:00"))
 
         # Assets have the computed emissions_intensity field
@@ -380,8 +407,8 @@ class TestCsvImport:
         csv_content = (
             "name,sector,region,revenue_usd_m,scope1_tco2e,scope2_tco2e,green_revenue_pct,controversies\n"
             "Good Corp,Energy,North America,1000,50000,10000,20,0\n"
-            ",Energy,North America,500,1000,500,10,0\n"          # missing name
-            "Bad Revenue,Utilities,Europe,INVALID,0,0,5,0\n"     # bad float
+            ",Energy,North America,500,1000,500,10,0\n"  # missing name
+            "Bad Revenue,Utilities,Europe,INVALID,0,0,5,0\n"  # bad float
         )
         files = {"file": ("portfolio.csv", io.BytesIO(csv_content.encode()), "text/csv")}
         response = await async_client.post("/portfolios/import/csv", files=files)

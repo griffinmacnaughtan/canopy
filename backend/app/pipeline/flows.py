@@ -15,12 +15,13 @@ Usage:
 
 import asyncio
 from datetime import datetime, timedelta
-from typing import Optional
+
 import structlog
 
 try:
-    from prefect import flow, task, get_run_logger
+    from prefect import flow, get_run_logger, task
     from prefect.tasks import task_input_hash
+
     PREFECT_AVAILABLE = True
 except ImportError:
     # Fallback for environments without Prefect
@@ -29,11 +30,13 @@ except ImportError:
     def flow(*args, **kwargs):
         def decorator(func):
             return func
+
         return decorator
 
     def task(*args, **kwargs):
         def decorator(func):
             return func
+
         return decorator
 
     def get_run_logger():
@@ -42,16 +45,18 @@ except ImportError:
     def task_input_hash(*args, **kwargs):
         return None
 
+
 from .config import PipelineConfig
-from .extractors import NOAAExtractor, EPAExtractor, WorldBankClimateExtractor
-from .validators import SchemaValidator, DataQualityValidator
+from .extractors import EPAExtractor, NOAAExtractor, WorldBankClimateExtractor
+from .loaders import DatabaseLoader, PostgresLoader, StagingLoader
 from .transformers import ClimateDataTransformer, EmissionsDataTransformer
-from .loaders import StagingLoader, PostgresLoader, DatabaseLoader
+from .validators import DataQualityValidator, SchemaValidator
 
 logger = structlog.get_logger()
 
 # Import database session for app integration
 _db_session_factory = None
+
 
 def get_db_session_factory():
     """Lazy import of database session factory to avoid circular imports."""
@@ -59,6 +64,7 @@ def get_db_session_factory():
     if _db_session_factory is None:
         try:
             from ..database.connection import async_session_factory
+
             _db_session_factory = async_session_factory
         except ImportError:
             pass
@@ -69,6 +75,7 @@ def get_db_session_factory():
 # TASKS
 # ============================================================================
 
+
 @task(
     name="extract_noaa_data",
     retries=3,
@@ -78,8 +85,8 @@ def get_db_session_factory():
 )
 async def extract_noaa_data(
     config: PipelineConfig,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
 ):
     """Extract climate data from NOAA."""
     log = get_run_logger() if PREFECT_AVAILABLE else logger
@@ -114,8 +121,8 @@ async def extract_noaa_data(
 )
 async def extract_epa_data(
     config: PipelineConfig,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
 ):
     """Extract emissions data from EPA."""
     log = get_run_logger() if PREFECT_AVAILABLE else logger
@@ -150,7 +157,7 @@ async def extract_epa_data(
 )
 async def extract_worldbank_data(
     config: PipelineConfig,
-    scenarios: Optional[list] = None,
+    scenarios: list | None = None,
 ):
     """Extract climate projections from World Bank."""
     log = get_run_logger() if PREFECT_AVAILABLE else logger
@@ -244,10 +251,7 @@ def validate_quality(data: dict):
         numeric_fields=numeric_fields,
     )
 
-    log.info(
-        f"Quality validation: score={report.quality_score:.1f}/100, "
-        f"passed={report.passed}"
-    )
+    log.info(f"Quality validation: score={report.quality_score:.1f}/100, passed={report.passed}")
 
     return {
         **data,
@@ -276,9 +280,7 @@ def transform_climate_data(data: dict):
     transformer = ClimateDataTransformer()
     result = transformer.transform(records)
 
-    log.info(
-        f"Climate transformation: {result.input_count} -> {result.output_count} records"
-    )
+    log.info(f"Climate transformation: {result.input_count} -> {result.output_count} records")
 
     return {
         "source": data.get("source"),
@@ -305,9 +307,7 @@ def transform_emissions_data(data: dict):
     transformer = EmissionsDataTransformer()
     result = transformer.transform(records)
 
-    log.info(
-        f"Emissions transformation: {result.input_count} -> {result.output_count} records"
-    )
+    log.info(f"Emissions transformation: {result.input_count} -> {result.output_count} records")
 
     return {
         "source": data.get("source"),
@@ -374,8 +374,7 @@ async def load_to_database(data: dict, source_name: str):
                 result = await loader.load_climate(records)
 
             log.info(
-                f"Database load: {result.records_loaded} records, "
-                f"{result.records_failed} failed"
+                f"Database load: {result.records_loaded} records, {result.records_failed} failed"
             )
 
             return {
@@ -416,8 +415,7 @@ async def load_to_production(data: dict, config: PipelineConfig):
             result = await loader.load_climate_data(records)
 
         log.info(
-            f"Production load: {result.records_loaded} records, "
-            f"{result.records_failed} failed"
+            f"Production load: {result.records_loaded} records, {result.records_failed} failed"
         )
 
         return {
@@ -437,6 +435,7 @@ async def load_to_production(data: dict, config: PipelineConfig):
 # ============================================================================
 # FLOWS
 # ============================================================================
+
 
 @flow(
     name="climate-data-pipeline",
@@ -501,7 +500,12 @@ async def climate_data_flow(
             extracted_data[name] = await coro
         except Exception as e:
             log.error(f"Extraction failed for {name}: {e}")
-            extracted_data[name] = {"source": name, "records": [], "status": "error", "error": str(e)}
+            extracted_data[name] = {
+                "source": name,
+                "records": [],
+                "status": "error",
+                "error": str(e),
+            }
 
     # =========================================================================
     # VALIDATION
@@ -568,7 +572,9 @@ async def climate_data_flow(
             "records_loaded": loaded_count,
             "staging_status": final.get("staging", {}).get("status"),
             "database_status": final.get("database", {}).get("status"),
-            "production_status": final.get("production", {}).get("status") if load_to_db else "skipped",
+            "production_status": final.get("production", {}).get("status")
+            if load_to_db
+            else "skipped",
         }
 
     results["completed_at"] = datetime.utcnow().isoformat()
@@ -629,6 +635,7 @@ async def noaa_climate_flow(load_to_db: bool = False, days_back: int = 30):
 # CLI ENTRY POINT
 # ============================================================================
 
+
 def run_pipeline(
     load_to_db: bool = False,
     include_noaa: bool = True,
@@ -670,4 +677,6 @@ if __name__ == "__main__":
 
     print(f"\nPipeline completed: {result['status']}")
     for source, stats in result["sources"].items():
-        print(f"  {source}: {stats['records_extracted']} extracted -> {stats['records_transformed']} transformed")
+        print(
+            f"  {source}: {stats['records_extracted']} extracted -> {stats['records_transformed']} transformed"
+        )

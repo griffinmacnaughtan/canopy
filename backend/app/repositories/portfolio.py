@@ -1,13 +1,12 @@
 """Portfolio repository for database operations."""
 
-from typing import List, Optional
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from ..database.models import PortfolioDB, AssetDB
+from ..database.models import AssetDB, PortfolioDB
 
 
 class PortfolioRepository:
@@ -16,16 +15,14 @@ class PortfolioRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_all(self) -> List[PortfolioDB]:
+    async def get_all(self) -> list[PortfolioDB]:
         """Get all portfolios with their assets."""
         result = await self.session.execute(
-            select(PortfolioDB)
-            .options(selectinload(PortfolioDB.assets))
-            .order_by(PortfolioDB.name)
+            select(PortfolioDB).options(selectinload(PortfolioDB.assets)).order_by(PortfolioDB.name)
         )
         return list(result.scalars().all())
 
-    async def get_by_id(self, portfolio_id: UUID) -> Optional[PortfolioDB]:
+    async def get_by_id(self, portfolio_id: UUID) -> PortfolioDB | None:
         """Get a portfolio by ID with its assets."""
         result = await self.session.execute(
             select(PortfolioDB)
@@ -34,7 +31,7 @@ class PortfolioRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_user_id(self, user_id: UUID) -> List[PortfolioDB]:
+    async def get_by_user_id(self, user_id: UUID) -> list[PortfolioDB]:
         """Get portfolios by user ID."""
         result = await self.session.execute(
             select(PortfolioDB)
@@ -44,7 +41,7 @@ class PortfolioRepository:
         )
         return list(result.scalars().all())
 
-    async def get_default(self) -> Optional[PortfolioDB]:
+    async def get_default(self) -> PortfolioDB | None:
         """Get the first available portfolio (default for demo)."""
         result = await self.session.execute(
             select(PortfolioDB)
@@ -60,7 +57,7 @@ class PortfolioRepository:
         await self.session.flush()
         return portfolio
 
-    async def add_asset(self, portfolio_id: UUID, asset: AssetDB) -> Optional[PortfolioDB]:
+    async def add_asset(self, portfolio_id: UUID, asset: AssetDB) -> PortfolioDB | None:
         """Add an asset to a portfolio."""
         portfolio = await self.get_by_id(portfolio_id)
         if portfolio:
@@ -68,7 +65,7 @@ class PortfolioRepository:
             await self.session.flush()
         return portfolio
 
-    async def remove_asset(self, portfolio_id: UUID, asset_id: UUID) -> Optional[PortfolioDB]:
+    async def remove_asset(self, portfolio_id: UUID, asset_id: UUID) -> PortfolioDB | None:
         """Remove an asset from a portfolio."""
         portfolio = await self.get_by_id(portfolio_id)
         if portfolio:

@@ -1,11 +1,11 @@
 """Document upload and management endpoints."""
 
-from fastapi import APIRouter, UploadFile, File
 import structlog
+from fastapi import APIRouter, File, UploadFile
 
-from ..models import DocumentInfo, UploadResponse, DocumentListResponse
-from ..documents import store_document, get_documents, clear_documents
+from ..documents import clear_documents, get_documents, store_document
 from ..exceptions import DocumentError, FileTooLargeError, UnsupportedFileTypeError
+from ..models import DocumentInfo, DocumentListResponse, UploadResponse
 
 router = APIRouter()
 logger = structlog.get_logger()
@@ -50,7 +50,7 @@ async def upload_document(file: UploadFile = File(...)):
 
     except Exception as e:
         logger.error("document_processing_failed", filename=file.filename, error=str(e))
-        raise DocumentError(f"Failed to process PDF: {str(e)}")
+        raise DocumentError(f"Failed to process PDF: {str(e)}") from e
 
 
 @router.get("/documents", response_model=DocumentListResponse)

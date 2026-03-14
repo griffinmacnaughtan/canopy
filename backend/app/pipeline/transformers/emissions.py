@@ -1,8 +1,7 @@
 """Emissions data transformers."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-import re
+from typing import Any
 
 from .base import BaseTransformer, TransformResult
 
@@ -42,13 +41,27 @@ class EmissionsDataTransformer(BaseTransformer):
 
     # State to region mapping
     STATE_TO_REGION = {
-        "CA": "West", "WA": "West", "OR": "West", "NV": "West", "AZ": "West",
-        "TX": "South", "FL": "South", "GA": "South", "NC": "South", "LA": "South",
-        "NY": "Northeast", "NJ": "Northeast", "PA": "Northeast", "MA": "Northeast",
-        "IL": "Midwest", "OH": "Midwest", "MI": "Midwest", "IN": "Midwest",
+        "CA": "West",
+        "WA": "West",
+        "OR": "West",
+        "NV": "West",
+        "AZ": "West",
+        "TX": "South",
+        "FL": "South",
+        "GA": "South",
+        "NC": "South",
+        "LA": "South",
+        "NY": "Northeast",
+        "NJ": "Northeast",
+        "PA": "Northeast",
+        "MA": "Northeast",
+        "IL": "Midwest",
+        "OH": "Midwest",
+        "MI": "Midwest",
+        "IN": "Midwest",
     }
 
-    def transform(self, records: List[Dict[str, Any]]) -> TransformResult:
+    def transform(self, records: list[dict[str, Any]]) -> TransformResult:
         """Transform emissions records."""
         input_count = len(records)
         transformed = []
@@ -83,7 +96,7 @@ class EmissionsDataTransformer(BaseTransformer):
             dropped_count=dropped,
         )
 
-    def _transform_emitter_record(self, record: Dict[str, Any]) -> Dict[str, Any] | None:
+    def _transform_emitter_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform EPA GHG emitter record."""
         facility_id = record.get("facility_id")
         if not facility_id:
@@ -106,11 +119,7 @@ class EmissionsDataTransformer(BaseTransformer):
         # Calculate CO2e if not provided
         if total_emissions == 0 and (co2_emissions > 0 or methane_emissions > 0):
             # GWP factors (100-year): CH4=28, N2O=265
-            total_emissions = (
-                co2_emissions +
-                (methane_emissions * 28) +
-                (n2o_emissions * 265)
-            )
+            total_emissions = co2_emissions + (methane_emissions * 28) + (n2o_emissions * 265)
 
         return {
             "facility_id": str(facility_id),
@@ -130,7 +139,7 @@ class EmissionsDataTransformer(BaseTransformer):
             "transformed_at": datetime.utcnow().isoformat(),
         }
 
-    def _transform_facility_record(self, record: Dict[str, Any]) -> Dict[str, Any] | None:
+    def _transform_facility_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform EPA facility location record."""
         facility_id = record.get("facility_id")
         if not facility_id:
@@ -163,7 +172,7 @@ class EmissionsDataTransformer(BaseTransformer):
             "transformed_at": datetime.utcnow().isoformat(),
         }
 
-    def _transform_generic_record(self, record: Dict[str, Any]) -> Dict[str, Any] | None:
+    def _transform_generic_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Generic transformation for unknown emission records."""
         cleaned = {}
         for key, value in record.items():
@@ -191,8 +200,8 @@ class EmissionsDataTransformer(BaseTransformer):
 
     def calculate_sector_aggregates(
         self,
-        records: List[Dict[str, Any]],
-    ) -> List[Dict[str, Any]]:
+        records: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
         """
         Aggregate emissions by sector and year.
 
@@ -213,25 +222,29 @@ class EmissionsDataTransformer(BaseTransformer):
         aggregated = []
         for (sector, year), data in groups.items():
             if sector and year:
-                aggregated.append({
-                    "sector": sector,
-                    "reporting_year": year,
-                    "total_emissions_mt_co2e": round(data["total_emissions"], 2),
-                    "facility_count": data["facility_count"],
-                    "avg_emissions_per_facility": round(
-                        data["total_emissions"] / data["facility_count"], 2
-                    ) if data["facility_count"] > 0 else 0,
-                    "aggregation": "sector_yearly",
-                    "aggregated_at": datetime.utcnow().isoformat(),
-                })
+                aggregated.append(
+                    {
+                        "sector": sector,
+                        "reporting_year": year,
+                        "total_emissions_mt_co2e": round(data["total_emissions"], 2),
+                        "facility_count": data["facility_count"],
+                        "avg_emissions_per_facility": round(
+                            data["total_emissions"] / data["facility_count"], 2
+                        )
+                        if data["facility_count"] > 0
+                        else 0,
+                        "aggregation": "sector_yearly",
+                        "aggregated_at": datetime.utcnow().isoformat(),
+                    }
+                )
 
         return aggregated
 
     def enrich_with_intensity(
         self,
-        records: List[Dict[str, Any]],
-        revenue_data: Dict[str, float],
-    ) -> List[Dict[str, Any]]:
+        records: list[dict[str, Any]],
+        revenue_data: dict[str, float],
+    ) -> list[dict[str, Any]]:
         """
         Calculate emissions intensity using revenue data.
 
@@ -253,9 +266,7 @@ class EmissionsDataTransformer(BaseTransformer):
 
             if revenue > 0:
                 record_copy["revenue_usd_m"] = revenue
-                record_copy["emissions_intensity_tco2e_per_m"] = round(
-                    emissions / revenue, 4
-                )
+                record_copy["emissions_intensity_tco2e_per_m"] = round(emissions / revenue, 4)
             else:
                 record_copy["revenue_usd_m"] = None
                 record_copy["emissions_intensity_tco2e_per_m"] = None

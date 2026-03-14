@@ -110,14 +110,12 @@ class RequestLoggingMiddleware:
             duration_ms = (time.perf_counter() - start_time) * 1000
 
             # Skip health check logs to reduce noise
-            if path.startswith("/health"):
-                return
-
-            self.logger.info(
-                "request",
-                method=method,
-                path=path,
-                status=response_status,
-                duration_ms=round(duration_ms, 2),
-                client_ip=client_ip,
-            )
+            if not path.startswith("/health"):
+                self.logger.info(
+                    "request",
+                    method=method,
+                    path=path,
+                    status=response_status,
+                    duration_ms=round(duration_ms, 2),
+                    client_ip=client_ip,
+                )

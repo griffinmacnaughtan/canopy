@@ -1,8 +1,8 @@
 """Data loaders for database operations."""
 
-from .staging import StagingLoader, LoadResult
-from .postgres import PostgresLoader
 from .database import DatabaseLoader
+from .postgres import PostgresLoader
+from .staging import LoadResult, StagingLoader
 
 __all__ = [
     "StagingLoader",

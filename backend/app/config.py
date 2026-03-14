@@ -2,10 +2,8 @@
 
 from functools import lru_cache
 from pathlib import Path
-from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 # Default to SQLite in the backend directory for zero-config local dev
 _DEFAULT_DB_PATH = Path(__file__).parent.parent / "data" / "canopy.db"
@@ -36,7 +34,7 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
 
     @property
-    def allowed_origins(self) -> List[str]:
+    def allowed_origins(self) -> list[str]:
         """Parse CORS_ORIGINS env var into a list for FastAPI middleware."""
         if self.cors_origins.strip() == "*":
             return ["*"]

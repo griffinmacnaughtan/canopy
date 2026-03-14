@@ -1,6 +1,6 @@
 """OpenAI LLM client implementation."""
 
-from typing import AsyncIterator, List, Optional
+from collections.abc import AsyncIterator
 
 import tiktoken
 from openai import AsyncOpenAI
@@ -12,7 +12,7 @@ from .base import LLMClient, LLMResponse
 class OpenAIClient(LLMClient):
     """OpenAI API client with streaming support."""
 
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, model: str | None = None):
         settings = get_settings()
         self.api_key = api_key or settings.openai_api_key
         self.model = model or settings.openai_model
@@ -26,8 +26,8 @@ class OpenAIClient(LLMClient):
 
     async def complete(
         self,
-        messages: List[dict],
-        system_prompt: Optional[str] = None,
+        messages: list[dict],
+        system_prompt: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.7,
     ) -> LLMResponse:
@@ -52,8 +52,8 @@ class OpenAIClient(LLMClient):
 
     async def stream(
         self,
-        messages: List[dict],
-        system_prompt: Optional[str] = None,
+        messages: list[dict],
+        system_prompt: str | None = None,
         max_tokens: int = 2048,
         temperature: float = 0.7,
     ) -> AsyncIterator[str]:
@@ -76,9 +76,7 @@ class OpenAIClient(LLMClient):
         """Count tokens using tiktoken."""
         return len(self.encoding.encode(text))
 
-    def _format_messages(
-        self, messages: List[dict], system_prompt: Optional[str]
-    ) -> List[dict]:
+    def _format_messages(self, messages: list[dict], system_prompt: str | None) -> list[dict]:
         """Format messages for OpenAI API."""
         formatted = []
 
@@ -86,9 +84,11 @@ class OpenAIClient(LLMClient):
             formatted.append({"role": "system", "content": system_prompt})
 
         for msg in messages:
-            formatted.append({
-                "role": msg.get("role", "user"),
-                "content": msg.get("content", ""),
-            })
+            formatted.append(
+                {
+                    "role": msg.get("role", "user"),
+                    "content": msg.get("content", ""),
+                }
+            )
 
         return formatted
