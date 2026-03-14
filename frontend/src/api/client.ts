@@ -35,7 +35,14 @@ import {
   MOCK_SECTORS,
 } from "./mockData";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Normalise the backend URL: if the secret was set without a protocol
+// (e.g. "canopy-production-xxx.up.railway.app" instead of
+// "https://canopy-production-xxx.up.railway.app"), prepend https:// so it
+// is always an absolute URL rather than a relative path.
+const _rawApiUrl = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = _rawApiUrl && !_rawApiUrl.startsWith("http")
+  ? `https://${_rawApiUrl}`
+  : _rawApiUrl;
 
 // Check if we're in demo mode (no backend)
 const isDemoMode = (): boolean => {
