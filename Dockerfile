@@ -25,4 +25,6 @@ USER esgcopilot
 RUN python -c "from app.main import app; print('Import OK')"
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell form so $PORT (injected by Railway) is expanded at runtime.
+# Falls back to 8000 for local docker run without PORT set.
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
