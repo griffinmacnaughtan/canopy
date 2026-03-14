@@ -204,12 +204,20 @@ class SchemaValidator:
                 continue
 
             # Range validation
-            if field_schema.min_value is not None and isinstance(value, (int, float)) and value < field_schema.min_value:
+            if (
+                field_schema.min_value is not None
+                and isinstance(value, (int, float))
+                and value < field_schema.min_value
+            ):
                 errors.append(
                     f"Record {index}: Field '{field_name}' value {value} below minimum {field_schema.min_value}"
                 )
 
-            if field_schema.max_value is not None and isinstance(value, (int, float)) and value > field_schema.max_value:
+            if (
+                field_schema.max_value is not None
+                and isinstance(value, (int, float))
+                and value > field_schema.max_value
+            ):
                 errors.append(
                     f"Record {index}: Field '{field_name}' value {value} above maximum {field_schema.max_value}"
                 )
@@ -217,8 +225,8 @@ class SchemaValidator:
             # Allowed values validation
             if field_schema.allowed_values is not None and value not in field_schema.allowed_values:
                 errors.append(
-                        f"Record {index}: Field '{field_name}' value '{value}' not in allowed values"
-                    )
+                    f"Record {index}: Field '{field_name}' value '{value}' not in allowed values"
+                )
 
         return errors
 

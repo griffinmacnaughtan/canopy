@@ -344,7 +344,11 @@ class DataQualityValidator:
         positive_fields = ["emissions", "revenue", "count", "population"]
         for record in records:
             for field_name, value in record.items():
-                if any(pf in field_name.lower() for pf in positive_fields) and isinstance(value, (int, float)) and value < 0:
+                if (
+                    any(pf in field_name.lower() for pf in positive_fields)
+                    and isinstance(value, (int, float))
+                    and value < 0
+                ):
                     issues.append(f"Negative value in positive field: {field_name}")
                     break
 
