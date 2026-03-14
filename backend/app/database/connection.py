@@ -100,6 +100,7 @@ async def init_db():
         await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS description TEXT")
         await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS is_sample BOOLEAN NOT NULL DEFAULT FALSE")
         await _run_ddl("ALTER TABLE portfolios ADD COLUMN IF NOT EXISTS user_id UUID")
+        await _run_ddl("ALTER TABLE assets ADD COLUMN IF NOT EXISTS ticker VARCHAR(20)")
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
