@@ -6,8 +6,8 @@ import path from "path";
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
   // For GitHub Pages deployment - set to repo name
-  // e.g., base: '/esg-copilot/' for https://username.github.io/esg-copilot/
-  base: mode === "production" ? "/esg-copilot/" : "/",
+  // e.g., base: '/canopy/' for https://username.github.io/canopy/
+  base: mode === "production" ? "/canopy/" : "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
