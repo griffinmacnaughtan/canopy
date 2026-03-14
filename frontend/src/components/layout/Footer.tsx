@@ -49,16 +49,6 @@ export function Footer() {
             </a>
           </div>
         </div>
-
-        <div className="mt-8 pt-6 border-t border-emerald-200/50 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-          <p>© 2025 Canopy. Open source climate tech.</p>
-          <p className="flex items-center gap-1.5">
-            Built with
-            <Heart className="h-3.5 w-3.5 text-emerald-500 fill-emerald-500" />
-            for sustainable finance
-            <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-emerald-500 to-forest-500 ml-1 shadow-sm shadow-emerald-500/50" />
-          </p>
-        </div>
       </div>
     </footer>
   );
