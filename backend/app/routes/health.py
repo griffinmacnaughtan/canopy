@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
-from ..database.connection import get_db
+from ..database.connection import get_db, async_session_factory
 from ..config import get_settings
 
 router = APIRouter()
@@ -51,3 +51,12 @@ async def health_ready(db: AsyncSession = Depends(get_db)):
         "status": "ready" if all_ready else "degraded",
         "checks": checks,
     }
+
+
+@router.post("/admin/seed")
+async def force_seed():
+    """Manually trigger database seeding. Safe to call multiple times."""
+    from ..database.init import seed_database
+    async with async_session_factory() as session:
+        seeded = await seed_database(session)
+    return {"seeded": seeded, "message": "Seed complete" if seeded else "Already seeded"}
