@@ -9,7 +9,6 @@ import pytest
 from app.agents.base import AgentExecutor, AgentResult, ToolDefinition
 from app.llm.base import LLMResponse
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 

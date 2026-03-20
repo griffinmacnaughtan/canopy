@@ -105,7 +105,7 @@ class VectorStore:
 
         ids = []
         with self._lock:
-            for chunk, embedding in zip(chunks, embeddings):
+            for chunk, embedding in zip(chunks, embeddings, strict=True):
                 doc_id = str(uuid.uuid4())
                 doc = Document(
                     id=doc_id,

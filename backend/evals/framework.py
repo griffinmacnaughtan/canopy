@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Any
 
 import structlog
 
@@ -158,7 +157,7 @@ class EvalRunner:
                 category=case.category,
                 prompt=case.prompt,
                 response=f"ERROR: {e}",
-                scores={dim: 0 for dim in case.criteria},
+                scores=dict.fromkeys(case.criteria, 0),
                 avg_score=0,
                 passed=False,
                 reasoning=f"LLM generation failed: {e}",

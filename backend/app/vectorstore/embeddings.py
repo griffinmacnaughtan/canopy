@@ -86,7 +86,7 @@ class HashEmbeddingProvider(EmbeddingProvider):
             # Use multiple hashes to fill 128 dimensions with values in [-1, 1]
             parts = []
             for i in range(4):
-                seed = f"{i}:{text}".encode("utf-8")
+                seed = f"{i}:{text}".encode()
                 digest = hashlib.sha256(seed).digest()
                 # 32 bytes → 32 uint8 values, scaled to [-1, 1]
                 vals = np.frombuffer(digest, dtype=np.uint8).astype(np.float32)

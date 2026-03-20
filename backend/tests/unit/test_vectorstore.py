@@ -7,7 +7,6 @@ from app.vectorstore.chunker import Chunk, chunk_text
 from app.vectorstore.embeddings import HashEmbeddingProvider
 from app.vectorstore.store import VectorStore
 
-
 # ── Chunker tests ────────────────────────────────────────────────────────
 
 

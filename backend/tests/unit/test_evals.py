@@ -10,7 +10,6 @@ from app.llm.base import LLMResponse
 from evals.framework import EvalCase, EvalRunner
 from evals.scorers import LLMJudgeScorer, RubricScorer
 
-
 # ── Fixtures ─────────────────────────────────────────────────────────────
 
 
