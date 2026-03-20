@@ -12,14 +12,14 @@ A production-grade portfolio analytics platform that quantifies climate transiti
 
 Institutional investors face a **$4.5 trillion annual climate investment gap**<sup>[1]</sup>. Portfolio managers need to:
 
-1. **Quantify exposure** - Translate Scope 1/2 emissions into financial risk metrics
-2. **Stress test** - Model portfolio impact under NGFS climate scenarios ($75-250/tCO2e carbon pricing)
-3. **Report** - Generate TCFD/CSRD-compliant narratives for board and regulatory disclosure
-4. **Act** - Identify transition leaders and laggards for engagement or divestment
+1. **Quantify exposure** — Translate Scope 1/2 emissions into financial risk metrics
+2. **Stress test** — Model portfolio impact under NGFS climate scenarios ($75–250/tCO2e carbon pricing)
+3. **Report** — Generate TCFD/CSRD-compliant narratives for board and regulatory disclosure
+4. **Act** — Identify transition leaders and laggards for engagement or divestment
 
-Canopy addresses this problem by combining production-grade data pipelines, quantitative risk scoring, and LLM-powered analysis into a single deployable platform.
+Canopy combines production-grade data pipelines, quantitative risk scoring, agentic AI, and LLM-powered analysis into a single deployable platform.
 
-<sub>[1] International Energy Agency, *World Energy Investment 2023*: "Clean energy investment needs to reach $4.5 trillion annually by 2030 for net zero by 2050." [iea.org/reports/world-energy-investment-2023](https://www.iea.org/reports/world-energy-investment-2023)</sub>
+<sub>[1] International Energy Agency, *World Energy Investment 2023*</sub>
 
 ---
 
@@ -27,7 +27,7 @@ Canopy addresses this problem by combining production-grade data pipelines, quan
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              CANOPY ARCHITECTURE                             │
+│                              CANOPY ARCHITECTURE                            │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
@@ -39,39 +39,39 @@ Canopy addresses this problem by combining production-grade data pipelines, quan
                                  │
                     ┌────────────▼────────────┐
                     │   PREFECT ORCHESTRATOR  │
-                    │  ┌──────────────────┐   │
-                    │  │ Extract → Validate│   │
-                    │  │ Transform → Load  │   │
-                    │  └──────────────────┘   │
+                    │  Extract → Validate     │
+                    │  Transform → Load       │
                     └────────────┬────────────┘
                                  │
                     ┌────────────▼────────────┐
                     │      POSTGRESQL         │
-                    │  ┌────────────────────┐ │
-                    │  │ emissions_data     │ │
-                    │  │ climate_data       │ │
-                    │  │ portfolios         │ │
-                    │  │ scenarios          │ │
-                    │  └────────────────────┘ │
+                    │  emissions_data         │
+                    │  climate_data           │
+                    │  portfolios / scenarios │
                     └────────────┬────────────┘
                                  │
 ┌────────────────────────────────┼────────────────────────────────┐
 │                     FASTAPI BACKEND                              │
+│                                                                  │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
-│  │ Risk Engine  │  │  Scenario    │  │   Claude/GPT RAG     │   │
-│  │  - Scoring   │  │  Stress Test │  │   - Context Build    │   │
-│  │  - Intensity │  │  - NGFS      │  │   - Streaming SSE    │   │
+│  │ Risk Engine  │  │  Scenario    │  │  ReAct Agent         │   │
+│  │  - Scoring   │  │  Stress Test │  │  - Tool use          │   │
+│  │  - Intensity │  │  - NGFS      │  │  - Multi-step plan   │   │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │ Vector Store │  │  LLM Copilot │  │  Eval Framework      │   │
+│  │  - Chunking  │  │  - RAG       │  │  - Rubric scorer     │   │
+│  │  - Cosine    │  │  - Streaming │  │  - LLM-as-judge      │   │
 │  └──────────────┘  └──────────────┘  └──────────────────────┘   │
 └────────────────────────────────┬────────────────────────────────┘
                                  │
                     ┌────────────▼────────────┐
                     │   REACT/TYPESCRIPT UI   │
-                    │  ┌────────────────────┐ │
-                    │  │ Dashboard          │ │
-                    │  │ Scenario Engine    │ │
-                    │  │ AI Copilot         │ │
-                    │  │ Portfolio Builder  │ │
-                    │  └────────────────────┘ │
+                    │  Dashboard              │
+                    │  Scenario Engine        │
+                    │  AI Copilot + Evals     │
+                    │  Portfolio Builder      │
                     └─────────────────────────┘
 ```
 
@@ -80,22 +80,52 @@ Canopy addresses this problem by combining production-grade data pipelines, quan
 ## Key Features
 
 ### 1. Portfolio Risk Scoring
-- **Transition Risk**: Carbon price exposure based on emissions intensity (tCO2e/$M revenue)
-- **Physical Risk**: Sector-weighted exposure to chronic and acute climate hazards
-- **Opportunity Score**: Green revenue percentage and low-carbon product pipeline
+- **Transition Risk** — Carbon price exposure based on emissions intensity (tCO2e/$M revenue)
+- **Physical Risk** — Sector-weighted exposure to chronic and acute climate hazards
+- **Opportunity Score** — Green revenue percentage and low-carbon product pipeline
+- Per-sector breakdown, top risks, quick wins
 
 ### 2. NGFS Scenario Engine
 - Pre-configured scenarios: Net Zero 2050, Delayed Transition, Current Policies
-- Custom scenario builder with adjustable carbon price and revenue shock parameters
+- Custom scenario builder with adjustable carbon price and revenue shock
 - EBITDA impact modeling and emissions delta projections
 
-### 3. AI-Powered Copilot
-- RAG pipeline injecting portfolio context and uploaded documents
+### 3. Agentic AI Analyst
+An autonomous **ReAct (Reasoning + Acting)** agent that plans multi-step analyses, selects tools, and iterates until it can deliver a comprehensive answer.
+
+- **5 registered tools**: portfolio analysis, scenario stress tests, EPA emissions queries, semantic document search, portfolio comparison
+- Streaming SSE endpoint exposes thought → action → observation in real time
+- Low-temperature tool calling for reliable structured output
+- Configurable iteration limits with graceful degradation
+
+### 4. Vector Store & Semantic RAG
+Embedding-based retrieval replaces naive text concatenation with proper chunking and cosine similarity search.
+
+- **Sentence-aware chunker** with configurable overlap to preserve cross-boundary context
+- **Pluggable embedding providers**: OpenAI `text-embedding-3-small` for production, deterministic hash for testing
+- **In-memory vector store** with numpy — designed for fast prototyping, swappable with pgvector
+
+### 5. LLM Evaluation Framework
+Systematic quality assessment — not anecdotal prompt testing. 17 curated eval cases across 4 categories:
+
+| Category | What it tests |
+|---|---|
+| ✅ Good prompts | Should produce data-driven, actionable, well-structured responses |
+| ❌ Bad prompts | Off-topic, empty, or informal inputs handled gracefully |
+| 🛡️ Adversarial | Prompt injection, jailbreaking, credential exfiltration, XSS |
+| 🔲 Edge cases | Zero-emission portfolios, CSRD×ISSB regulatory cross-references |
+
+- **Dual scoring**: fast rubric scorer for CI + LLM-as-judge for deep semantic evaluation
+- **Keyword enforcement**: expected/forbidden keywords with automatic score penalties
+- **Three entry points**: CLI (`python -m evals.run_evals`), HTTP API (`POST /evals/run`), frontend Evals tab with visual drill-down
+
+### 6. AI-Powered Copilot
+- RAG pipeline injecting portfolio context, uploaded documents, and vector search results
 - Streaming responses via Server-Sent Events
 - Source attribution and confidence scoring
 - Multi-provider support (Claude Sonnet 4, GPT-4o)
 
-### 4. Climate Data Pipeline
+### 7. Climate Data Pipeline
 - Automated ingestion from NOAA, EPA GHGRP, World Bank Climate API
 - Prefect-orchestrated ETL with validation, staging, and incremental loading
 - Schema validation and anomaly detection
@@ -112,9 +142,10 @@ Canopy addresses this problem by combining production-grade data pipelines, quan
 | **Backend** | FastAPI, Pydantic, SQLAlchemy 2.0 | Async API with type safety |
 | **Database** | PostgreSQL 16, Alembic | Relational store with migrations |
 | **LLM** | Anthropic Claude, OpenAI GPT | Multi-provider abstraction |
+| **Embeddings** | OpenAI text-embedding-3-small, numpy | Vector search for RAG |
 | **Pipeline** | Prefect 2.x, httpx | Orchestrated data ingestion |
 | **Observability** | structlog | Structured JSON logging |
-| **Testing** | pytest, Vitest, MSW | Unit + integration coverage |
+| **Testing** | pytest, Vitest, MSW | Unit + integration + eval coverage |
 | **Deployment** | Docker, GitHub Actions | Multi-stage builds, CI/CD |
 
 ---
@@ -124,13 +155,13 @@ Canopy addresses this problem by combining production-grade data pipelines, quan
 ### Prerequisites
 - Python 3.11+
 - Node.js 20+
-- PostgreSQL 16 (optional, SQLite default for local dev)
+- PostgreSQL 16 (optional — SQLite default for local dev)
 
 ### 1. Clone and Setup Backend
 
 ```bash
-git clone https://github.com/griffinmacnaughtan/esg-copilot.git
-cd esg-copilot/backend
+git clone https://github.com/griffinmacnaughtan/canopy.git
+cd canopy/backend
 
 # Create virtual environment
 python -m venv .venv
@@ -173,8 +204,6 @@ Access:
 
 ## Data Pipeline
 
-The pipeline extracts climate and emissions data from multiple sources:
-
 ```bash
 # Run pipeline manually
 cd backend
@@ -197,48 +226,101 @@ prefect deployment apply climate_data_flow-deployment.yaml
 
 ---
 
+## LLM Evaluations
+
+Run the eval suite to measure copilot response quality:
+
+```bash
+cd backend
+
+# Run all eval datasets with the rubric scorer
+python -m evals.run_evals
+
+# Run a specific dataset
+python -m evals.run_evals --dataset safety --scorer rubric
+
+# Use LLM-as-judge for deeper semantic scoring
+python -m evals.run_evals --dataset climate_copilot --scorer llm
+
+# Limit cases for quick iteration
+python -m evals.run_evals --max-cases 5
+```
+
+Or trigger via the HTTP API:
+
+```bash
+curl -X POST http://localhost:8000/evals/run \
+  -H "Content-Type: application/json" \
+  -d '{"dataset": "climate_copilot"}'
+```
+
+Or use the **Evals tab** in the copilot workspace for a visual dashboard with score heatmaps and per-case drill-down.
+
+---
+
 ## Project Structure
 
 ```
-esg-copilot/
+canopy/
 ├── backend/
 │   ├── app/
 │   │   ├── main.py              # FastAPI entrypoint
 │   │   ├── config.py            # Pydantic settings
-│   │   ├── exceptions.py        # Custom error handling
+│   │   ├── risk.py              # Scoring algorithms
 │   │   ├── routes/              # API route modules
 │   │   │   ├── health.py
 │   │   │   ├── portfolios.py
 │   │   │   ├── scoring.py
-│   │   │   ├── documents.py
-│   │   │   └── copilot.py
+│   │   │   ├── copilot.py
+│   │   │   ├── agents.py       # Agentic AI endpoints
+│   │   │   └── evals.py        # Eval framework endpoint
+│   │   ├── agents/              # ReAct agent framework
+│   │   │   ├── base.py         # Agent executor + ReAct loop
+│   │   │   ├── tools.py        # Tool definitions
+│   │   │   └── climate_agent.py
+│   │   ├── vectorstore/         # Semantic search
+│   │   │   ├── chunker.py      # Document chunking
+│   │   │   ├── embeddings.py   # Embedding providers
+│   │   │   └── store.py        # Cosine similarity store
 │   │   ├── database/            # SQLAlchemy models & connection
 │   │   ├── llm/                 # LLM provider abstraction
-│   │   ├── pipeline/            # Prefect ETL pipeline
-│   │   │   ├── extractors/      # NOAA, EPA, World Bank
-│   │   │   ├── transformers/    # Climate, emissions
-│   │   │   ├── validators/      # Schema, quality checks
-│   │   │   ├── loaders/         # Staging, PostgreSQL
-│   │   │   └── flows.py         # Prefect orchestration
-│   │   └── risk.py              # Scoring algorithms
+│   │   └── pipeline/            # Prefect ETL pipeline
+│   │       ├── extractors/      # NOAA, EPA, World Bank
+│   │       ├── transformers/
+│   │       ├── validators/
+│   │       └── loaders/
+│   ├── evals/                   # LLM evaluation framework
+│   │   ├── framework.py         # EvalRunner, EvalCase, EvalResult
+│   │   ├── scorers.py           # RubricScorer, LLMJudgeScorer
+│   │   ├── run_evals.py         # CLI entry point
+│   │   └── datasets/            # Curated test cases
+│   │       ├── climate_copilot.py
+│   │       └── safety.py
 │   ├── tests/
 │   │   ├── unit/
+│   │   │   ├── test_risk.py
+│   │   │   ├── test_agents.py
+│   │   │   ├── test_vectorstore.py
+│   │   │   └── test_evals.py
 │   │   └── integration/
-│   ├── alembic/                 # Database migrations
+│   ├── alembic/
 │   └── Dockerfile
 ├── frontend/
 │   ├── src/
 │   │   ├── api/                 # API client + mock data
-│   │   ├── components/          # React components
+│   │   ├── components/
 │   │   │   ├── dashboard/
 │   │   │   ├── copilot/
+│   │   │   │   ├── CopilotWorkspace.tsx
+│   │   │   │   ├── EvalPanel.tsx    # Eval visualization
+│   │   │   │   └── StreamingResponse.tsx
 │   │   │   ├── portfolio/
 │   │   │   └── ui/
-│   │   ├── hooks/               # Custom React hooks
-│   │   └── contexts/            # State management
+│   │   ├── hooks/
+│   │   └── contexts/
 │   ├── Dockerfile
 │   └── vite.config.ts
-├── .github/workflows/           # CI/CD
+├── .github/workflows/
 ├── docker-compose.yml
 └── .env.example
 ```
@@ -248,29 +330,34 @@ esg-copilot/
 ## Design Decisions
 
 ### Why FastAPI over Flask/Django?
-- Native async support for LLM streaming and concurrent API calls
+- Native async for LLM streaming and concurrent API calls
 - Automatic OpenAPI documentation
 - Pydantic validation reduces boilerplate
 
 ### Why Prefect over Airflow?
 - Pythonic API with native async support
-- Simpler deployment (no separate scheduler daemon)
-- Better local development experience
-- Lower operational overhead for this scale
+- No separate scheduler daemon — simpler deployment
+- Better local dev experience at this scale
+
+### Why a ReAct agent instead of a chain?
+- Multi-step analysis needs dynamic tool selection — a fixed chain can't decide at runtime whether to run a scenario, query emissions, or search documents
+- The thought → action → observation loop is self-correcting: the agent sees tool errors and tries alternatives
+- Streaming the reasoning trace builds user trust in the AI's analysis
+
+### Why an in-memory vector store?
+- For the current document scale (< 100k chunks), numpy cosine similarity is fast and simple
+- The `EmbeddingProvider` abstraction makes it trivial to swap in pgvector or Pinecone when scale demands it
+- Hash-based test embeddings mean the full vector store test suite runs in < 1s with zero API calls
+
+### Why a rubric scorer + LLM judge?
+- Rubric scoring is deterministic and fast — runs in CI without LLM API keys or costs
+- LLM-as-judge catches semantic issues (tone, reasoning quality) that keyword heuristics miss
+- Auto-fallback: if the judge LLM errors out, the rubric scorer takes over gracefully
 
 ### Why separate extractors/transformers/loaders?
 - **Testability**: Each component can be unit tested in isolation
 - **Reusability**: Transformers work across multiple sources
 - **Observability**: Clear logging at each pipeline stage
-- **Maintainability**: Single responsibility principle
-
-### Why SQLAlchemy 2.0 with asyncpg?
-- Async queries don't block during LLM streaming
-- Type-safe query building with ORM
-- Alembic migrations for schema versioning
-
-### Why RAG without vector embeddings?
-For the current portfolio scale (5-20 assets, <10 documents), full-text context injection is sufficient. The entire portfolio context + documents fit within Claude's 100k token window. Vector embeddings would be overkill and add complexity without benefit.
 
 ---
 
@@ -283,6 +370,9 @@ pytest -v
 
 # With coverage
 pytest --cov=app --cov-report=html
+
+# Run LLM evals (rubric scorer, no API keys needed)
+python -m evals.run_evals --scorer rubric
 
 # Frontend tests
 cd frontend
@@ -306,6 +396,9 @@ npm test
 | `/upload` | POST | Upload PDF for RAG context |
 | `/copilot` | POST | Non-streaming copilot |
 | `/copilot/stream` | POST | Streaming SSE copilot |
+| `/agent` | POST | Agentic analyst (sync) |
+| `/agent/stream` | POST | Agentic analyst (streaming SSE) |
+| `/evals/run` | POST | Run LLM evaluation suite |
 | `/pipeline/stats` | GET | Pipeline data statistics |
 | `/pipeline/emissions` | GET | EPA facility emissions data |
 | `/pipeline/emissions/top-emitters` | GET | Top emitting facilities |
@@ -328,7 +421,7 @@ Full OpenAPI spec available at `/docs` when running locally.
 | `NOAA_API_TOKEN` | NOAA Climate Data Online token | No |
 | `APP_ENV` | `development` / `production` | No |
 
-*At least one LLM API key required for copilot functionality.
+*At least one LLM API key required for copilot and agent functionality.
 
 ---
 
