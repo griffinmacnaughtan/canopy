@@ -222,3 +222,72 @@ class CsvImportResponse(BaseModel):
     rows_skipped: int
     warnings: list[str]
     message: str
+
+
+# ---------------------------------------------------------------------------
+# Agentic AI
+# ---------------------------------------------------------------------------
+
+
+class AgentRequest(BaseModel):
+    """Request to the agentic climate analyst."""
+
+    query: str = Field(..., min_length=3, max_length=4000)
+    portfolio_id: str | None = None
+    max_iterations: int = Field(8, ge=1, le=15)
+
+
+class AgentStepResponse(BaseModel):
+    """A single step in the agent's reasoning trace."""
+
+    thought: str
+    tool_name: str | None = None
+    tool_input: dict[str, Any] | None = None
+    observation: str | None = None
+
+
+class AgentResponse(BaseModel):
+    """Response from the agentic analyst."""
+
+    answer: str
+    steps: list[AgentStepResponse]
+    tool_calls: int
+    iterations: int
+    duration_ms: float
+
+
+# ---------------------------------------------------------------------------
+# Eval Framework
+# ---------------------------------------------------------------------------
+
+
+class EvalRunRequest(BaseModel):
+    """Request to run the LLM evaluation suite."""
+
+    dataset: str = Field("climate_copilot", description="Dataset name to evaluate")
+    max_cases: int | None = Field(None, ge=1, le=100)
+
+
+class EvalCaseResult(BaseModel):
+    """Result of a single eval case."""
+
+    case_id: str
+    category: str
+    prompt: str
+    response: str
+    scores: dict[str, float]
+    passed: bool
+    reasoning: str
+
+
+class EvalRunResponse(BaseModel):
+    """Aggregated results from an eval run."""
+
+    dataset: str
+    total_cases: int
+    passed: int
+    failed: int
+    pass_rate: float
+    avg_scores: dict[str, float]
+    results: list[EvalCaseResult]
+    duration_ms: float

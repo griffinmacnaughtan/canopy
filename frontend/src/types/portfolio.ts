@@ -232,3 +232,33 @@ export interface SectorInfo {
   sector: string;
   facility_count: number;
 }
+
+// ---------------------------------------------------------------------------
+// Eval Framework
+// ---------------------------------------------------------------------------
+
+export interface EvalCaseResult {
+  case_id: string;
+  category: string;
+  prompt: string;
+  response: string;
+  scores: Record<string, number>;
+  passed: boolean;
+  reasoning: string;
+}
+
+export interface EvalRunResponse {
+  dataset: string;
+  total_cases: number;
+  passed: number;
+  failed: number;
+  pass_rate: number;
+  avg_scores: Record<string, number>;
+  results: EvalCaseResult[];
+  duration_ms: number;
+}
+
+export interface EvalRunRequest {
+  dataset: string;
+  max_cases?: number;
+}
