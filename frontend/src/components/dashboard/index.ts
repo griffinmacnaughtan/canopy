@@ -1,5 +1,4 @@
 export { PortfolioOverview } from "./PortfolioOverview";
-export { PortfolioSignal } from "./PortfolioSignal";
 export { RiskNarrative } from "./RiskNarrative";
 export { SectorBreakdown } from "./SectorBreakdown";
 export { ScenarioEngine } from "./ScenarioEngine";
@@ -8,5 +7,4 @@ export { EmissionsBreakdown } from "./EmissionsBreakdown";
 export { RegulatoryReadiness } from "./RegulatoryReadiness";
 export { PortfolioInsights } from "./PortfolioInsights";
 export { NetZeroPathway } from "./NetZeroPathway";
-export { ImpactSummary } from "./ImpactSummary";
 export { PipelineExplorer } from "./PipelineExplorer";

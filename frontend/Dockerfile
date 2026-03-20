@@ -1,4 +1,4 @@
-# ESG Copilot Frontend Dockerfile
+# Canopy Frontend Dockerfile
 # Multi-stage build for development and production
 
 # ============================================

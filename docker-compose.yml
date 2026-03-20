@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: esg-copilot-db
+    container_name: canopy-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -16,13 +16,13 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - esg-network
+      - canopy-network
 
   api:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: esg-copilot-api
+    container_name: canopy-api
     ports:
       - "8000:8000"
     environment:
@@ -41,7 +41,7 @@ services:
     volumes:
       - ./backend:/app
     networks:
-      - esg-network
+      - canopy-network
     restart: unless-stopped
 
   frontend:
@@ -49,7 +49,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
-    container_name: esg-copilot-frontend
+    container_name: canopy-frontend
     ports:
       - "5173:5173"
     environment:
@@ -60,12 +60,12 @@ services:
     depends_on:
       - api
     networks:
-      - esg-network
+      - canopy-network
     restart: unless-stopped
 
 volumes:
   postgres_data:
 
 networks:
-  esg-network:
+  canopy-network:
     driver: bridge

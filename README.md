@@ -4,7 +4,7 @@
 
 A production-grade portfolio analytics platform that quantifies climate transition risk, models scenario stress tests, and delivers AI-powered investment insights. Built for finance teams who need to operationalize TCFD, CSRD, and ISSB disclosure requirements.
 
-[Live Demo](https://griffinmacnaughtan.github.io/esg-copilot/) | [API Docs](http://localhost:8000/docs)
+[Live Demo](https://griffinmacnaughtan.github.io/canopy/) | [API Reference](#api-reference)
 
 ---
 

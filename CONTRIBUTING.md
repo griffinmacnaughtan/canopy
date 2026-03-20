@@ -15,8 +15,8 @@ Thank you for your interest in contributing to Canopy. This document outlines th
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/esg-copilot.git
-cd esg-copilot
+git clone https://github.com/griffinmacnaughtan/canopy.git
+cd canopy
 
 # Backend setup
 cd backend
