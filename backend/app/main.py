@@ -44,6 +44,19 @@ async def _init_db_background() -> None:
         # endpoints will return 500s until the database becomes reachable.
         logger.error("db_init_failed", error=str(exc), error_type=type(exc).__name__)
 
+    # Seed the vector store with SEC filing excerpts for RAG
+    try:
+        from .ingestion import seed_vector_store
+
+        result = await seed_vector_store()
+        logger.info(
+            "vector_store_seeded",
+            total_chunks=result["total_chunks"],
+            files_processed=result["files_processed"],
+        )
+    except Exception as exc:
+        logger.error("vector_store_seed_failed", error=str(exc))
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

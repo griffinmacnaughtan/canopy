@@ -47,6 +47,10 @@ class EvalCase:
     forbidden_keywords: list[str] = field(default_factory=list)
     max_score: int = 5
     pass_threshold: float = 3.0
+    # Ground-truth fields for domain accuracy evaluation
+    expected_answer: str | None = None
+    expected_values: dict[str, float] = field(default_factory=dict)
+    expected_entities: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -162,13 +166,27 @@ class EvalRunner:
                 duration_ms=(time.perf_counter() - start) * 1000,
             )
 
-        # Score with the configured scorer
-        scores, reasoning = await self._scorer.score(
-            prompt=case.prompt,
-            response=response,
-            criteria=case.criteria,
-            max_score=case.max_score,
-        )
+        # Score with the configured scorer.
+        # If the scorer supports ground-truth checking and the case has
+        # expected values, use the extended interface.
+        if hasattr(self._scorer, "score_with_ground_truth") and (
+            case.expected_values or case.expected_entities
+        ):
+            scores, reasoning = await self._scorer.score_with_ground_truth(
+                prompt=case.prompt,
+                response=response,
+                criteria=case.criteria,
+                max_score=case.max_score,
+                expected_values=case.expected_values,
+                expected_entities=case.expected_entities,
+            )
+        else:
+            scores, reasoning = await self._scorer.score(
+                prompt=case.prompt,
+                response=response,
+                criteria=case.criteria,
+                max_score=case.max_score,
+            )
 
         # Keyword checks
         hits, violations = self._check_keywords(response, case)

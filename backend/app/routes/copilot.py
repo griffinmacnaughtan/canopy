@@ -19,6 +19,7 @@ from ..llm import SYSTEM_PROMPT, build_portfolio_context, get_llm_client
 from ..llm.prompts import build_user_message
 from ..models import CopilotRequest, CopilotResponse, CopilotStreamRequest
 from ..risk import score_portfolio
+from ..vectorstore import get_vector_store
 from .portfolios import db_asset_to_pydantic, get_portfolio_by_id
 from .scoring import get_scenarios_dict
 
@@ -85,10 +86,39 @@ async def get_pipeline_context(db: AsyncSession) -> str | None:
         return None
 
 
+async def search_filing_context(question: str) -> str | None:
+    """Search the vector store for relevant SEC filing chunks.
+
+    Returns formatted context string, or ``None`` if the store is empty
+    or no results exceed the relevance threshold.
+    """
+    store = get_vector_store()
+    if store.size == 0:
+        return None
+
+    try:
+        results = await store.search(question, top_k=5, min_score=0.1)
+    except Exception as e:
+        logger.warning("vector_search_error", error=str(e))
+        return None
+
+    if not results:
+        return None
+
+    parts: list[str] = []
+    for r in results:
+        company = r.document.metadata.get("company", "Unknown")
+        filing = r.document.metadata.get("filing_type", "10-K")
+        parts.append(f"**{company}** ({filing}, relevance: {r.score:.2f}):\n{r.document.text}")
+
+    return "## Relevant SEC Filing Excerpts\n\n" + "\n\n---\n\n".join(parts)
+
+
 def calculate_confidence_score(
     question: str,
     has_documents: bool,
     portfolio_size: int,
+    has_filings: bool = False,
 ) -> float:
     """
     Calculate confidence score for the response based on context quality.
@@ -97,6 +127,7 @@ def calculate_confidence_score(
     - Question specificity (longer questions tend to be more specific)
     - Document availability (more context = higher confidence)
     - Portfolio size (more data = higher confidence)
+    - Filing availability (authoritative SEC data boosts confidence)
 
     Returns:
         Float between 0.0 and 1.0
@@ -113,7 +144,10 @@ def calculate_confidence_score(
     # Portfolio size factor (0-0.15)
     portfolio_factor = min(0.15, portfolio_size * 0.02)
 
-    confidence = base_score + question_factor + doc_factor + portfolio_factor
+    # SEC filing factor (0-0.15) — higher value, authoritative source
+    filing_factor = 0.15 if has_filings else 0.0
+
+    confidence = base_score + question_factor + doc_factor + portfolio_factor + filing_factor
 
     return round(min(1.0, confidence), 2)
 
@@ -122,6 +156,7 @@ def get_source_attribution(
     has_documents: bool,
     document_count: int = 0,
     has_pipeline_data: bool = False,
+    has_filings: bool = False,
 ) -> list:
     """
     Generate source attribution for the response.
@@ -131,9 +166,12 @@ def get_source_attribution(
     """
     sources = [
         "Portfolio asset inventory",
-        "Sector baseline risk factors (NGFS-aligned)",
-        "Scenario library (NGFS-inspired)",
+        "Sector benchmarks (TPI, S&P Trucost, IEA — see benchmarks module)",
+        "Scenario library (NGFS Phase IV)",
     ]
+
+    if has_filings:
+        sources.append("SEC 10-K filings (Item 1A climate risk disclosures)")
 
     if has_pipeline_data:
         sources.append("EPA GHGRP emissions data")
@@ -190,7 +228,21 @@ async def copilot(
     if pipeline_context:
         context = context + "\n\n" + pipeline_context
 
-    user_message = build_user_message(request.question, context, document_context)
+    # Search vector store for relevant SEC filing excerpts
+    filing_context = await search_filing_context(request.question)
+
+    # Merge document and filing context for RAG injection
+    combined_doc_context = document_context or ""
+    if filing_context:
+        combined_doc_context = (
+            (combined_doc_context + "\n\n" + filing_context).strip()
+            if combined_doc_context
+            else filing_context
+        )
+
+    user_message = build_user_message(
+        request.question, context, combined_doc_context if combined_doc_context else None
+    )
     messages = [{"role": "user", "content": user_message}]
 
     try:
@@ -207,16 +259,19 @@ async def copilot(
         raise LLMError(f"LLM request failed: {str(e)[:200]}") from e
 
     has_pipeline = pipeline_context is not None
+    has_filings = filing_context is not None
     confidence = calculate_confidence_score(
         request.question,
         has_documents=document_context is not None or has_pipeline,
         portfolio_size=len(pydantic_assets),
+        has_filings=has_filings,
     )
 
     citations = get_source_attribution(
         has_documents=document_context is not None,
         document_count=len(document_context.split("### Document:")) - 1 if document_context else 0,
         has_pipeline_data=has_pipeline,
+        has_filings=has_filings,
     )
 
     return CopilotResponse(
@@ -275,19 +330,33 @@ async def generate_stream(
         if pipeline_context:
             context = context + "\n\n" + pipeline_context
 
+        # Search vector store for relevant SEC filing excerpts
+        filing_context = await search_filing_context(question)
+
+        # Merge document and filing context
+        combined_doc_context = document_context or ""
+        if filing_context:
+            combined_doc_context = (
+                (combined_doc_context + "\n\n" + filing_context).strip()
+                if combined_doc_context
+                else filing_context
+            )
+
         # Calculate and emit confidence metadata first
         has_pipeline_data = pipeline_context is not None
+        has_filings = filing_context is not None
         confidence = calculate_confidence_score(
             question,
             has_documents=document_context is not None or has_pipeline_data,
             portfolio_size=len(pydantic_assets),
+            has_filings=has_filings,
         )
 
         # Emit metadata event
         yield f'event: metadata\ndata: {{"confidence": {confidence}, "portfolio": "{portfolio.name}"}}\n\n'
 
         # Log context info
-        doc_size = len(document_context) if document_context else 0
+        doc_size = len(combined_doc_context) if combined_doc_context else 0
         logger.info(
             "copilot_stream_started",
             portfolio_id=str(portfolio.id),
@@ -295,10 +364,13 @@ async def generate_stream(
             question_preview=question[:50],
             context_chars=len(context),
             document_chars=doc_size,
+            has_filings=has_filings,
             confidence=confidence,
         )
 
-        user_message = build_user_message(question, context, document_context)
+        user_message = build_user_message(
+            question, context, combined_doc_context if combined_doc_context else None
+        )
         messages = [{"role": "user", "content": user_message}]
 
     try:

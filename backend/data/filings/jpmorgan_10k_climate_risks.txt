@@ -1,0 +1,32 @@
+Company: JPMorgan Chase & Co.
+Ticker: JPM
+Filing: 10-K Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2024-02-16
+Source: SEC EDGAR (CIK: 0000019617)
+---
+Climate-Related Financial Risks
+
+Climate change and the global response to climate change present both physical risks and transition risks to the Firm and its clients. The Firm has significant exposure to climate risk through its lending, investment, and advisory activities across multiple sectors and geographies.
+
+Transition Risk — Financed Emissions
+
+As a global financial institution, the Firm's climate risk exposure is primarily driven by its financed emissions — the GHG emissions associated with its lending and investment portfolio — rather than its direct operational emissions. The Firm's Scope 1 and Scope 2 emissions from its own operations are relatively modest (approximately 78,000 and 245,000 metric tons CO2e respectively in 2023). However, its financed emissions across the lending portfolio are orders of magnitude larger and represent its most material climate exposure.
+
+The Firm has set 2030 intermediate emissions intensity reduction targets for key carbon-intensive sectors in its financing portfolio, including oil and gas, electric power, auto manufacturing, iron and steel, and cement. Achieving these targets depends in part on client actions, government policies, and the pace of technological innovation, all of which are beyond the Firm's direct control.
+
+Regulatory and Policy Risk
+
+Climate-related regulation and policy continue to evolve rapidly across jurisdictions. The Firm is subject to or could become subject to various climate-related regulatory requirements, including the EU CSRD, potential SEC climate disclosure rules, and banking supervisory guidance on climate-related financial risk management from the OCC, Federal Reserve, FDIC, and international bodies including the Basel Committee and European Banking Authority.
+
+The adoption of carbon pricing mechanisms, fossil fuel subsidy reforms, or restrictions on financing for carbon-intensive activities could affect the creditworthiness of the Firm's borrowers in sectors such as oil and gas, power generation, transportation, and real estate. A rapid and disorderly transition, in which climate policies are abruptly tightened, could lead to increased credit losses and stranded assets in the Firm's loan portfolio.
+
+Physical Risk Exposure
+
+Physical climate risks, including more frequent and severe hurricanes, floods, droughts, and wildfires, could affect the Firm's real estate and mortgage portfolios, as well as the operations of its commercial banking clients. Properties in flood zones, coastal areas, and regions prone to extreme heat may experience declining values and increasing insurance costs. The Firm's exposure to physical climate risk is concentrated in its residential and commercial real estate lending portfolios.
+
+Climate-related extreme weather events may also disrupt the Firm's own operations, including data centers, branch networks, and critical infrastructure. The Firm maintains business continuity plans to address such disruptions, but the increasing frequency and severity of weather events could strain these capabilities.
+
+Reputational and Stakeholder Considerations
+
+The Firm faces scrutiny from a range of stakeholders — including investors, regulators, employees, and advocacy groups — regarding its approach to climate change. The Firm has been criticized by environmental groups for its financing of fossil fuel companies and by certain investors and political figures for its participation in climate initiatives. Balancing these competing expectations presents ongoing reputational and strategic challenges.

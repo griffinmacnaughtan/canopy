@@ -1,0 +1,28 @@
+Company: NextEra Energy, Inc.
+Ticker: NEE
+Filing: 10-K Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2024-02-15
+Source: SEC EDGAR (CIK: 0000753308)
+---
+Climate and Weather-Related Risks
+
+NextEra Energy's operations are subject to risks from weather events and changing climate conditions. Florida Power & Light Company (FPL), our regulated utility subsidiary, operates in Florida, which is particularly vulnerable to hurricanes, tropical storms, flooding, and sea-level rise. NextEra Energy Resources, our competitive clean energy subsidiary, operates wind and solar generation facilities across North America that are exposed to variations in wind patterns, solar irradiance, and extreme weather events.
+
+Hurricane and Severe Weather Exposure
+
+FPL's electric utility infrastructure, including approximately 28,000 miles of transmission and distribution lines, substations, and generating facilities, is exposed to damage from hurricanes and severe weather. In 2022, Hurricane Ian caused approximately $3.2 billion in restoration costs for FPL. While the Company has invested significantly in grid hardening and undergrounding programs, the increasing frequency and intensity of Atlantic hurricanes may lead to higher restoration costs and customer outages.
+
+Renewable Energy Generation Variability
+
+Climate change may alter wind and solar resource patterns that affect the output of our renewable energy facilities. NextEra Energy Resources is the world's largest generator of renewable energy from wind and sun, operating approximately 33 GW of wind, solar, and battery storage capacity. Changes in historical weather patterns, including shifts in wind speed distributions, cloud cover, or extreme temperature events that reduce solar panel efficiency, could affect generation output and revenue.
+
+Transition Opportunities and Regulatory Support
+
+As the largest clean energy company in North America, NextEra Energy is positioned to benefit from the transition to a lower-carbon economy. The Inflation Reduction Act of 2022 extended and expanded federal tax credits for wind, solar, and battery storage projects, providing long-term policy certainty. However, changes in government policy, including potential repeal or modification of clean energy tax credits, could adversely affect the economic viability of renewable energy projects.
+
+The Company has set a goal to reduce its CO2 emissions rate by 70% from a 2005 baseline by 2025 and has a Real Zero goal to eliminate carbon emissions from its operations by no later than 2045. Achievement of these goals depends on continued investment in renewable energy, retirement of fossil fuel generation, and development of enabling technologies such as long-duration energy storage and green hydrogen.
+
+Water and Environmental Resources
+
+Certain of our generation facilities depend on water resources for cooling and operations. Prolonged drought conditions, increased competition for water resources, and regulatory restrictions on water use could affect the operations and output of our thermal generation fleet, particularly in water-stressed regions. Climate change is expected to exacerbate water stress in many regions where we operate.

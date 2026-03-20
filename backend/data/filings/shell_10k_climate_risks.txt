@@ -1,0 +1,34 @@
+Company: Shell plc
+Ticker: SHEL
+Filing: 20-F Annual Report
+Section: Risk Factors (Climate-Related Excerpts)
+Filing Date: 2024-03-14
+Source: SEC EDGAR (CIK: 0001306965)
+---
+Climate Change and Energy Transition
+
+Shell's business is exposed to significant risks arising from climate change and the global transition to a lower-carbon energy system. The pace and pathway of the energy transition are uncertain and will be shaped by government policies, technological developments, and changes in societal behavior and consumer preferences.
+
+Greenhouse Gas Emissions and Regulatory Exposure
+
+Shell's operated Scope 1 and 2 emissions were approximately 68 million and 10 million metric tons of CO2 equivalent respectively in 2023. The Group is subject to various greenhouse gas regulations and carbon pricing mechanisms in jurisdictions where it operates, including the EU Emissions Trading System, the UK Emissions Trading Scheme, and carbon pricing mechanisms in Canada, Singapore, and other markets.
+
+The potential for new or expanded carbon pricing, including carbon border adjustment mechanisms, methane emissions regulations, and more stringent emissions standards, could materially increase the Group's compliance costs. The EU's Carbon Border Adjustment Mechanism (CBAM), which entered its transitional phase in October 2023, could affect the competitiveness of certain of our products in European markets.
+
+Legal Proceedings Related to Climate
+
+In May 2021, the District Court of The Hague ruled that Shell must reduce its absolute CO2 emissions by 45% by 2030 compared with 2019 levels, covering Scope 1, 2, and 3 emissions. Shell has appealed this ruling. The outcome of this appeal and similar climate litigation in other jurisdictions could have significant implications for our business strategy and operations.
+
+Shell is a defendant in numerous other climate-related legal proceedings in various jurisdictions, including cases brought by municipalities, states, and other governmental entities alleging that the Group's products have contributed to climate change and associated harms. Additional climate-related lawsuits may be filed in the future.
+
+Stranded Asset Risk
+
+Under scenarios consistent with limiting global warming to 1.5 degrees Celsius, certain of the Group's oil and gas reserves and related infrastructure could become uneconomic to develop, constituting stranded assets. Shell's proved oil and gas reserves at year-end 2023 were 9.3 billion barrels of oil equivalent. A decline in long-term demand for oil and gas under aggressive decarbonization scenarios could result in impairments to the carrying value of these assets.
+
+Physical Risks
+
+Shell operates assets in regions exposed to physical climate risks, including offshore platforms in the Gulf of Mexico, North Sea, and tropical waters; refineries and chemical plants in coastal areas; and LNG facilities in geographies subject to cyclones, flooding, and extreme heat. Increasing severity of weather events may lead to production interruptions, asset damage, and higher insurance costs. Our operations in Nigeria and the Middle East face additional risks from water stress and extreme temperature events.
+
+Energy Transition Strategy
+
+Shell has adopted a Powering Progress strategy that includes targets to become a net-zero emissions energy business by 2050. However, the Group has acknowledged that achieving this target depends on society also progressing toward net zero, including through effective government policies and widespread adoption of low-carbon technologies. In 2023, Shell revised certain of its intermediate emissions reduction targets, which drew criticism from climate-focused investors and advocacy groups.

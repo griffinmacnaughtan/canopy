@@ -1,0 +1,24 @@
+Company: Apple Inc.
+Ticker: AAPL
+Filing: 10-K Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2024-11-01
+Source: SEC EDGAR (CIK: 0000320193)
+---
+Environmental and Climate-Related Risks
+
+The Company's operations and supply chain are subject to risks associated with climate change and environmental regulations. Climate change may increase the frequency and severity of extreme weather events, which could disrupt the Company's supply chain, damage facilities, and affect the availability of critical components. The Company sources components from suppliers located in regions that may be particularly vulnerable to climate-related disruptions, including parts of East Asia susceptible to typhoons and flooding.
+
+Supply Chain Disruption
+
+The Company relies on a global network of suppliers and manufacturing partners, many of which are located in areas at heightened risk from climate-related physical hazards. Extended disruptions due to extreme weather events, water scarcity, or other climate impacts could materially affect the Company's ability to manufacture and deliver products. In recent years, semiconductor fabrication facilities in Taiwan have experienced drought conditions that temporarily constrained water supplies essential to chip manufacturing.
+
+Regulatory Compliance
+
+The Company is subject to various international, national, and local environmental laws and regulations, including those related to climate change, energy efficiency, and electronic waste. The European Union's Corporate Sustainability Reporting Directive (CSRD) and other disclosure frameworks require extensive reporting on environmental matters, including Scope 1, 2, and 3 greenhouse gas emissions. Compliance with evolving climate disclosure requirements, including potential SEC climate disclosure rules, may result in additional costs.
+
+The Company has achieved carbon neutrality for its global corporate operations since 2020 and has committed to achieving carbon neutrality across its entire supply chain and product life cycle by 2030. To meet these targets, the Company has invested in renewable energy projects, energy efficiency improvements, and carbon removal credits. However, there can be no assurance that these commitments can be fully achieved, and failure to meet publicly stated environmental goals could result in reputational harm and regulatory scrutiny.
+
+Product Design and Circular Economy
+
+The Company has invested in designing products that use recycled and renewable materials, reduce energy consumption, and extend product lifecycles. However, evolving environmental regulations regarding product energy efficiency, material restrictions, and end-of-life recycling obligations could increase product development costs and affect product design choices. The EU's proposed Ecodesign for Sustainable Products Regulation may impose additional requirements on electronic devices sold in the European market.

@@ -1,8 +1,7 @@
 """Scoring strategies for LLM evaluation.
 
-Provides both rule-based (``RubricScorer``) and LLM-as-judge
-(``LLMJudgeScorer``) approaches. The rule-based scorer is fast and
-deterministic; the LLM judge provides deeper semantic evaluation.
+Provides rule-based (``RubricScorer``), LLM-as-judge (``LLMJudgeScorer``),
+and ground-truth (``FactualAccuracyScorer``) approaches.
 """
 
 from __future__ import annotations
@@ -209,3 +208,147 @@ Respond ONLY with a JSON object in this exact format:
             fallback = RubricScorer()
             scores, reasoning = await fallback.score(prompt, response, criteria, max_score)
             return scores, f"LLM judge failed ({e}), used rubric fallback: {reasoning}"
+
+
+class FactualAccuracyScorer(Scorer):
+    """Scorer that checks factual accuracy against ground-truth values.
+
+    Unlike ``RubricScorer`` (formatting heuristics) and ``LLMJudgeScorer``
+    (semantic LLM evaluation), this scorer compares extracted numeric
+    values and entity mentions against **known correct answers** computed
+    from the seed data.
+
+    Scoring methodology:
+
+    1. **Numeric accuracy** -- extract all numbers from the LLM response,
+       check whether each expected value appears within a configurable
+       tolerance (default ±10 %).
+    2. **Entity recall** -- verify that required entity names (companies,
+       sectors) appear in the response.
+    3. **Combined score** -- weighted average of numeric accuracy (60 %)
+       and entity recall (40 %).
+    """
+
+    def __init__(self, tolerance: float = 0.10) -> None:
+        self._tolerance = tolerance
+
+    async def score(
+        self,
+        prompt: str,
+        response: str,
+        criteria: dict[str, str],
+        max_score: int = 5,
+    ) -> tuple[dict[str, float], str]:
+        """Fall back to rubric scoring when no ground-truth is provided."""
+        fallback = RubricScorer()
+        return await fallback.score(prompt, response, criteria, max_score)
+
+    async def score_with_ground_truth(
+        self,
+        prompt: str,
+        response: str,
+        criteria: dict[str, str],
+        max_score: int = 5,
+        expected_values: dict[str, float] | None = None,
+        expected_entities: list[str] | None = None,
+    ) -> tuple[dict[str, float], str]:
+        """Score a response against ground-truth numeric values and entities.
+
+        Args:
+            prompt: The original prompt.
+            response: The LLM response to evaluate.
+            criteria: Scoring dimensions (used for output keys).
+            max_score: Maximum score per dimension.
+            expected_values: ``{label: numeric_value}`` pairs to check.
+            expected_entities: Entity names that must appear in the response.
+
+        Returns:
+            ``(scores_dict, reasoning_string)``
+        """
+        reasons: list[str] = []
+        expected_values = expected_values or {}
+        expected_entities = expected_entities or []
+
+        # ── Numeric accuracy ────────────────────────────────────────
+        numeric_score = max_score  # Start perfect, deduct for misses
+        response_numbers = self._extract_numbers(response)
+
+        value_hits = 0
+        value_misses: list[str] = []
+
+        for label, expected in expected_values.items():
+            if self._number_found(expected, response_numbers):
+                value_hits += 1
+            else:
+                value_misses.append(f"{label}={expected:,.0f}")
+                numeric_score -= max_score / max(len(expected_values), 1)
+
+        numeric_score = max(0.0, numeric_score)
+
+        if expected_values:
+            reasons.append(f"Numeric: {value_hits}/{len(expected_values)} values found")
+            if value_misses:
+                reasons.append(f"Missing: {', '.join(value_misses)}")
+
+        # ── Entity recall ───────────────────────────────────────────
+        entity_score = max_score
+        resp_lower = response.lower()
+
+        entity_hits = 0
+        entity_misses: list[str] = []
+
+        for entity in expected_entities:
+            if entity.lower() in resp_lower:
+                entity_hits += 1
+            else:
+                entity_misses.append(entity)
+                entity_score -= max_score / max(len(expected_entities), 1)
+
+        entity_score = max(0.0, entity_score)
+
+        if expected_entities:
+            reasons.append(f"Entities: {entity_hits}/{len(expected_entities)} found")
+            if entity_misses:
+                reasons.append(f"Missing entities: {', '.join(entity_misses)}")
+
+        # ── Combine into per-criterion scores ───────────────────────
+        # Weight: 60% numeric, 40% entity
+        has_values = bool(expected_values)
+        has_entities = bool(expected_entities)
+
+        if has_values and has_entities:
+            combined = numeric_score * 0.6 + entity_score * 0.4
+        elif has_values:
+            combined = numeric_score
+        elif has_entities:
+            combined = entity_score
+        else:
+            combined = max_score * 0.5
+
+        combined = round(min(max_score, combined), 1)
+
+        scores = dict.fromkeys(criteria, combined)
+        return scores, "; ".join(reasons)
+
+    def _extract_numbers(self, text: str) -> list[float]:
+        """Extract all numeric values from text, handling commas."""
+        # Match numbers with optional commas and decimals
+        raw = re.findall(r"[\d,]+\.?\d*", text)
+        results = []
+        for r in raw:
+            try:
+                results.append(float(r.replace(",", "")))
+            except ValueError:
+                continue
+        return results
+
+    def _number_found(
+        self,
+        expected: float,
+        found_numbers: list[float],
+    ) -> bool:
+        """Check if the expected value appears in the extracted numbers."""
+        if expected == 0:
+            return 0.0 in found_numbers
+
+        return any(abs(num - expected) / abs(expected) <= self._tolerance for num in found_numbers)
