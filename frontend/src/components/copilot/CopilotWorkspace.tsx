@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, RefreshCw, AlertCircle, Paperclip, FileText, X, Loader2, Sparkles } from "lucide-react";
+import { Send, Bot, RefreshCw, AlertCircle, Paperclip, FileText, X, Loader2, Sparkles, FlaskConical } from "lucide-react";
+import * as Tabs from "@radix-ui/react-tabs";
 import { Card, CardHeader, CardTitle, CardContent, Button, Skeleton } from "@/components/ui";
 import { useCopilot, usePortfolio } from "@/hooks";
 import { useDocuments } from "@/hooks/useDocuments";
 import { StreamingResponse } from "./StreamingResponse";
 import { QuickPrompts } from "./QuickPrompts";
+import { EvalPanel } from "./EvalPanel";
 import { api } from "@/api/client";
 
 function CopilotSkeleton() {
@@ -103,7 +105,7 @@ export function CopilotWorkspace() {
         {/* Premium gradient accent bar */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-forest-500 to-emerald-400" />
 
-        <CardHeader className="pb-4">
+        <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-forest-600 shadow-md shadow-emerald-500/20">
               <Bot className="h-5 w-5 text-white" />
@@ -124,152 +126,177 @@ export function CopilotWorkspace() {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          {/* Quick prompts */}
-          <QuickPrompts onSelect={handleQuickPrompt} disabled={isBusy} />
-
-          {/* Uploaded documents display */}
-          <AnimatePresence>
-            {documents.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="flex flex-wrap items-center gap-2"
+        <CardContent className="pt-2">
+          <Tabs.Root defaultValue="copilot">
+            <Tabs.List className="flex gap-1 mb-4 border-b border-gray-100 pb-px">
+              <Tabs.Trigger
+                value="copilot"
+                className="px-3 py-1.5 text-xs font-medium text-muted-foreground rounded-t-lg transition-colors data-[state=active]:text-emerald-700 data-[state=active]:bg-emerald-50 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500 hover:text-foreground flex items-center gap-1.5"
               >
-                {documents.map((doc) => (
+                <Bot className="h-3 w-3" />
+                Copilot
+              </Tabs.Trigger>
+              <Tabs.Trigger
+                value="evals"
+                className="px-3 py-1.5 text-xs font-medium text-muted-foreground rounded-t-lg transition-colors data-[state=active]:text-emerald-700 data-[state=active]:bg-emerald-50 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500 hover:text-foreground flex items-center gap-1.5"
+              >
+                <FlaskConical className="h-3 w-3" />
+                Evals
+              </Tabs.Trigger>
+            </Tabs.List>
+
+            <Tabs.Content value="copilot" className="space-y-4">
+              {/* Quick prompts */}
+              <QuickPrompts onSelect={handleQuickPrompt} disabled={isBusy} />
+
+              {/* Uploaded documents display */}
+              <AnimatePresence>
+                {documents.length > 0 && (
                   <motion.div
-                    key={doc.filename}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-2 text-xs bg-emerald-100 text-emerald-700 rounded-full px-3 py-1.5 border border-emerald-200"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex flex-wrap items-center gap-2"
                   >
-                    <FileText className="h-3 w-3" />
-                    <span className="max-w-[150px] truncate font-medium">{doc.filename}</span>
-                    <span className="text-emerald-600/70">({formatCharCount(doc.char_count)})</span>
+                    {documents.map((doc) => (
+                      <motion.div
+                        key={doc.filename}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-2 text-xs bg-emerald-100 text-emerald-700 rounded-full px-3 py-1.5 border border-emerald-200"
+                      >
+                        <FileText className="h-3 w-3" />
+                        <span className="max-w-[150px] truncate font-medium">{doc.filename}</span>
+                        <span className="text-emerald-600/70">({formatCharCount(doc.char_count)})</span>
+                      </motion.div>
+                    ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => clearDocuments()}
+                      disabled={isClearing || isBusy}
+                      className="h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    >
+                      {isClearing ? (
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <X className="h-3 w-3" />
+                      )}
+                    </Button>
                   </motion.div>
-                ))}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => clearDocuments()}
-                  disabled={isClearing || isBusy}
-                  className="h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                >
-                  {isClearing ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <X className="h-3 w-3" />
-                  )}
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Upload error */}
-          <AnimatePresence>
-            {uploadError && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-xs border border-destructive/20"
-              >
-                <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
-                <span>
-                  {uploadError instanceof Error ? uploadError.message : "Upload failed"}
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Question input with integrated upload button */}
-          <form onSubmit={handleSubmit}>
-            <div className="relative">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={handleFileSelect}
-                className="hidden"
-                disabled={isBusy}
-              />
-
-              <textarea
-                ref={textareaRef}
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Ask about your portfolio's climate risks, opportunities, or regulatory readiness..."
-                className="w-full min-h-[100px] max-h-[200px] p-4 pl-12 pr-14 rounded-xl bg-emerald-50/50 border border-emerald-200/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 resize-none transition-all duration-200"
-                disabled={isBusy}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit(e);
-                  }
-                }}
-              />
-
-              {/* Attachment button - bottom left */}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isBusy}
-                className="absolute bottom-3 left-3 p-2 rounded-lg text-emerald-600/60 hover:text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
-                title="Attach PDF"
-              >
-                {isUploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Paperclip className="h-4 w-4" />
                 )}
-              </button>
+              </AnimatePresence>
 
-              {/* Send button - bottom right */}
-              <Button
-                type="submit"
-                size="icon"
-                disabled={!question.trim() || isBusy}
-                className="absolute bottom-3 right-3 bg-gradient-to-r from-emerald-500 to-forest-600 hover:from-emerald-600 hover:to-forest-700 shadow-lg shadow-emerald-500/25"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </div>
-          </form>
+              {/* Upload error */}
+              <AnimatePresence>
+                {uploadError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-xs border border-destructive/20"
+                  >
+                    <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span>
+                      {uploadError instanceof Error ? uploadError.message : "Upload failed"}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-          {/* Error display */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20"
-            >
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              <span>{error.message}</span>
-            </motion.div>
-          )}
+              {/* Question input with integrated upload button */}
+              <form onSubmit={handleSubmit}>
+                <div className="relative">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    disabled={isBusy}
+                  />
 
-          {/* Streaming response */}
-          <StreamingResponse content={response} isStreaming={isStreaming} />
+                  <textarea
+                    ref={textareaRef}
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    placeholder="Ask about your portfolio's climate risks, opportunities, or regulatory readiness..."
+                    className="w-full min-h-[100px] max-h-[200px] p-4 pl-12 pr-14 rounded-xl bg-emerald-50/50 border border-emerald-200/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 resize-none transition-all duration-200"
+                    disabled={isBusy}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
+                  />
 
-          {/* Reset button */}
-          {response && !isStreaming && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex justify-end"
-            >
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleReset}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <RefreshCw className="h-3 w-3 mr-2" />
-                New Question
-              </Button>
-            </motion.div>
-          )}
+                  {/* Attachment button - bottom left */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isBusy}
+                    className="absolute bottom-3 left-3 p-2 rounded-lg text-emerald-600/60 hover:text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    title="Attach PDF"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Paperclip className="h-4 w-4" />
+                    )}
+                  </button>
+
+                  {/* Send button - bottom right */}
+                  <Button
+                    type="submit"
+                    size="icon"
+                    disabled={!question.trim() || isBusy}
+                    className="absolute bottom-3 right-3 bg-gradient-to-r from-emerald-500 to-forest-600 hover:from-emerald-600 hover:to-forest-700 shadow-lg shadow-emerald-500/25"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+
+              {/* Error display */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20"
+                >
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span>{error.message}</span>
+                </motion.div>
+              )}
+
+              {/* Streaming response */}
+              <StreamingResponse content={response} isStreaming={isStreaming} />
+
+              {/* Reset button */}
+              {response && !isStreaming && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-end"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleReset}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <RefreshCw className="h-3 w-3 mr-2" />
+                    New Question
+                  </Button>
+                </motion.div>
+              )}
+            </Tabs.Content>
+
+            <Tabs.Content value="evals">
+              <EvalPanel />
+            </Tabs.Content>
+          </Tabs.Root>
         </CardContent>
       </Card>
     </motion.div>
