@@ -192,10 +192,12 @@ class VectorStore:
                 if score < min_score:
                     continue
                 doc_id = self._matrix_ids[idx]
-                results.append(SearchResult(
-                    document=self._documents[doc_id],
-                    score=score,
-                ))
+                results.append(
+                    SearchResult(
+                        document=self._documents[doc_id],
+                        score=score,
+                    )
+                )
 
         return results
 

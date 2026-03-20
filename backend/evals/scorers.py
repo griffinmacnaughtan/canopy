@@ -169,9 +169,7 @@ Respond ONLY with a JSON object in this exact format:
         criteria: dict[str, str],
         max_score: int = 5,
     ) -> tuple[dict[str, float], str]:
-        criteria_text = "\n".join(
-            f"- **{dim}**: {desc}" for dim, desc in criteria.items()
-        )
+        criteria_text = "\n".join(f"- **{dim}**: {desc}" for dim, desc in criteria.items())
 
         judge_prompt = self.JUDGE_PROMPT.format(
             prompt=prompt,

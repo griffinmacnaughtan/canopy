@@ -91,7 +91,7 @@ class HashEmbeddingProvider(EmbeddingProvider):
                 # 32 bytes → 32 uint8 values, scaled to [-1, 1]
                 vals = np.frombuffer(digest, dtype=np.uint8).astype(np.float32)
                 parts.append((vals / 127.5) - 1.0)
-            vec = np.concatenate(parts)[:self.DIMENSION]
+            vec = np.concatenate(parts)[: self.DIMENSION]
             # L2-normalise so cosine similarity works correctly
             norm = np.linalg.norm(vec)
             if norm > 0:

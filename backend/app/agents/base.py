@@ -149,7 +149,9 @@ class AgentExecutor:
         final_answer = None
 
         # Extract THOUGHT
-        thought_match = re.search(r"THOUGHT:\s*(.+?)(?=\nACTION:|\nFINAL ANSWER:|\Z)", text, re.DOTALL)
+        thought_match = re.search(
+            r"THOUGHT:\s*(.+?)(?=\nACTION:|\nFINAL ANSWER:|\Z)", text, re.DOTALL
+        )
         if thought_match:
             thought = thought_match.group(1).strip()
 
@@ -259,19 +261,25 @@ class AgentExecutor:
 
                 # Feed the full exchange back to the LLM
                 messages.append({"role": "assistant", "content": response.content})
-                messages.append({
-                    "role": "user",
-                    "content": f"OBSERVATION: {observation}",
-                })
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": f"OBSERVATION: {observation}",
+                    }
+                )
             else:
                 # LLM didn't produce a valid action or final answer — nudge it
-                step.observation = "No valid action parsed. Please use the THOUGHT/ACTION/FINAL ANSWER format."
+                step.observation = (
+                    "No valid action parsed. Please use the THOUGHT/ACTION/FINAL ANSWER format."
+                )
                 steps.append(step)
                 messages.append({"role": "assistant", "content": response.content})
-                messages.append({
-                    "role": "user",
-                    "content": "Please respond with either an ACTION or a FINAL ANSWER using the required format.",
-                })
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": "Please respond with either an ACTION or a FINAL ANSWER using the required format.",
+                    }
+                )
 
         # Max iterations reached — synthesise from what we have
         total_ms = (time.perf_counter() - start_time) * 1000
@@ -341,9 +349,11 @@ class AgentExecutor:
                 messages.append({"role": "user", "content": f"OBSERVATION: {observation}"})
             else:
                 messages.append({"role": "assistant", "content": response.content})
-                messages.append({
-                    "role": "user",
-                    "content": "Please respond with either an ACTION or a FINAL ANSWER.",
-                })
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": "Please respond with either an ACTION or a FINAL ANSWER.",
+                    }
+                )
 
         yield {"type": "error", "content": "Maximum iterations reached."}

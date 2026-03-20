@@ -135,9 +135,7 @@ class EvalRunner:
         )
         return response.content
 
-    def _check_keywords(
-        self, response: str, case: EvalCase
-    ) -> tuple[list[str], list[str]]:
+    def _check_keywords(self, response: str, case: EvalCase) -> tuple[list[str], list[str]]:
         """Check expected and forbidden keywords."""
         response_lower = response.lower()
         hits = [kw for kw in case.expected_keywords if kw.lower() in response_lower]

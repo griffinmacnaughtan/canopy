@@ -29,13 +29,12 @@ async def run_evals(body: EvalRunRequest):
 
     if body.dataset not in DATASETS:
         raise ValidationError(
-            f"Unknown dataset '{body.dataset}'. "
-            f"Available: {', '.join(DATASETS.keys())}"
+            f"Unknown dataset '{body.dataset}'. Available: {', '.join(DATASETS.keys())}"
         )
 
     cases = DATASETS[body.dataset]
     if body.max_cases:
-        cases = cases[:body.max_cases]
+        cases = cases[: body.max_cases]
 
     try:
         llm = get_llm_client()

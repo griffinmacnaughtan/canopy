@@ -66,7 +66,7 @@ async def _stream_agent(query: str, max_iterations: int) -> AsyncIterator[str]:
             yield f"data: {json.dumps(event)}\n\n"
     except Exception as e:
         logger.error("agent_stream_error", error=str(e))
-        yield f'data: {json.dumps({"type": "error", "content": str(e)[:200]})}\n\n'
+        yield f"data: {json.dumps({'type': 'error', 'content': str(e)[:200]})}\n\n"
 
     yield "data: [DONE]\n\n"
 

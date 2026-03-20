@@ -27,32 +27,39 @@ async def analyze_portfolio(portfolio_id: str | None = None) -> str:
 
     asset_summary = []
     for a in assets:
-        intensity = (a.scope1_tco2e + a.scope2_tco2e) / a.revenue_usd_m if a.revenue_usd_m > 0 else 0
-        asset_summary.append({
-            "name": a.name,
-            "sector": a.sector,
-            "region": a.region,
-            "revenue_m": a.revenue_usd_m,
-            "emissions_tco2e": a.scope1_tco2e + a.scope2_tco2e,
-            "intensity": round(intensity, 2),
-            "green_revenue_pct": a.green_revenue_pct,
-            "controversies": a.controversies,
-        })
+        intensity = (
+            (a.scope1_tco2e + a.scope2_tco2e) / a.revenue_usd_m if a.revenue_usd_m > 0 else 0
+        )
+        asset_summary.append(
+            {
+                "name": a.name,
+                "sector": a.sector,
+                "region": a.region,
+                "revenue_m": a.revenue_usd_m,
+                "emissions_tco2e": a.scope1_tco2e + a.scope2_tco2e,
+                "intensity": round(intensity, 2),
+                "green_revenue_pct": a.green_revenue_pct,
+                "controversies": a.controversies,
+            }
+        )
 
-    return json.dumps({
-        "portfolio": portfolio.name,
-        "scores": {
-            "overall": overall,
-            "climate_risk": climate,
-            "transition_risk": transition,
-            "physical_risk": physical,
-            "opportunity": opportunity,
+    return json.dumps(
+        {
+            "portfolio": portfolio.name,
+            "scores": {
+                "overall": overall,
+                "climate_risk": climate,
+                "transition_risk": transition,
+                "physical_risk": physical,
+                "opportunity": opportunity,
+            },
+            "top_risks": top_risks,
+            "quick_wins": quick_wins,
+            "sector_breakdown": sector,
+            "assets": asset_summary,
         },
-        "top_risks": top_risks,
-        "quick_wins": quick_wins,
-        "sector_breakdown": sector,
-        "assets": asset_summary,
-    }, indent=2)
+        indent=2,
+    )
 
 
 async def run_scenario(
@@ -83,14 +90,17 @@ async def run_scenario(
 
     ebitda_impact, emissions_delta, hotspots = scenario_impact(assets, cp, rs)
 
-    return json.dumps({
-        "scenario": scenario_name,
-        "carbon_price_usd": cp,
-        "revenue_shock_pct": rs,
-        "est_ebitda_impact_pct": ebitda_impact,
-        "emissions_delta_pct": emissions_delta,
-        "hotspots": hotspots,
-    }, indent=2)
+    return json.dumps(
+        {
+            "scenario": scenario_name,
+            "carbon_price_usd": cp,
+            "revenue_shock_pct": rs,
+            "est_ebitda_impact_pct": ebitda_impact,
+            "emissions_delta_pct": emissions_delta,
+            "hotspots": hotspots,
+        },
+        indent=2,
+    )
 
 
 async def query_emissions(sector: str | None = None, limit: int = 10) -> str:
@@ -101,9 +111,7 @@ async def query_emissions(sector: str | None = None, limit: int = 10) -> str:
     from ..database.pipeline_models import EmissionsData
 
     async with async_session_factory() as db:
-        query = select(EmissionsData).where(
-            EmissionsData.total_emissions_mt_co2e.isnot(None)
-        )
+        query = select(EmissionsData).where(EmissionsData.total_emissions_mt_co2e.isnot(None))
         if sector:
             query = query.where(EmissionsData.sector == sector)
         query = query.order_by(desc(EmissionsData.total_emissions_mt_co2e)).limit(limit)
@@ -123,23 +131,33 @@ async def query_emissions(sector: str | None = None, limit: int = 10) -> str:
                 .order_by(desc("total"))
             )
             sector_rows = sector_query.all()
-            return json.dumps({
-                "message": "No facility data found" + (f" for sector '{sector}'" if sector else ""),
-                "available_sectors": [
-                    {"sector": r.sector, "total_mt_co2e": float(r.total or 0), "facilities": r.count}
-                    for r in sector_rows
-                ],
-            }, indent=2)
+            return json.dumps(
+                {
+                    "message": "No facility data found"
+                    + (f" for sector '{sector}'" if sector else ""),
+                    "available_sectors": [
+                        {
+                            "sector": r.sector,
+                            "total_mt_co2e": float(r.total or 0),
+                            "facilities": r.count,
+                        }
+                        for r in sector_rows
+                    ],
+                },
+                indent=2,
+            )
 
     facilities = []
     for r in rows:
-        facilities.append({
-            "facility": r.facility_name or "Unknown",
-            "state": r.state,
-            "sector": r.sector,
-            "total_emissions_mt_co2e": float(r.total_emissions_mt_co2e or 0),
-            "reporting_year": r.reporting_year,
-        })
+        facilities.append(
+            {
+                "facility": r.facility_name or "Unknown",
+                "state": r.state,
+                "sector": r.sector,
+                "total_emissions_mt_co2e": float(r.total_emissions_mt_co2e or 0),
+                "reporting_year": r.reporting_year,
+            }
+        )
 
     return json.dumps({"facilities": facilities, "count": len(facilities)}, indent=2)
 
@@ -153,18 +171,21 @@ async def search_documents(query: str, top_k: int = 5) -> str:
         return json.dumps({"message": "No documents indexed in the vector store.", "results": []})
 
     results = await store.search(query, top_k=top_k)
-    return json.dumps({
-        "query": query,
-        "results": [
-            {
-                "text": r.document.text[:500],
-                "source": r.document.source,
-                "score": round(r.score, 4),
-                "metadata": r.document.metadata,
-            }
-            for r in results
-        ],
-    }, indent=2)
+    return json.dumps(
+        {
+            "query": query,
+            "results": [
+                {
+                    "text": r.document.text[:500],
+                    "source": r.document.source,
+                    "score": round(r.score, 4),
+                    "metadata": r.document.metadata,
+                }
+                for r in results
+            ],
+        },
+        indent=2,
+    )
 
 
 async def compare_portfolios(portfolio_id_a: str, portfolio_id_b: str) -> str:
