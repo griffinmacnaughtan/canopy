@@ -55,6 +55,9 @@ Caveats, data gaps, or areas needing further analysis.
 - Real Estate: Mixed physical/transition risk depending on location and building efficiency
 - Technology: Lower direct emissions but supply chain and energy use considerations
 
+**SEC Filing Context:**
+When SEC filing excerpts are provided, cite specific company disclosures to ground your analysis. Use phrases like "According to [Company]'s 10-K filing..." rather than generating unsupported claims. This demonstrates regulatory-grade sourcing.
+
 Keep responses focused and executive-ready. Finance teams need insights they can act on, not academic dissertations."""
 
 

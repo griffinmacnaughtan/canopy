@@ -1,0 +1,30 @@
+Company: BASF SE
+Ticker: BASFY
+Filing: 20-F Annual Report
+Section: Risk Factors (Climate-Related Excerpts)
+Filing Date: 2024-02-23
+Source: SEC EDGAR (CIK: 0001022321)
+---
+Climate Change and Environmental Regulation
+
+BASF's chemical production processes are energy-intensive and generate significant greenhouse gas emissions. In 2023, BASF's Scope 1 emissions from chemical production, energy generation, and other operations were approximately 16.9 million metric tons of CO2 equivalent, with Scope 2 emissions from purchased energy of approximately 4.2 million metric tons. As the world's largest chemical company by revenue, BASF faces substantial transition risks from climate-related regulation.
+
+EU Emissions Trading System and Carbon Costs
+
+A significant portion of BASF's European production facilities is covered by the EU Emissions Trading System (EU ETS). As free allocation of emission allowances is progressively reduced under Phase IV of the EU ETS, BASF's carbon compliance costs are expected to increase materially. At current EU ETS allowance prices of approximately EUR 60-80 per metric ton, the annual cost of carbon compliance for our European operations represents a significant operating expense. Further increases in carbon prices consistent with the EU's Fit for 55 package could substantially impact our competitiveness relative to producers in jurisdictions without comparable carbon pricing.
+
+The EU Carbon Border Adjustment Mechanism (CBAM), effective in its transitional phase since October 2023, aims to prevent carbon leakage by imposing carbon costs on imports of certain products. While CBAM may provide some competitive protection for BASF's European operations, the mechanism's effectiveness depends on its design, scope, and enforcement.
+
+Process Emissions and Hard-to-Abate Chemistry
+
+Chemical production generates process emissions that cannot be eliminated solely through energy efficiency or fuel switching. Certain chemical reactions, including steam cracking to produce ethylene and propylene, inherently release CO2. BASF has committed to reducing its Scope 1 and 2 emissions by 25% compared with 2018 by 2030, and to achieving net-zero emissions by 2050. Achieving these targets requires breakthrough technologies, including electrically heated steam crackers, carbon capture and storage, and green hydrogen, many of which are not yet commercially available at scale.
+
+Physical Climate Risks
+
+BASF's largest integrated production site (Verbund) in Ludwigshafen, Germany, is located on the Rhine River. In 2018 and 2022, prolonged low water levels on the Rhine due to drought significantly disrupted barge transport of raw materials and finished products, resulting in production curtailments and increased transportation costs. Climate change projections indicate that low-water events on European rivers may become more frequent, posing a recurring logistical risk.
+
+Additionally, BASF operates facilities in regions exposed to other physical climate hazards, including flooding in Southeast Asia, water stress in China, and extreme heat events that can affect production processes requiring precise temperature control.
+
+Raw Material and Energy Cost Volatility
+
+The transition to a lower-carbon economy may significantly affect the availability and cost of BASF's key raw materials and energy inputs. BASF's chemical production consumes substantial quantities of natural gas (both as feedstock and fuel) and naphtha. Carbon pricing and energy transition policies could increase the cost of these fossil-based inputs. BASF is investing in renewable energy procurement and circular economy approaches, including chemical recycling of plastics, to reduce its dependence on virgin fossil feedstocks.

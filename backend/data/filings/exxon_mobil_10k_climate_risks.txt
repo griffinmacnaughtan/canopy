@@ -1,0 +1,34 @@
+Company: Exxon Mobil Corporation
+Ticker: XOM
+Filing: 10-K Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2024-02-28
+Source: SEC EDGAR (CIK: 0000034088)
+---
+Climate Change and Greenhouse Gas Restrictions
+
+The risk of climate change and the related transition to a lower-carbon economy present a number of challenges and risks to our business. Societal and investor attention to climate change and related matters, including with respect to greenhouse gas (GHG) emissions, has continued to increase, potentially affecting the availability and cost of capital and our ability to attract and retain talent. Current and pending GHG regulations or policies, including the EU Emissions Trading System and other carbon pricing mechanisms, may increase our compliance costs and create financial risks.
+
+Our operations produce significant greenhouse gas emissions. In 2023, our gross operated Scope 1 and Scope 2 emissions were approximately 98 million and 12 million metric tons of CO2 equivalent, respectively. Regulatory actions to address GHG emissions could increase costs across many areas of our operations, including costs of compliance, raw materials, energy, capital expenditures, and the risk that facilities could become stranded assets.
+
+Carbon Pricing and Regulatory Risk
+
+Government-mandated carbon pricing, including carbon taxes and cap-and-trade programs, already affects portions of our business. For example, operations in the European Union are subject to the EU Emissions Trading System, which has seen allowance prices range from EUR 40 to EUR 100 per metric ton of CO2 in recent years. The International Energy Agency's Net Zero by 2050 scenario projects carbon prices could reach $130 per metric ton by 2030 in advanced economies, which would materially increase our operating costs.
+
+If governments were to adopt carbon pricing broadly at levels consistent with limiting warming to 1.5 degrees Celsius, the cost to our operations could be significant. Based on our analysis, a $100 per metric ton carbon price applied globally to our Scope 1 emissions alone would represent an annual cost of approximately $9.8 billion, before mitigation measures.
+
+Physical Climate Risks
+
+Climate change may also pose physical risks to our operations. Our upstream operations, downstream refining and chemical facilities, and logistics infrastructure could be adversely affected by extreme weather events such as hurricanes, floods, droughts, wildfires, and extreme temperatures. Certain of our coastal operations in the Gulf of Mexico, Southeast Asia, and West Africa face increased risk from rising sea levels and more intense tropical storms. In 2023, weather-related disruptions caused approximately $200 million in unplanned costs across our global operations.
+
+Transition Risk and Demand Outlook
+
+A transition to a lower-carbon economy may reduce long-term demand for oil and natural gas products. Governments worldwide have adopted policies intended to promote the use of renewable energy and reduce the use of fossil fuels. The pace and extent of this transition are uncertain. Under certain scenarios, including aggressive policy action and rapid technology advancement, demand for our products could peak within the next decade and decline materially thereafter.
+
+We have exposure to the risk that certain proved oil and gas reserves may become uneconomic to develop under scenarios with aggressive decarbonization policies. The carrying value of our upstream assets is assessed using assumptions about future commodity prices that reflect our view of supply and demand fundamentals, but significant shifts in the energy transition trajectory could result in impairments.
+
+Litigation and Reputational Risk
+
+We are involved in litigation relating to climate change, including lawsuits brought by state and local governments alleging that our products and alleged misrepresentation of climate risks have contributed to climate change-related harms. While we believe these claims are without merit, adverse rulings or settlements could have a material impact on our financial position. The number of climate-related lawsuits against energy companies has increased significantly in recent years, and we expect this trend to continue.
+
+Additionally, certain investors, non-governmental organizations, and stakeholders have expressed concerns about our GHG emissions and climate strategy, which could affect our reputation, access to capital markets, and relationships with business partners and host governments.

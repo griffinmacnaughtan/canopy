@@ -1,19 +1,9 @@
+from .benchmarks import get_sector_baselines
 from .models import Asset
 
-# Default baselines if none provided
-DEFAULT_SECTOR_BASELINES = {
-    "Information Technology": {"transition_risk": 0.2, "physical_risk": 0.15},
-    "Energy": {"transition_risk": 0.9, "physical_risk": 0.4},
-    "Utilities": {"transition_risk": 0.7, "physical_risk": 0.5},
-    "Materials": {"transition_risk": 0.75, "physical_risk": 0.45},
-    "Industrials": {"transition_risk": 0.6, "physical_risk": 0.35},
-    "Consumer Discretionary": {"transition_risk": 0.4, "physical_risk": 0.25},
-    "Consumer Staples": {"transition_risk": 0.35, "physical_risk": 0.4},
-    "Healthcare": {"transition_risk": 0.25, "physical_risk": 0.3},
-    "Financials": {"transition_risk": 0.3, "physical_risk": 0.2},
-    "Real Estate": {"transition_risk": 0.45, "physical_risk": 0.6},
-    "Communication Services": {"transition_risk": 0.25, "physical_risk": 0.2},
-}
+# Baselines sourced from TPI, S&P Trucost, IEA, and NGFS published data.
+# See app/benchmarks/sector_benchmarks.py for full citations.
+DEFAULT_SECTOR_BASELINES = get_sector_baselines()
 
 
 def _emissions_intensity(asset: Asset) -> float:
