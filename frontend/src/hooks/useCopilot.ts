@@ -7,6 +7,7 @@ interface UseCopilotOptions {
 
 interface UseCopilotReturn {
   response: string;
+  lastQuestion: string;
   isStreaming: boolean;
   error: Error | null;
   sendQuestion: (question: string) => Promise<void>;
@@ -15,6 +16,7 @@ interface UseCopilotReturn {
 
 export function useCopilot(options: UseCopilotOptions = {}): UseCopilotReturn {
   const [response, setResponse] = useState("");
+  const [lastQuestion, setLastQuestion] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -22,6 +24,7 @@ export function useCopilot(options: UseCopilotOptions = {}): UseCopilotReturn {
     async (question: string) => {
       if (!question.trim()) return;
 
+      setLastQuestion(question);
       setResponse("");
       setIsStreaming(true);
       setError(null);
@@ -44,11 +47,13 @@ export function useCopilot(options: UseCopilotOptions = {}): UseCopilotReturn {
 
   const reset = useCallback(() => {
     setResponse("");
+    setLastQuestion("");
     setError(null);
   }, []);
 
   return {
     response,
+    lastQuestion,
     isStreaming,
     error,
     sendQuestion,
