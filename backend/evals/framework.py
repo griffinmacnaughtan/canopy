@@ -8,6 +8,7 @@ orchestrates execution and scoring across a dataset.
 
 from __future__ import annotations
 
+import asyncio
 import time
 from dataclasses import dataclass, field
 
@@ -229,22 +230,28 @@ class EvalRunner:
         self,
         cases: list[EvalCase],
         dataset_name: str = "unnamed",
+        max_concurrency: int = 4,
     ) -> EvalSuiteResult:
         """Run a complete evaluation suite.
 
         Args:
             cases: List of eval cases to execute.
             dataset_name: Name for reporting.
+            max_concurrency: Maximum number of cases to run in parallel.
 
         Returns:
             Aggregated ``EvalSuiteResult``.
         """
         start = time.perf_counter()
-        results: list[EvalResult] = []
 
-        for case in cases:
-            result = await self.run_case(case)
-            results.append(result)
+        # Run cases concurrently with a semaphore to limit parallelism
+        sem = asyncio.Semaphore(max_concurrency)
+
+        async def _run_with_sem(case: EvalCase) -> EvalResult:
+            async with sem:
+                return await self.run_case(case)
+
+        results = await asyncio.gather(*[_run_with_sem(c) for c in cases])
 
         # Aggregate scores
         all_dims: dict[str, list[float]] = {}

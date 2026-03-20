@@ -69,6 +69,29 @@ class ApiError extends Error {
   }
 }
 
+/**
+ * Wrapper around fetch that adds an AbortController timeout.
+ * Defaults to 30 seconds; callers can override for long-running requests.
+ */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs: number = 30_000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiError(408, `Request timed out after ${timeoutMs / 1000}s`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const message = await response.text().catch(() => "Unknown error");
@@ -86,7 +109,7 @@ export const api = {
     if (isDemoMode()) {
       return { status: "demo", version: "demo" };
     }
-    const response = await fetch(`${API_BASE}/health`);
+    const response = await fetchWithTimeout(`${API_BASE}/health`);
     return handleResponse<HealthResponse>(response);
   },
 
@@ -94,7 +117,7 @@ export const api = {
     if (isDemoMode()) {
       return { status: "demo", checks: { database: true, llm: true } };
     }
-    const response = await fetch(`${API_BASE}/health/ready`);
+    const response = await fetchWithTimeout(`${API_BASE}/health/ready`);
     return handleResponse<HealthResponse>(response);
   },
 
@@ -103,7 +126,7 @@ export const api = {
     if (isDemoMode()) {
       return { portfolios: MOCK_PORTFOLIOS };
     }
-    const response = await fetch(`${API_BASE}/portfolios`);
+    const response = await fetchWithTimeout(`${API_BASE}/portfolios`);
     return handleResponse<PortfolioListResponse>(response);
   },
 
@@ -121,7 +144,7 @@ export const api = {
         message: "Demo mode: Portfolio created (not persisted)",
       };
     }
-    const response = await fetch(`${API_BASE}/portfolios`, {
+    const response = await fetchWithTimeout(`${API_BASE}/portfolios`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request),
@@ -137,7 +160,7 @@ export const api = {
     const url = portfolioId
       ? `${API_BASE}/assets?portfolio_id=${portfolioId}`
       : `${API_BASE}/assets`;
-    const response = await fetch(url);
+    const response = await fetchWithTimeout(url);
     return handleResponse<Asset[]>(response);
   },
 
@@ -149,7 +172,7 @@ export const api = {
     const url = portfolioId
       ? `${API_BASE}/portfolio?portfolio_id=${portfolioId}`
       : `${API_BASE}/portfolio`;
-    const response = await fetch(url);
+    const response = await fetchWithTimeout(url);
     return handleResponse<Portfolio>(response);
   },
 
@@ -161,7 +184,7 @@ export const api = {
     const url = portfolioId
       ? `${API_BASE}/score?portfolio_id=${portfolioId}`
       : `${API_BASE}/score`;
-    const response = await fetch(url);
+    const response = await fetchWithTimeout(url);
     return handleResponse<ScoreResponse>(response);
   },
 
@@ -170,7 +193,7 @@ export const api = {
     if (isDemoMode()) {
       return MOCK_SCENARIOS;
     }
-    const response = await fetch(`${API_BASE}/scenarios`);
+    const response = await fetchWithTimeout(`${API_BASE}/scenarios`);
     return handleResponse<Scenarios>(response);
   },
 
@@ -181,7 +204,7 @@ export const api = {
         scenario: request.scenario,
       };
     }
-    const response = await fetch(`${API_BASE}/scenario`, {
+    const response = await fetchWithTimeout(`${API_BASE}/scenario`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request),
@@ -198,11 +221,11 @@ export const api = {
         citations: ["Demo portfolio data", "NGFS scenarios"],
       };
     }
-    const response = await fetch(`${API_BASE}/copilot`, {
+    const response = await fetchWithTimeout(`${API_BASE}/copilot`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request),
-    });
+    }, 120_000);
     return handleResponse<CopilotResponse>(response);
   },
 
@@ -282,10 +305,10 @@ export const api = {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(`${API_BASE}/upload`, {
+    const response = await fetchWithTimeout(`${API_BASE}/upload`, {
       method: "POST",
       body: formData,
-    });
+    }, 60_000);
     return handleResponse<UploadResponse>(response);
   },
 
@@ -293,7 +316,7 @@ export const api = {
     if (isDemoMode()) {
       return { documents: [], total_chars: 0 };
     }
-    const response = await fetch(`${API_BASE}/documents`);
+    const response = await fetchWithTimeout(`${API_BASE}/documents`);
     return handleResponse<DocumentListResponse>(response);
   },
 
@@ -301,7 +324,7 @@ export const api = {
     if (isDemoMode()) {
       return { success: true, cleared: 0 };
     }
-    const response = await fetch(`${API_BASE}/documents`, {
+    const response = await fetchWithTimeout(`${API_BASE}/documents`, {
       method: "DELETE",
     });
     return handleResponse<DeleteDocumentsResponse>(response);
@@ -312,7 +335,7 @@ export const api = {
     if (isDemoMode()) {
       return MOCK_PIPELINE_STATS;
     }
-    const response = await fetch(`${API_BASE}/pipeline/stats`);
+    const response = await fetchWithTimeout(`${API_BASE}/pipeline/stats`);
     return handleResponse<PipelineStats>(response);
   },
 
@@ -339,7 +362,7 @@ export const api = {
     if (params?.limit) searchParams.set("limit", params.limit.toString());
 
     const url = `${API_BASE}/pipeline/emissions${searchParams.toString() ? `?${searchParams}` : ""}`;
-    const response = await fetch(url);
+    const response = await fetchWithTimeout(url);
     return handleResponse<EmissionsFacility[]>(response);
   },
 
@@ -349,7 +372,7 @@ export const api = {
         (a, b) => (b.total_emissions_mt_co2e || 0) - (a.total_emissions_mt_co2e || 0)
       ).slice(0, limit);
     }
-    const response = await fetch(`${API_BASE}/pipeline/emissions/top-emitters?limit=${limit}`);
+    const response = await fetchWithTimeout(`${API_BASE}/pipeline/emissions/top-emitters?limit=${limit}`);
     return handleResponse<EmissionsFacility[]>(response);
   },
 
@@ -373,7 +396,7 @@ export const api = {
     if (params?.limit) searchParams.set("limit", params.limit.toString());
 
     const url = `${API_BASE}/pipeline/climate${searchParams.toString() ? `?${searchParams}` : ""}`;
-    const response = await fetch(url);
+    const response = await fetchWithTimeout(url);
     return handleResponse<ClimateObservation[]>(response);
   },
 
@@ -381,7 +404,7 @@ export const api = {
     if (isDemoMode()) {
       return MOCK_PIPELINE_RUNS.slice(0, limit);
     }
-    const response = await fetch(`${API_BASE}/pipeline/runs?limit=${limit}`);
+    const response = await fetchWithTimeout(`${API_BASE}/pipeline/runs?limit=${limit}`);
     return handleResponse<PipelineRunInfo[]>(response);
   },
 
@@ -389,7 +412,7 @@ export const api = {
     if (isDemoMode()) {
       return MOCK_SECTORS;
     }
-    const response = await fetch(`${API_BASE}/pipeline/sectors`);
+    const response = await fetchWithTimeout(`${API_BASE}/pipeline/sectors`);
     return handleResponse<SectorInfo[]>(response);
   },
 
@@ -401,7 +424,7 @@ export const api = {
     if (isDemoMode()) {
       return { success: true, message: "Demo mode: Portfolio deleted (not persisted)" };
     }
-    const response = await fetch(`${API_BASE}/portfolios/${portfolioId}`, {
+    const response = await fetchWithTimeout(`${API_BASE}/portfolios/${portfolioId}`, {
       method: "DELETE",
     });
     return handleResponse<DeletePortfolioResponse>(response);
@@ -434,7 +457,7 @@ export const api = {
         recommendation: "Demo mode: comparison not available.",
       };
     }
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${API_BASE}/portfolios/compare/diff?a=${aId}&b=${bId}`
     );
     return handleResponse<ComparePortfoliosResponse>(response);
@@ -460,7 +483,7 @@ export const api = {
         scenario_impacts: [],
       };
     }
-    const response = await fetch(`${API_BASE}/portfolios/${portfolioId}/export`);
+    const response = await fetchWithTimeout(`${API_BASE}/portfolios/${portfolioId}/export`);
     return handleResponse<PortfolioExportReport>(response);
   },
 
@@ -486,7 +509,7 @@ export const api = {
     const url = name
       ? `${API_BASE}/portfolios/import/csv?name=${encodeURIComponent(name)}`
       : `${API_BASE}/portfolios/import/csv`;
-    const response = await fetch(url, { method: "POST", body: formData });
+    const response = await fetchWithTimeout(url, { method: "POST", body: formData }, 60_000);
     return handleResponse<CsvImportResponse>(response);
   },
 
@@ -513,11 +536,12 @@ export const api = {
         duration_ms: 3200,
       };
     }
-    const response = await fetch(`${API_BASE}/evals/run`, {
+    // Evals run 12 LLM calls — allow up to 5 minutes
+    const response = await fetchWithTimeout(`${API_BASE}/evals/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(request),
-    });
+    }, 300_000);
     return handleResponse<EvalRunResponse>(response);
   },
 };

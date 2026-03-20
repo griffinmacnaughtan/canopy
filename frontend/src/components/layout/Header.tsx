@@ -83,7 +83,7 @@ export function Header() {
     <header className="border-b border-border bg-white sticky top-0 z-50">
       <div className="container mx-auto px-6 py-3 flex items-center justify-between gap-4 flex-wrap">
         {/* Brand */}
-        <div className="flex items-center gap-2.5">
+        <a href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <div className="p-2 rounded-lg bg-emerald-600 text-white">
             <Leaf className="h-5 w-5" />
           </div>
@@ -95,7 +95,7 @@ export function Header() {
               Climate Risk Intelligence
             </p>
           </div>
-        </div>
+        </a>
 
         <div className="flex items-center gap-2.5 flex-wrap">
           {/* Portfolio Selector */}
