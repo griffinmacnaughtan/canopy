@@ -30,49 +30,50 @@ Canopy combines production-grade data pipelines, quantitative risk scoring, agen
 │                              CANOPY ARCHITECTURE                            │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   NOAA Climate  │     │   EPA GHGRP     │     │  World Bank     │
-│   Data API      │     │   Emissions     │     │  Climate API    │
-└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │   PREFECT ORCHESTRATOR  │
-                    │  Extract → Validate     │
-                    │  Transform → Load       │
-                    └────────────┬────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │      POSTGRESQL         │
-                    │  emissions_data         │
-                    │  climate_data           │
-                    │  portfolios / scenarios │
-                    └────────────┬────────────┘
-                                 │
-┌────────────────────────────────┼────────────────────────────────┐
-│                     FASTAPI BACKEND                              │
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
-│  │ Risk Engine  │  │  Scenario    │  │  ReAct Agent         │   │
-│  │  - Scoring   │  │  Stress Test │  │  - Tool use          │   │
-│  │  - Intensity │  │  - NGFS      │  │  - Multi-step plan   │   │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
-│  │ Vector Store │  │  LLM Copilot │  │  Eval Framework      │   │
-│  │  - Chunking  │  │  - RAG       │  │  - Rubric scorer     │   │
-│  │  - Cosine    │  │  - Streaming │  │  - LLM-as-judge      │   │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
-└────────────────────────────────┬────────────────────────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │   REACT/TYPESCRIPT UI   │
-                    │  Dashboard              │
-                    │  Scenario Engine        │
-                    │  AI Copilot + Evals     │
-                    │  Portfolio Builder      │
-                    └─────────────────────────┘
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌────────────┐
+│   NOAA Climate  │  │   EPA GHGRP     │  │  World Bank     │  │ SEC EDGAR  │
+│   Data API      │  │   Emissions     │  │  Climate API    │  │ 10-K/20-F  │
+└────────┬────────┘  └────────┬────────┘  └────────┬────────┘  └─────┬──────┘
+         │                    │                     │                 │
+         └────────────────────┼─────────────────────┘                 │
+                              │                                       │
+                 ┌────────────▼────────────┐          ┌──────────────▼───────┐
+                 │   PREFECT ORCHESTRATOR  │          │  INGESTION PIPELINE  │
+                 │  Extract → Validate     │          │  Load → Chunk →      │
+                 │  Transform → Load       │          │  Embed → Store       │
+                 └────────────┬────────────┘          └──────────┬───────────┘
+                              │                                  │
+                 ┌────────────▼──────────────────────────────────▼──────┐
+                 │              DATA LAYER                               │
+                 │  PostgreSQL (portfolios, emissions, climate)          │
+                 │  Vector Store (SEC filing chunks, cosine search)      │
+                 │  Sector Benchmarks (TPI, S&P Trucost, IEA, NGFS)     │
+                 └────────────────────────┬────────────────────────────-┘
+                                          │
+┌─────────────────────────────────────────┼────────────────────────────────┐
+│                          FASTAPI BACKEND                                  │
+│                                                                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐            │
+│  │ Risk Engine  │  │  Scenario    │  │  ReAct Agent         │            │
+│  │  - Scoring   │  │  Stress Test │  │  - Tool use          │            │
+│  │  - Benchmarks│  │  - NGFS      │  │  - Multi-step plan   │            │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘            │
+│                                                                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐            │
+│  │ Vector Store │  │  LLM Copilot │  │  Eval Framework      │            │
+│  │  - Chunking  │  │  - RAG       │  │  - Rubric scorer     │            │
+│  │  - Cosine    │  │  - Filing    │  │  - LLM-as-judge      │            │
+│  │  - Retrieval │  │    context   │  │  - Factual accuracy   │            │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘            │
+└─────────────────────────────────────────┬────────────────────────────────┘
+                                          │
+                             ┌────────────▼────────────┐
+                             │   REACT/TYPESCRIPT UI   │
+                             │  Dashboard              │
+                             │  Scenario Engine        │
+                             │  AI Copilot + Evals     │
+                             │  Portfolio Builder      │
+                             └─────────────────────────┘
 ```
 
 ---
@@ -80,9 +81,10 @@ Canopy combines production-grade data pipelines, quantitative risk scoring, agen
 ## Key Features
 
 ### 1. Portfolio Risk Scoring
-- **Transition Risk** — Carbon price exposure based on emissions intensity (tCO2e/$M revenue)
-- **Physical Risk** — Sector-weighted exposure to chronic and acute climate hazards
+- **Transition Risk** — Carbon price exposure based on emissions intensity (tCO2e/$M revenue), weighted by sector benchmarks sourced from TPI and S&P Trucost
+- **Physical Risk** — Sector-weighted exposure to chronic and acute climate hazards using CRREM and NGFS Phase IV benchmarks
 - **Opportunity Score** — Green revenue percentage and low-carbon product pipeline
+- **Cited benchmarks** — 11 GICS sectors with transition/physical risk weights and emissions intensity baselines from published sources (IEA WEO 2023, PCAF)
 - Per-sector breakdown, top risks, quick wins
 
 ### 2. NGFS Scenario Engine
@@ -99,30 +101,35 @@ An autonomous **ReAct (Reasoning + Acting)** agent that plans multi-step analyse
 - Configurable iteration limits with graceful degradation
 
 ### 4. Vector Store & Semantic RAG
-Embedding-based retrieval replaces naive text concatenation with proper chunking and cosine similarity search.
+Embedding-based retrieval replaces naive text concatenation with proper chunking and cosine similarity search. Seeded at startup with real SEC filing excerpts.
 
 - **Sentence-aware chunker** with configurable overlap to preserve cross-boundary context
 - **Pluggable embedding providers**: OpenAI `text-embedding-3-small` for production, deterministic hash for testing
 - **In-memory vector store** with numpy — designed for fast prototyping, swappable with pgvector
+- **SEC 10-K/20-F ingestion pipeline** — Climate risk excerpts from 6 public companies (Apple, BASF, ExxonMobil, JPMorgan, NextEra Energy, Shell) automatically chunked and loaded at app startup
+- SEC EDGAR EFTS API integration scaffolded for live filing retrieval
 
 ### 5. LLM Evaluation Framework
-Systematic quality assessment — not anecdotal prompt testing. 17 curated eval cases across 4 categories:
+Systematic quality assessment — not anecdotal prompt testing. 32 curated eval cases across 5 categories:
 
-| Category | What it tests |
-|---|---|
-| ✅ Good prompts | Should produce data-driven, actionable, well-structured responses |
-| ❌ Bad prompts | Off-topic, empty, or informal inputs handled gracefully |
-| 🛡️ Adversarial | Prompt injection, jailbreaking, credential exfiltration, XSS |
-| 🔲 Edge cases | Zero-emission portfolios, CSRD×ISSB regulatory cross-references |
+| Category | Cases | What it tests |
+|---|---|---|
+| ✅ Good prompts | 7 | Data-driven, actionable, well-structured responses |
+| ❌ Bad prompts | 4 | Off-topic, empty, or informal inputs handled gracefully |
+| 🛡️ Adversarial | 3 | Prompt injection, jailbreaking, credential exfiltration, XSS |
+| 🔲 Edge cases | 3 | Zero-emission portfolios, CSRD×ISSB regulatory cross-references |
+| 🎯 Domain accuracy | 15 | Ground-truth factual evaluation against computed seed data |
 
-- **Dual scoring**: fast rubric scorer for CI + LLM-as-judge for deep semantic evaluation
+- **Three scorers**: fast rubric scorer for CI, LLM-as-judge for semantic depth, **FactualAccuracyScorer** for ground-truth verification with numeric tolerance (±10%) and entity recall
+- **Ground-truth evals** — Expected values computed programmatically from seed data, not hardcoded. Covers factual retrieval, computation, ranking, comparison, and edge cases
 - **Keyword enforcement**: expected/forbidden keywords with automatic score penalties
 - **Three entry points**: CLI (`python -m evals.run_evals`), HTTP API (`POST /evals/run`), frontend Evals tab with visual drill-down
 
 ### 6. AI-Powered Copilot
-- RAG pipeline injecting portfolio context, uploaded documents, and vector search results
+- RAG pipeline injecting portfolio context, uploaded documents, SEC filing excerpts, and vector search results
 - Streaming responses via Server-Sent Events
-- Source attribution and confidence scoring
+- Source attribution with provenance tracking (portfolio data, sector benchmarks, SEC filings, EPA data, uploaded docs)
+- Confidence scoring that weights authoritative sources (SEC filings boost confidence by 15%)
 - Multi-provider support (Claude Sonnet 4, GPT-4o)
 
 ### 7. Climate Data Pipeline
@@ -223,6 +230,8 @@ prefect deployment apply climate_data_flow-deployment.yaml
 | NOAA CDO | Temperature, precipitation, extreme events | Daily |
 | EPA GHGRP | Facility-level GHG emissions | Annual |
 | World Bank | Climate projections (RCP scenarios) | Static |
+| SEC EDGAR | 10-K/20-F climate risk disclosures (Item 1A) | Annual (static excerpts included) |
+| TPI / S&P Trucost / IEA | Sector emissions benchmarks | Embedded in benchmarks module |
 
 ---
 
@@ -238,6 +247,9 @@ python -m evals.run_evals
 
 # Run a specific dataset
 python -m evals.run_evals --dataset safety --scorer rubric
+
+# Run ground-truth domain accuracy evals
+python -m evals.run_evals --dataset domain_accuracy
 
 # Use LLM-as-judge for deeper semantic scoring
 python -m evals.run_evals --dataset climate_copilot --scorer llm
@@ -267,21 +279,26 @@ canopy/
 │   │   ├── main.py              # FastAPI entrypoint
 │   │   ├── config.py            # Pydantic settings
 │   │   ├── risk.py              # Scoring algorithms
+│   │   ├── benchmarks/          # Cited sector risk benchmarks
+│   │   │   └── sector_benchmarks.py  # TPI, S&P Trucost, IEA data
+│   │   ├── ingestion/           # SEC filing ingestion pipeline
+│   │   │   ├── sec_filings.py   # Filing loader + EDGAR API
+│   │   │   └── ingest.py        # Chunk → embed → store
 │   │   ├── routes/              # API route modules
 │   │   │   ├── health.py
 │   │   │   ├── portfolios.py
 │   │   │   ├── scoring.py
-│   │   │   ├── copilot.py
-│   │   │   ├── agents.py       # Agentic AI endpoints
-│   │   │   └── evals.py        # Eval framework endpoint
+│   │   │   ├── copilot.py       # RAG with SEC filing context
+│   │   │   ├── agents.py        # Agentic AI endpoints
+│   │   │   └── evals.py         # Eval framework endpoint
 │   │   ├── agents/              # ReAct agent framework
-│   │   │   ├── base.py         # Agent executor + ReAct loop
-│   │   │   ├── tools.py        # Tool definitions
+│   │   │   ├── base.py          # Agent executor + ReAct loop
+│   │   │   ├── tools.py         # Tool definitions
 │   │   │   └── climate_agent.py
 │   │   ├── vectorstore/         # Semantic search
-│   │   │   ├── chunker.py      # Document chunking
-│   │   │   ├── embeddings.py   # Embedding providers
-│   │   │   └── store.py        # Cosine similarity store
+│   │   │   ├── chunker.py       # Document chunking
+│   │   │   ├── embeddings.py    # Embedding providers
+│   │   │   └── store.py         # Cosine similarity store
 │   │   ├── database/            # SQLAlchemy models & connection
 │   │   ├── llm/                 # LLM provider abstraction
 │   │   └── pipeline/            # Prefect ETL pipeline
@@ -289,19 +306,31 @@ canopy/
 │   │       ├── transformers/
 │   │       ├── validators/
 │   │       └── loaders/
+│   ├── data/
+│   │   └── filings/             # SEC 10-K/20-F climate excerpts
+│   │       ├── apple_10k_climate_risks.txt
+│   │       ├── exxon_mobil_10k_climate_risks.txt
+│   │       ├── jpmorgan_10k_climate_risks.txt
+│   │       ├── nextera_energy_10k_climate_risks.txt
+│   │       ├── shell_10k_climate_risks.txt
+│   │       └── basf_20f_climate_risks.txt
 │   ├── evals/                   # LLM evaluation framework
 │   │   ├── framework.py         # EvalRunner, EvalCase, EvalResult
-│   │   ├── scorers.py           # RubricScorer, LLMJudgeScorer
+│   │   ├── scorers.py           # Rubric, LLM-judge, FactualAccuracy
 │   │   ├── run_evals.py         # CLI entry point
 │   │   └── datasets/            # Curated test cases
 │   │       ├── climate_copilot.py
-│   │       └── safety.py
+│   │       ├── safety.py
+│   │       └── domain_accuracy.py  # 15 ground-truth eval cases
 │   ├── tests/
 │   │   ├── unit/
 │   │   │   ├── test_risk.py
 │   │   │   ├── test_agents.py
 │   │   │   ├── test_vectorstore.py
-│   │   │   └── test_evals.py
+│   │   │   ├── test_evals.py
+│   │   │   ├── test_benchmarks.py       # Sector benchmark tests
+│   │   │   ├── test_ingestion.py        # Filing pipeline tests
+│   │   │   └── test_domain_accuracy_evals.py  # Ground-truth eval tests
 │   │   └── integration/
 │   ├── alembic/
 │   └── Dockerfile
@@ -349,9 +378,10 @@ canopy/
 - The `EmbeddingProvider` abstraction makes it trivial to swap in pgvector or Pinecone when scale demands it
 - Hash-based test embeddings mean the full vector store test suite runs in < 1s with zero API calls
 
-### Why a rubric scorer + LLM judge?
+### Why a rubric scorer + LLM judge + factual accuracy scorer?
 - Rubric scoring is deterministic and fast — runs in CI without LLM API keys or costs
 - LLM-as-judge catches semantic issues (tone, reasoning quality) that keyword heuristics miss
+- FactualAccuracyScorer checks numeric values (±10% tolerance) and entity recall against ground-truth answers computed from actual seed data — not hardcoded
 - Auto-fallback: if the judge LLM errors out, the rubric scorer takes over gracefully
 
 ### Why separate extractors/transformers/loaders?
@@ -363,6 +393,8 @@ canopy/
 
 ## Testing
 
+174 unit tests covering risk scoring, benchmarks, ingestion, vector store, evals, agents, and pipeline.
+
 ```bash
 # Backend tests
 cd backend
@@ -373,6 +405,9 @@ pytest --cov=app --cov-report=html
 
 # Run LLM evals (rubric scorer, no API keys needed)
 python -m evals.run_evals --scorer rubric
+
+# Run domain accuracy evals (ground-truth, no API keys needed)
+python -m evals.run_evals --dataset domain_accuracy
 
 # Frontend tests
 cd frontend
