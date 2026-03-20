@@ -1,3 +1,4 @@
+export { PortfolioOverview } from "./PortfolioOverview";
 export { PortfolioSignal } from "./PortfolioSignal";
 export { RiskNarrative } from "./RiskNarrative";
 export { SectorBreakdown } from "./SectorBreakdown";

@@ -250,15 +250,15 @@ export function PortfolioBuilder({ isOpen, onClose, onSave }: PortfolioBuilderPr
           className="w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-card shadow-2xl border border-border/50"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-emerald-200/50 bg-gradient-to-r from-emerald-50 via-white to-forest-50">
+          <div className="flex items-center justify-between p-6 border-b border-border">
             <div>
-              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-forest-600 shadow-md shadow-emerald-500/20">
-                  <Sparkles className="h-5 w-5 text-white" />
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                  <Sparkles className="h-5 w-5" />
                 </div>
                 Create Portfolio
               </h2>
-              <p className="text-sm text-emerald-600/70 mt-1 font-medium">
+              <p className="text-sm text-muted-foreground mt-1">
                 Build a custom portfolio or import from CSV
               </p>
             </div>
@@ -288,7 +288,7 @@ export function PortfolioBuilder({ isOpen, onClose, onSave }: PortfolioBuilderPr
               {activeTab === "build" && (
                 <motion.div
                   layoutId="tab-indicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-forest-500"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"
                 />
               )}
             </button>
@@ -308,7 +308,7 @@ export function PortfolioBuilder({ isOpen, onClose, onSave }: PortfolioBuilderPr
               {activeTab === "import" && (
                 <motion.div
                   layoutId="tab-indicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-forest-500"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"
                 />
               )}
             </button>
@@ -571,15 +571,15 @@ export function PortfolioBuilder({ isOpen, onClose, onSave }: PortfolioBuilderPr
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-between p-6 border-t border-emerald-200/50 bg-gradient-to-r from-emerald-50/50 to-forest-50/50">
-            <p className="text-sm text-emerald-600/80 font-medium">
+          <div className="flex items-center justify-between p-6 border-t border-border">
+            <p className="text-sm text-muted-foreground font-medium">
               {assets.length} asset{assets.length !== 1 ? "s" : ""} in portfolio
             </p>
             <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={onClose} className="border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300">
+              <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={handleSave} className="gap-2 bg-gradient-to-r from-emerald-500 to-forest-600 hover:from-emerald-600 hover:to-forest-700 shadow-lg shadow-emerald-500/25">
+              <Button onClick={handleSave} className="gap-2 bg-emerald-600 hover:bg-emerald-700">
                 Create Portfolio
                 <ChevronRight className="h-4 w-4" />
               </Button>

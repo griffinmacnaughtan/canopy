@@ -210,7 +210,7 @@ export function RegulatoryReadiness() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
     >
-      <Card className="shadow-sm hover:shadow-lg transition-all duration-300 border-border/50 bg-card/80 backdrop-blur-sm">
+      <Card className="border border-border bg-card shadow-sm">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>

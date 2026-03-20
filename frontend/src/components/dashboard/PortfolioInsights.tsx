@@ -250,7 +250,7 @@ export function PortfolioInsights() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <Card className="shadow-sm hover:shadow-lg transition-all duration-300 border-border/50 bg-card/80 backdrop-blur-sm">
+      <Card className="border border-border bg-card shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <Lightbulb className="h-5 w-5 text-primary" />

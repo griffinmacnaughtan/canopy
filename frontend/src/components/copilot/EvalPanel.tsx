@@ -177,7 +177,7 @@ export function EvalPanel() {
           size="sm"
           onClick={runEvals}
           disabled={isRunning}
-          className="bg-gradient-to-r from-emerald-500 to-forest-600 hover:from-emerald-600 hover:to-forest-700 text-white text-xs"
+          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
         >
           {isRunning ? (
             <>

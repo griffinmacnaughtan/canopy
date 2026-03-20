@@ -181,7 +181,7 @@ export function ScenarioEngine() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
     >
-      <Card className="shadow-sm hover:shadow-lg transition-all duration-300 border-border/50 bg-card/80 backdrop-blur-sm">
+      <Card className="border border-border bg-card shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <FlaskConical className="h-5 w-5 text-primary" />
@@ -208,7 +208,7 @@ export function ScenarioEngine() {
             <Button
               onClick={handleRun}
               disabled={!selectedScenario || runScenario.isPending}
-              className="bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-sm"
+              className="bg-emerald-600 hover:bg-emerald-700"
             >
               <Play className="h-4 w-4 mr-2" />
               {runScenario.isPending ? "Running..." : "Run"}

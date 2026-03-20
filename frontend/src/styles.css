@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sora:wght@300;400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -22,40 +22,9 @@
 }
 
 @layer utilities {
-  /* Gradient text */
+  /* Gradient text — used sparingly for branding only */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
-  }
-
-  /* Glass effect */
-  .glass {
-    @apply bg-card/80 backdrop-blur-lg border border-border/50;
-  }
-
-  /* Glow effect */
-  .glow {
-    box-shadow:
-      0 0 25px theme("colors.emerald.500 / 25%"),
-      0 0 50px theme("colors.emerald.500 / 12%");
-  }
-
-  /* Green gradient card */
-  .green-gradient-card {
-    background: linear-gradient(
-      135deg,
-      theme("colors.emerald.50") 0%,
-      theme("colors.card.DEFAULT") 50%,
-      theme("colors.forest.50") 100%
-    );
-  }
-
-  /* Leaf accent border */
-  .leaf-border {
-    border-image: linear-gradient(
-      to bottom,
-      theme("colors.emerald.400"),
-      theme("colors.forest.400")
-    ) 1;
+    @apply bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent;
   }
 
   /* Hide scrollbar */
@@ -71,37 +40,37 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-background;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted rounded-full;
+  @apply bg-gray-300 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/50;
+  @apply bg-gray-400;
 }
 
 /* Selection */
 ::selection {
-  @apply bg-primary/30 text-foreground;
+  @apply bg-emerald-100 text-emerald-900;
 }
 
 /* Focus outline */
 :focus-visible {
-  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  @apply outline-none ring-2 ring-emerald-500 ring-offset-2 ring-offset-background;
 }
 
 /* Animations */
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -112,25 +81,11 @@
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow:
-      0 0 20px theme("colors.emerald.500 / 25%"),
-      0 0 40px theme("colors.emerald.500 / 12%");
-  }
-  50% {
-    box-shadow:
-      0 0 35px theme("colors.emerald.500 / 35%"),
-      0 0 70px theme("colors.emerald.500 / 18%");
   }
 }
 
@@ -140,64 +95,4 @@
 
 .animate-slide-up {
   animation: slide-up 0.4s ease-out forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-/* Background gradient - vibrant forest green theme */
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
-  background:
-    radial-gradient(
-      ellipse 100% 60% at 50% -10%,
-      theme("colors.emerald.200 / 50%") 0%,
-      transparent 50%
-    ),
-    radial-gradient(
-      ellipse 70% 50% at 100% 0%,
-      theme("colors.emerald.100 / 60%") 0%,
-      transparent 45%
-    ),
-    radial-gradient(
-      ellipse 60% 45% at 0% 0%,
-      theme("colors.forest.100 / 50%") 0%,
-      transparent 40%
-    ),
-    radial-gradient(
-      ellipse 40% 30% at 20% 30%,
-      theme("colors.accent.DEFAULT / 6%") 0%,
-      transparent 50%
-    );
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Subtle mesh gradient overlay at bottom */
-body::after {
-  content: "";
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 500px;
-  background:
-    radial-gradient(
-      ellipse 80% 50% at 50% 100%,
-      theme("colors.emerald.100 / 30%") 0%,
-      transparent 60%
-    ),
-    linear-gradient(
-      to top,
-      theme("colors.forest.50 / 25%") 0%,
-      transparent 100%
-    );
-  pointer-events: none;
-  z-index: -1;
 }
