@@ -46,14 +46,14 @@ export function QuickPrompts({ onSelect, disabled }: QuickPromptsProps) {
       {QUICK_PROMPTS.map((prompt, index) => (
         <motion.button
           key={prompt.label}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05 }}
+          transition={{ delay: index * 0.04 }}
           onClick={() => onSelect(prompt.prompt)}
           disabled={disabled}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-full bg-white/90 backdrop-blur-sm border border-emerald-200/60 text-foreground hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:ring-offset-2 focus:ring-offset-background transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none shadow-sm hover:shadow-md"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border text-muted-foreground bg-white hover:bg-gray-50 hover:border-gray-300 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-colors disabled:opacity-50 disabled:pointer-events-none"
         >
-          <prompt.icon className="h-3.5 w-3.5 text-emerald-600" />
+          <prompt.icon className="h-3 w-3" />
           {prompt.label}
         </motion.button>
       ))}

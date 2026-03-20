@@ -12,7 +12,7 @@ import { api } from "@/api/client";
 
 function CopilotSkeleton() {
   return (
-    <Card className="shadow-sm">
+    <Card className="border border-border">
       <CardHeader>
         <Skeleton className="h-6 w-40" />
       </CardHeader>
@@ -97,28 +97,25 @@ export function CopilotWorkspace() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
+      transition={{ delay: 0.2 }}
     >
-      <Card className="relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-emerald-200/50 bg-white/90 backdrop-blur-sm">
-        {/* Premium gradient accent bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-forest-500 to-emerald-400" />
-
+      <Card className="border border-border bg-card shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-forest-600 shadow-md shadow-emerald-500/20">
-              <Bot className="h-5 w-5 text-white" />
+          <CardTitle className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+              <Bot className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-foreground font-semibold">Canopy AI</span>
+              <span className="text-foreground font-semibold text-base">Canopy AI</span>
               {api.isDemoMode() ? (
                 <p className="text-xs text-amber-600 font-medium mt-0.5 flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
-                  Demo Mode - Run locally for live AI
+                  Demo Mode — Run locally for live AI
                 </p>
               ) : (
-                <p className="text-xs text-emerald-600/70 font-medium mt-0.5">
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">
                   Powered by Claude
                 </p>
               )}
@@ -128,7 +125,7 @@ export function CopilotWorkspace() {
 
         <CardContent className="pt-2">
           <Tabs.Root defaultValue="copilot">
-            <Tabs.List className="flex gap-1 mb-4 border-b border-gray-100 pb-px">
+            <Tabs.List className="flex gap-1 mb-4 border-b border-border pb-px">
               <Tabs.Trigger
                 value="copilot"
                 className="px-3 py-1.5 text-xs font-medium text-muted-foreground rounded-t-lg transition-colors data-[state=active]:text-emerald-700 data-[state=active]:bg-emerald-50 data-[state=active]:border-b-2 data-[state=active]:border-emerald-500 hover:text-foreground flex items-center gap-1.5"
@@ -163,7 +160,7 @@ export function CopilotWorkspace() {
                         key={doc.filename}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="flex items-center gap-2 text-xs bg-emerald-100 text-emerald-700 rounded-full px-3 py-1.5 border border-emerald-200"
+                        className="flex items-center gap-2 text-xs bg-emerald-50 text-emerald-700 rounded-full px-3 py-1.5 border border-emerald-200"
                       >
                         <FileText className="h-3 w-3" />
                         <span className="max-w-[150px] truncate font-medium">{doc.filename}</span>
@@ -194,7 +191,7 @@ export function CopilotWorkspace() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-xs border border-destructive/20"
+                    className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-xs border border-red-200"
                   >
                     <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
                     <span>
@@ -204,7 +201,7 @@ export function CopilotWorkspace() {
                 )}
               </AnimatePresence>
 
-              {/* Question input with integrated upload button */}
+              {/* Question input */}
               <form onSubmit={handleSubmit}>
                 <div className="relative">
                   <input
@@ -221,7 +218,7 @@ export function CopilotWorkspace() {
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     placeholder="Ask about your portfolio's climate risks, opportunities, or regulatory readiness..."
-                    className="w-full min-h-[100px] max-h-[200px] p-4 pl-12 pr-14 rounded-xl bg-emerald-50/50 border border-emerald-200/60 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 resize-none transition-all duration-200"
+                    className="w-full min-h-[100px] max-h-[200px] p-4 pl-12 pr-14 rounded-lg bg-white border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 resize-none transition-colors"
                     disabled={isBusy}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
@@ -231,12 +228,12 @@ export function CopilotWorkspace() {
                     }}
                   />
 
-                  {/* Attachment button - bottom left */}
+                  {/* Attachment button */}
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isBusy}
-                    className="absolute bottom-3 left-3 p-2 rounded-lg text-emerald-600/60 hover:text-emerald-600 hover:bg-emerald-100 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                    className="absolute bottom-3 left-3 p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors disabled:opacity-50 disabled:pointer-events-none"
                     title="Attach PDF"
                   >
                     {isUploading ? (
@@ -246,12 +243,12 @@ export function CopilotWorkspace() {
                     )}
                   </button>
 
-                  {/* Send button - bottom right */}
+                  {/* Send button */}
                   <Button
                     type="submit"
                     size="icon"
                     disabled={!question.trim() || isBusy}
-                    className="absolute bottom-3 right-3 bg-gradient-to-r from-emerald-500 to-forest-600 hover:from-emerald-600 hover:to-forest-700 shadow-lg shadow-emerald-500/25"
+                    className="absolute bottom-3 right-3 bg-emerald-600 hover:bg-emerald-700"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -263,7 +260,7 @@ export function CopilotWorkspace() {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm border border-destructive/20"
+                  className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-sm border border-red-200"
                 >
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   <span>{error.message}</span>

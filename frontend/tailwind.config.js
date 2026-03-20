@@ -5,17 +5,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Vibrant forest green theme
-        background: "hsl(145 30% 96%)",
-        foreground: "hsl(152 40% 10%)",
+        // Clean, neutral base
+        background: "hsl(0 0% 98%)",
+        foreground: "hsl(220 13% 18%)",
 
-        // Card colors - Clean white with green tint
+        // Card colors — pure white
         card: {
-          DEFAULT: "hsl(150 30% 99%)",
-          foreground: "hsl(152 40% 10%)",
+          DEFAULT: "hsl(0 0% 100%)",
+          foreground: "hsl(220 13% 18%)",
         },
 
-        // Primary - Vibrant emerald green
+        // Primary — emerald green (used sparingly)
         primary: {
           DEFAULT: "hsl(152 76% 36%)",
           foreground: "hsl(0 0% 100%)",
@@ -31,47 +31,47 @@ export default {
           900: "hsl(156 78% 12%)",
         },
 
-        // Secondary - Soft mint
+        // Secondary — light gray
         secondary: {
-          DEFAULT: "hsl(145 35% 93%)",
-          foreground: "hsl(152 30% 20%)",
+          DEFAULT: "hsl(220 14% 96%)",
+          foreground: "hsl(220 13% 32%)",
         },
 
-        // Muted - Sage
+        // Muted — medium gray
         muted: {
-          DEFAULT: "hsl(145 20% 90%)",
-          foreground: "hsl(150 15% 40%)",
+          DEFAULT: "hsl(220 14% 93%)",
+          foreground: "hsl(220 9% 46%)",
         },
 
-        // Accent - Forest gold
+        // Accent — warm amber
         accent: {
           DEFAULT: "hsl(42 95% 50%)",
-          foreground: "hsl(152 40% 10%)",
+          foreground: "hsl(220 13% 18%)",
         },
 
-        // Destructive - Coral
+        // Destructive — red
         destructive: {
           DEFAULT: "hsl(0 72% 55%)",
           foreground: "hsl(0 0% 100%)",
         },
 
-        // Popover - White
+        // Popover — white
         popover: {
-          DEFAULT: "hsl(150 30% 99%)",
-          foreground: "hsl(152 40% 10%)",
+          DEFAULT: "hsl(0 0% 100%)",
+          foreground: "hsl(220 13% 18%)",
         },
 
-        // Border - Green-tinted gray
-        border: "hsl(145 25% 86%)",
-        input: "hsl(145 25% 86%)",
+        // Border — neutral gray
+        border: "hsl(220 13% 91%)",
+        input: "hsl(220 13% 91%)",
         ring: "hsl(152 76% 36%)",
 
-        // Status colors - Vivid nature palette
+        // Status colors
         success: "hsl(145 80% 38%)",
         warning: "hsl(40 96% 50%)",
         info: "hsl(200 95% 50%)",
 
-        // Emerald palette
+        // Emerald palette (accent use)
         emerald: {
           50: "hsl(149 80% 96%)",
           100: "hsl(149 75% 90%)",
@@ -86,7 +86,7 @@ export default {
           950: "hsl(157 80% 6%)",
         },
 
-        // Forest palette
+        // Forest palette (accent use)
         forest: {
           50: "hsl(140 60% 96%)",
           100: "hsl(141 55% 90%)",
@@ -108,7 +108,6 @@ export default {
       },
       fontFamily: {
         sans: ["Sora", "system-ui", "sans-serif"],
-        serif: ["Playfair Display", "Georgia", "serif"],
       },
       keyframes: {
         "accordion-down": {
@@ -136,21 +135,21 @@ export default {
       typography: {
         DEFAULT: {
           css: {
-            color: "hsl(152 40% 10%)",
+            color: "hsl(220 13% 18%)",
             maxWidth: "none",
-            h1: { color: "hsl(152 40% 10%)" },
-            h2: { color: "hsl(152 40% 10%)", marginTop: "1.5em", marginBottom: "0.5em" },
-            h3: { color: "hsl(152 40% 10%)", marginTop: "1.25em", marginBottom: "0.5em" },
-            h4: { color: "hsl(152 40% 10%)" },
-            strong: { color: "hsl(152 76% 36%)" },
+            h1: { color: "hsl(220 13% 18%)" },
+            h2: { color: "hsl(220 13% 18%)", marginTop: "1.5em", marginBottom: "0.5em" },
+            h3: { color: "hsl(220 13% 18%)", marginTop: "1.25em", marginBottom: "0.5em" },
+            h4: { color: "hsl(220 13% 18%)" },
+            strong: { color: "hsl(153 80% 30%)" },
             p: { marginTop: "0.75em", marginBottom: "0.75em" },
             li: { marginTop: "0.25em", marginBottom: "0.25em" },
-            "ul > li::marker": { color: "hsl(152 76% 36%)" },
-            "ol > li::marker": { color: "hsl(152 76% 36%)" },
-            a: { color: "hsl(152 76% 36%)" },
-            code: { color: "hsl(152 30% 20%)", backgroundColor: "hsl(145 35% 93%)", padding: "0.2em 0.4em", borderRadius: "0.25em" },
-            hr: { borderColor: "hsl(145 25% 86%)" },
-            blockquote: { borderLeftColor: "hsl(152 76% 36%)", color: "hsl(150 15% 40%)" },
+            "ul > li::marker": { color: "hsl(153 80% 30%)" },
+            "ol > li::marker": { color: "hsl(153 80% 30%)" },
+            a: { color: "hsl(153 80% 30%)" },
+            code: { color: "hsl(220 13% 32%)", backgroundColor: "hsl(220 14% 96%)", padding: "0.2em 0.4em", borderRadius: "0.25em" },
+            hr: { borderColor: "hsl(220 13% 91%)" },
+            blockquote: { borderLeftColor: "hsl(153 80% 30%)", color: "hsl(220 9% 46%)" },
           },
         },
       },

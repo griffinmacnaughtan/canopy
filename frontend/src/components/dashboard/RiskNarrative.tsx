@@ -90,7 +90,7 @@ export function RiskNarrative() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
     >
-      <Card className="shadow-sm hover:shadow-lg transition-all duration-300 border-border/50 bg-card/80 backdrop-blur-sm h-full">
+      <Card className="border border-border bg-card shadow-sm h-full">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />

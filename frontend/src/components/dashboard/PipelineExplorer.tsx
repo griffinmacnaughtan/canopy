@@ -78,14 +78,14 @@ export function PipelineExplorer() {
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="pb-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
               <Database className="h-5 w-5" />
             </div>
             <div>
-              <CardTitle className="text-xl">Data Pipeline Explorer</CardTitle>
+              <CardTitle>Data Pipeline Explorer</CardTitle>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Real EPA emissions and climate data
               </p>
@@ -293,18 +293,18 @@ function StatCard({
   isYear?: boolean;
 }) {
   const colors = {
-    blue: "from-blue-500 to-blue-600 shadow-blue-500/25",
-    emerald: "from-emerald-500 to-emerald-600 shadow-emerald-500/25",
-    purple: "from-purple-500 to-purple-600 shadow-purple-500/25",
-    amber: "from-amber-500 to-amber-600 shadow-amber-500/25",
+    blue: "bg-blue-50 text-blue-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    purple: "bg-purple-50 text-purple-600",
+    amber: "bg-amber-50 text-amber-600",
   };
 
   return (
-    <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+    <div className="p-4 bg-gray-50 rounded-lg border border-border">
       <div
-        className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors[color]} flex items-center justify-center mb-2 shadow-lg`}
+        className={`w-7 h-7 rounded-lg ${colors[color]} flex items-center justify-center mb-2`}
       >
-        <Icon className="h-4 w-4 text-white" />
+        <Icon className="h-3.5 w-3.5" />
       </div>
       <p className="text-xs text-muted-foreground">{label}</p>
       {value == null ? (
