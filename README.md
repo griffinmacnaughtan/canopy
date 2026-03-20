@@ -497,4 +497,5 @@ MIT
 Built by [Griffin MacNaughtan](https://github.com/griffinmacnaughtan).
 
 - GitHub: [github.com/griffinmacnaughtan](https://github.com/griffinmacnaughtan)
-- LinkedIn: [linkedin.com/in/griffinmacnaughtan](https://linkedin.com/in/griffinmacnaughtan)
+- LinkedIn: [Griffin MacNaughtan](https://www.linkedin.com/in/griffin-macnaughtan/)
+- Email: gmacnaughtan@rogers.com
