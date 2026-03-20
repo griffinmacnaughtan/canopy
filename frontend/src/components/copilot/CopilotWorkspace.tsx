@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Bot, RefreshCw, AlertCircle, Paperclip, FileText, X, Loader2, Sparkles, FlaskConical } from "lucide-react";
+import { Send, Bot, RefreshCw, AlertCircle, Paperclip, FileText, X, Loader2, Sparkles, FlaskConical, User } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Card, CardHeader, CardTitle, CardContent, Button, Skeleton } from "@/components/ui";
 import { useCopilot, usePortfolio } from "@/hooks";
@@ -26,7 +26,7 @@ function CopilotSkeleton() {
 
 export function CopilotWorkspace() {
   const { data: portfolio, isLoading: portfolioLoading } = usePortfolio();
-  const { response, isStreaming, error, sendQuestion, reset } = useCopilot({
+  const { response, lastQuestion, isStreaming, error, sendQuestion, reset } = useCopilot({
     portfolioId: portfolio?.id,
   });
   const {
@@ -267,7 +267,19 @@ export function CopilotWorkspace() {
                 </motion.div>
               )}
 
-              {/* Streaming response */}
+              {/* User prompt + Streaming response */}
+              {lastQuestion && (response || isStreaming) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-3 mt-4 p-3 rounded-lg bg-gray-50 border border-border"
+                >
+                  <div className="p-1.5 rounded-md bg-gray-200 text-gray-600 mt-0.5">
+                    <User className="h-3.5 w-3.5" />
+                  </div>
+                  <p className="text-sm text-foreground font-medium leading-relaxed">{lastQuestion}</p>
+                </motion.div>
+              )}
               <StreamingResponse content={response} isStreaming={isStreaming} />
 
               {/* Reset button */}

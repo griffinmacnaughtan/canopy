@@ -270,13 +270,26 @@ export const api = {
         // Keep the last potentially incomplete line in the buffer
         buffer = lines.pop() || "";
 
+        // Track SSE event type — the backend sends named events like
+        // "event: metadata" before their data line. We only want to
+        // yield data from the default (unnamed) event, which carries
+        // the actual LLM content chunks.
+        let currentEvent = "";
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
+          if (line.startsWith("event: ")) {
+            currentEvent = line.slice(7).trim();
+          } else if (line.startsWith("data: ")) {
             const data = line.slice(6);
             if (data === "[DONE]") {
               return;
             }
-            yield data;
+            // Skip non-content events (metadata, etc.)
+            if (!currentEvent) {
+              yield data;
+            }
+          } else if (line.trim() === "") {
+            // Blank line resets the event type per SSE spec
+            currentEvent = "";
           }
         }
       }
