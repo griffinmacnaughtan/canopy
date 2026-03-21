@@ -1,0 +1,16 @@
+name,ticker,sector,region,revenue_usd_m,scope1_tco2e,scope2_tco2e,green_revenue_pct,controversies
+NextEra Energy,NEE,Utilities,North America,21000,42000000,3200000,55,0
+TotalEnergies SE,TTE,Energy,Europe,218000,38000000,4100000,12,3
+TSMC,TSM,Information Technology,APAC,73000,3800000,12500000,5,0
+Vestas Wind Systems,VWS,Industrials,Europe,15000,120000,95000,92,0
+JPMorgan Chase,JPM,Financials,North America,154000,52000,410000,8,2
+Vale S.A.,VALE,Materials,Latin America,41000,11500000,2100000,3,4
+Orsted A/S,ORSTED,Utilities,Europe,17000,850000,210000,88,0
+Mitsubishi Heavy Industries,7011,Industrials,APAC,35000,4200000,1800000,18,1
+Ecopetrol S.A.,EC,Energy,Latin America,32000,19000000,1600000,2,3
+Schneider Electric,SU,Industrials,Europe,38000,95000,280000,72,0
+BHP Group,BHP,Materials,APAC,53000,14800000,3200000,4,2
+Enphase Energy,ENPH,Information Technology,North America,2300,8000,22000,95,0
+Brookfield Renewable,BEP,Utilities,North America,4800,15000,42000,97,0
+Saudi Aramco,2222,Energy,Middle East,535000,68000000,8500000,1,3
+Siemens Gamesa,,Industrials,Europe,11000,85000,110000,90,1

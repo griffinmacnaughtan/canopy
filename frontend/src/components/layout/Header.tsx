@@ -99,8 +99,7 @@ export function Header() {
 
         <div className="flex items-center gap-2.5 flex-wrap">
           {/* Portfolio Selector */}
-          <div className="relative flex items-center">
-            <span className="text-xs text-muted-foreground font-medium mr-2">Portfolio:</span>
+          <div className="relative">
             <select
               value={selectedPortfolioId}
               onChange={(e) => setSelectedPortfolioId(e.target.value)}

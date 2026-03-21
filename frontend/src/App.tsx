@@ -44,6 +44,7 @@ function Dashboard() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              <span className="text-muted-foreground font-medium">Portfolio:</span>{" "}
               {portfolio?.name || "Portfolio"}
             </h1>
             {assetNames && (
