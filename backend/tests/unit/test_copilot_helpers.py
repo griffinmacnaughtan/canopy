@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from app.llm.prompts import get_source_attribution
 
 
