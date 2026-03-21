@@ -27,21 +27,25 @@ export function Footer() {
           {/* Links */}
           <div className="flex items-center gap-3">
             <a
-              href="#"
+              href="https://github.com/griffinmacnaughtan"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-lg text-gray-400 hover:text-foreground hover:bg-gray-50 transition-colors"
               aria-label="GitHub"
             >
               <Github className="h-4 w-4" />
             </a>
             <a
-              href="#"
+              href="https://www.linkedin.com/in/griffin-macnaughtan"
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-lg text-gray-400 hover:text-foreground hover:bg-gray-50 transition-colors"
               aria-label="LinkedIn"
             >
               <Linkedin className="h-4 w-4" />
             </a>
             <a
-              href="#"
+              href="mailto:gmacnaughtan@rogers.com"
               className="p-2 rounded-lg text-gray-400 hover:text-foreground hover:bg-gray-50 transition-colors"
               aria-label="Contact"
             >
