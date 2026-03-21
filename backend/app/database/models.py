@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models for ESG Copilot."""
+"""SQLAlchemy ORM models for Canopy."""
 
 import uuid
 from datetime import datetime

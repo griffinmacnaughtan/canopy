@@ -29,7 +29,7 @@ def seed_database():
 
         # Create demo user
         demo_user = UserDB(
-            email="demo@esg-copilot.com",
+            email="demo@canopy.dev",
             name="Demo User",
         )
         session.add(demo_user)

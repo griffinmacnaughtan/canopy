@@ -1,1 +1,1 @@
-"""Integration tests for ESG Copilot backend."""
+"""Integration tests for Canopy backend."""

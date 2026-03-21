@@ -1,4 +1,4 @@
-"""Structured logging configuration for ESG Copilot."""
+"""Structured logging configuration for Canopy."""
 
 import logging
 import sys

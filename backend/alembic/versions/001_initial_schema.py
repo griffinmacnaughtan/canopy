@@ -1,4 +1,4 @@
-"""Initial schema for ESG Copilot
+"""Initial schema for Canopy
 
 Revision ID: 001_initial
 Revises:

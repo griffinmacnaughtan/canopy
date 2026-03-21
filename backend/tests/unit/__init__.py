@@ -1,1 +1,1 @@
-"""Unit tests for ESG Copilot backend."""
+"""Unit tests for Canopy backend."""

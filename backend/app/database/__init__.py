@@ -1,4 +1,4 @@
-"""Database module for ESG Copilot."""
+"""Database module for Canopy."""
 
 from .connection import async_session_factory, engine, get_db
 from .models import AssetDB, Base, PortfolioDB, ScenarioDB, UserDB, portfolio_assets

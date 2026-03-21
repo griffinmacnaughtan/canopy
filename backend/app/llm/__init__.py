@@ -1,4 +1,4 @@
-"""LLM integration module for ESG Copilot."""
+"""LLM integration module for Canopy."""
 
 from .anthropic_client import AnthropicClient
 from .base import LLMClient, LLMResponse

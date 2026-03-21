@@ -17,9 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ .
 
-RUN groupadd -r esgcopilot && useradd -r -g esgcopilot esgcopilot
-RUN chown -R esgcopilot:esgcopilot /app
-USER esgcopilot
+RUN groupadd -r canopy && useradd -r -g canopy canopy
+RUN chown -R canopy:canopy /app
+USER canopy
 
 # Build-time smoke test: if this fails the build log shows the exact traceback
 RUN python -c "from app.main import app; print('Import OK')"

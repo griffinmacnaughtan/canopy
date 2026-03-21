@@ -1,4 +1,4 @@
-# ESG Copilot Backend Dockerfile
+# Canopy Backend Dockerfile
 # Multi-stage build for optimized production image
 
 # ============================================
@@ -53,13 +53,13 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload
 FROM base as production
 
 # Create non-root user for security
-RUN groupadd -r esgcopilot && useradd -r -g esgcopilot esgcopilot
+RUN groupadd -r canopy && useradd -r -g canopy canopy
 
 # Copy application code
-COPY --chown=esgcopilot:esgcopilot . .
+COPY --chown=canopy:canopy . .
 
 # Switch to non-root user
-USER esgcopilot
+USER canopy
 
 # Expose port
 EXPOSE 8000

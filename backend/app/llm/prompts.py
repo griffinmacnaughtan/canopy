@@ -1,4 +1,4 @@
-"""Prompt engineering for ESG Copilot."""
+"""Prompt engineering for Canopy."""
 
 from typing import Any
 

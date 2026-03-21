@@ -1,1 +1,1 @@
-"""Test package for ESG Copilot backend."""
+"""Test package for Canopy backend."""
