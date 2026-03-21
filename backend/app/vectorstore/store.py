@@ -154,6 +154,7 @@ class VectorStore:
         query: str,
         top_k: int = 5,
         min_score: float = 0.0,
+        metadata_filter: dict[str, str] | None = None,
     ) -> list[SearchResult]:
         """Semantic similarity search.
 
@@ -161,6 +162,9 @@ class VectorStore:
             query: The search query text.
             top_k: Maximum number of results.
             min_score: Minimum cosine similarity threshold.
+            metadata_filter: Optional dict of ``{key: value}`` pairs.
+                Only documents whose metadata matches **all** entries
+                are eligible for retrieval.
 
         Returns:
             Sorted list of ``SearchResult`` (highest score first).
@@ -180,6 +184,15 @@ class VectorStore:
             norms = np.linalg.norm(self._matrix, axis=1, keepdims=True) + 1e-10
             matrix_norm = self._matrix / norms
             similarities = matrix_norm @ query_norm
+
+            # Mask out documents that don't match the metadata filter
+            if metadata_filter:
+                for i, doc_id in enumerate(self._matrix_ids):
+                    doc_meta = self._documents[doc_id].metadata
+                    for key, value in metadata_filter.items():
+                        if doc_meta.get(key) != value:
+                            similarities[i] = -1.0
+                            break
 
             # Top-k selection
             k = min(top_k, len(similarities))

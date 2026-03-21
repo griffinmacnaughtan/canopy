@@ -43,10 +43,14 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
 
     Uses the OpenAI API to generate 1536-dimensional embeddings
     optimised for semantic similarity and retrieval tasks.
+
+    Large input lists are automatically split into sub-batches to
+    stay within API limits.
     """
 
     MODEL = "text-embedding-3-small"
     DIMENSION = 1536
+    _BATCH_SIZE = 128  # OpenAI recommends <= 2048 inputs; 128 keeps payloads safe
 
     def __init__(self, api_key: str | None = None) -> None:
         import openai
@@ -58,6 +62,16 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
         return self.DIMENSION
 
     async def embed(self, texts: list[str]) -> np.ndarray:
+        if len(texts) <= self._BATCH_SIZE:
+            return await self._embed_batch(texts)
+
+        all_vectors: list[np.ndarray] = []
+        for i in range(0, len(texts), self._BATCH_SIZE):
+            batch = texts[i : i + self._BATCH_SIZE]
+            all_vectors.append(await self._embed_batch(batch))
+        return np.concatenate(all_vectors, axis=0)
+
+    async def _embed_batch(self, texts: list[str]) -> np.ndarray:
         response = await self._client.embeddings.create(
             input=texts,
             model=self.MODEL,
