@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, RefreshCw, AlertCircle, Paperclip, FileText, X, Loader2, Sparkles, FlaskConical, User } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { Card, CardHeader, CardTitle, CardContent, Button, Skeleton } from "@/components/ui";
 import { useCopilot, usePortfolio } from "@/hooks";
 import { useDocuments } from "@/hooks/useDocuments";
+import { useCopilotContext } from "@/contexts/CopilotContext";
 import { StreamingResponse } from "./StreamingResponse";
 import { QuickPrompts } from "./QuickPrompts";
 import { EvalPanel } from "./EvalPanel";
@@ -38,10 +39,19 @@ export function CopilotWorkspace() {
     isClearing,
   } = useDocuments();
 
+  const { registerCopilot } = useCopilotContext();
+
   const [question, setQuestion] = useState("");
   const isBusy = isStreaming || isUploading;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Register with the CopilotContext so other components can scroll here + set questions
+  const stableSetQuestion = useCallback((q: string) => setQuestion(q), []);
+  useEffect(() => {
+    registerCopilot(containerRef.current, stableSetQuestion);
+  }, [registerCopilot, stableSetQuestion]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -97,6 +107,7 @@ export function CopilotWorkspace() {
 
   return (
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}

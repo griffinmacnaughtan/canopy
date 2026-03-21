@@ -18,6 +18,7 @@ import { CopilotWorkspace } from "@/components/copilot";
 import { ErrorBoundary } from "@/components/ui";
 import { usePortfolio } from "@/hooks";
 import { PortfolioProvider } from "@/contexts/PortfolioContext";
+import { CopilotProvider } from "@/contexts/CopilotContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -142,9 +143,11 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <PortfolioProvider>
-        <MainLayout>
-          <Dashboard />
-        </MainLayout>
+        <CopilotProvider>
+          <MainLayout>
+            <Dashboard />
+          </MainLayout>
+        </CopilotProvider>
       </PortfolioProvider>
     </QueryClientProvider>
   );
