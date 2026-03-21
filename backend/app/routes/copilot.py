@@ -352,7 +352,9 @@ async def generate_stream(
 
         citations = get_source_attribution(
             has_documents=document_context is not None,
-            document_count=len(document_context.split("### Document:")) - 1 if document_context else 0,
+            document_count=len(document_context.split("### Document:")) - 1
+            if document_context
+            else 0,
             has_pipeline_data=has_pipeline_data,
             filing_sources=filing_sources if filing_sources else None,
         )

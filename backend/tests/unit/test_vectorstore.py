@@ -210,17 +210,13 @@ class TestVectorStore:
         assert len(all_results) == 2
 
         # With filter — only Apple
-        filtered = await store.search(
-            text, top_k=5, metadata_filter={"company": "Apple Inc."}
-        )
+        filtered = await store.search(text, top_k=5, metadata_filter={"company": "Apple Inc."})
         assert len(filtered) == 1
         assert filtered[0].document.metadata["company"] == "Apple Inc."
 
     @pytest.mark.asyncio
     async def test_search_metadata_filter_no_match(self, store):
         await store.add_text("some text", source="a", metadata={"company": "X"})
-        results = await store.search(
-            "some text", metadata_filter={"company": "NonExistent"}
-        )
+        results = await store.search("some text", metadata_filter={"company": "NonExistent"})
         # All candidates masked to -1.0 and filtered by min_score default (0.0)
         assert results == []

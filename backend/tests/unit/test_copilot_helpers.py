@@ -30,25 +30,34 @@ class TestSourceAttribution:
                 "excerpt": "...",
             },
         ]
-        citations = get_source_attribution(
-            has_documents=False, filing_sources=filing_sources
-        )
+        citations = get_source_attribution(has_documents=False, filing_sources=filing_sources)
         assert any("Apple" in c for c in citations)
         assert any("Shell" in c for c in citations)
         # Should NOT have a generic label
         assert not any(
-            c == "SEC 10-K filings (Item 1A climate risk disclosures)"
-            for c in citations
+            c == "SEC 10-K filings (Item 1A climate risk disclosures)" for c in citations
         )
 
     def test_duplicate_filing_companies_deduplicated(self):
         filing_sources = [
-            {"company": "Apple Inc.", "filing_type": "10-K", "section": "", "filing_date": "", "relevance": 0.9, "excerpt": "..."},
-            {"company": "Apple Inc.", "filing_type": "10-K", "section": "", "filing_date": "", "relevance": 0.8, "excerpt": "..."},
+            {
+                "company": "Apple Inc.",
+                "filing_type": "10-K",
+                "section": "",
+                "filing_date": "",
+                "relevance": 0.9,
+                "excerpt": "...",
+            },
+            {
+                "company": "Apple Inc.",
+                "filing_type": "10-K",
+                "section": "",
+                "filing_date": "",
+                "relevance": 0.8,
+                "excerpt": "...",
+            },
         ]
-        citations = get_source_attribution(
-            has_documents=False, filing_sources=filing_sources
-        )
+        citations = get_source_attribution(has_documents=False, filing_sources=filing_sources)
         apple_citations = [c for c in citations if "Apple" in c]
         assert len(apple_citations) == 1
 
@@ -72,9 +81,7 @@ class TestSourceAttribution:
                 "excerpt": "...",
             },
         ]
-        citations = get_source_attribution(
-            has_documents=False, filing_sources=filing_sources
-        )
+        citations = get_source_attribution(has_documents=False, filing_sources=filing_sources)
         exxon_cite = [c for c in citations if "Exxon" in c][0]
         assert "Item 1A" in exxon_cite
         assert "2024-02-28" in exxon_cite
