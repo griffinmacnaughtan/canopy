@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { Shield, Database, FileText } from "lucide-react";
 import { MainLayout } from "@/components/layout";
 import {
   PortfolioOverview,
@@ -30,21 +31,41 @@ const queryClient = new QueryClient({
 function Dashboard() {
   const { data: portfolio } = usePortfolio();
 
+  const assetNames = portfolio?.assets?.map((a) => a.name.replace(/[,.]?\s*(Inc|Corp|plc|SE|Ltd|Co|Corporation|PLC)\.?$/i, "")).join(", ");
+
   return (
     <div className="space-y-6">
       {/* Command Bar */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex items-center justify-between py-2"
+        className="py-2"
       >
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            {portfolio?.name || "Portfolio"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {portfolio?.description || "Climate risk analytics and AI-powered insights"}
-          </p>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              {portfolio?.name || "Portfolio"}
+            </h1>
+            {assetNames && (
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {assetNames}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <Shield className="h-3 w-3 text-emerald-500" />
+              TCFD &middot; NGFS
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Database className="h-3 w-3 text-emerald-500" />
+              EPA &middot; NOAA
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <FileText className="h-3 w-3 text-emerald-500" />
+              SEC Filings
+            </span>
+          </div>
         </div>
       </motion.section>
 
