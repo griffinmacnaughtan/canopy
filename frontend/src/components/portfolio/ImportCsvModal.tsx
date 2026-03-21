@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { Upload, FileText, X, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { usePortfolioContext } from "@/contexts/PortfolioContext";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ const CSV_TEMPLATE = [
 
 export function ImportCsvModal({ isOpen, onClose }: ImportCsvModalProps) {
   const { setSelectedPortfolioId } = usePortfolioContext();
+  const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [portfolioName, setPortfolioName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
@@ -85,6 +87,7 @@ export function ImportCsvModal({ isOpen, onClose }: ImportCsvModalProps) {
         toast.success(
           `Imported "${resp.portfolio.name}" — ${resp.rows_imported} assets`
         );
+        await queryClient.invalidateQueries({ queryKey: ["portfolios"] });
         setSelectedPortfolioId(resp.portfolio.id);
       }
     } catch (err) {
