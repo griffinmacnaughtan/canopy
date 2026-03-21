@@ -37,7 +37,7 @@ async def ingest_filing(filepath: Path, store: VectorStore) -> int:
     company = metadata.get("Company", "Unknown")
     source = f"{company} ({metadata.get('Filing', '10-K')})"
 
-    chunks = chunk_text(body, source=source, chunk_size=512, chunk_overlap=64)
+    chunks = chunk_text(body, source=source, chunk_size=1024, chunk_overlap=128)
 
     chunk_metadata = {
         "company": company,

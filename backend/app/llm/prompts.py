@@ -58,6 +58,9 @@ Caveats, data gaps, or areas needing further analysis.
 **SEC Filing Context:**
 When SEC filing excerpts are provided, cite specific company disclosures to ground your analysis. Use phrases like "According to [Company]'s 10-K filing..." rather than generating unsupported claims. This demonstrates regulatory-grade sourcing.
 
+**Honesty & Confidence:**
+If the available data is insufficient to answer a question confidently, say so explicitly. Identify what data is missing and what the user could provide to get a better answer. Never fabricate statistics, company disclosures, or regulatory details. Partial answers grounded in real data are far more valuable than comprehensive answers built on speculation.
+
 Keep responses focused and executive-ready. Finance teams need insights they can act on, not academic dissertations."""
 
 
@@ -188,3 +191,48 @@ def build_user_message(
     )
 
     return "".join(parts)
+
+
+def get_source_attribution(
+    has_documents: bool,
+    document_count: int = 0,
+    has_pipeline_data: bool = False,
+    filing_sources: list[dict] | None = None,
+) -> list[str]:
+    """Generate source attribution for the response.
+
+    When filing sources are provided, each cited filing gets its own
+    entry with company, section, and date — giving users chunk-level
+    traceability instead of a generic "SEC filings" label.
+    """
+    sources = [
+        "Portfolio asset inventory",
+        "Sector benchmarks (TPI, S&P Trucost, IEA — see benchmarks module)",
+        "Scenario library (NGFS Phase IV)",
+    ]
+
+    if filing_sources:
+        seen: set[str] = set()
+        for fs in filing_sources:
+            company = fs.get("company", "Unknown")
+            filing = fs.get("filing_type", "10-K")
+            section = fs.get("section", "")
+            date = fs.get("filing_date", "")
+            key = f"{company}|{filing}"
+            if key in seen:
+                continue
+            seen.add(key)
+            label = f"{company} {filing}"
+            if section:
+                label += f" — {section}"
+            if date:
+                label += f" ({date})"
+            sources.append(label)
+
+    if has_pipeline_data:
+        sources.append("EPA GHGRP emissions data")
+
+    if has_documents:
+        sources.append(f"Uploaded documents ({document_count} files)")
+
+    return sources

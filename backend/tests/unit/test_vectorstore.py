@@ -196,3 +196,27 @@ class TestVectorStore:
         ids = await store.add_chunks([])
         assert ids == []
         assert store.size == 0
+
+    @pytest.mark.asyncio
+    async def test_search_metadata_filter(self, store):
+        # Use identical text so hash embeddings produce the same vector —
+        # guaranteeing both pass min_score regardless of query wording.
+        text = "carbon disclosure report"
+        await store.add_text(text, source="a", metadata={"company": "Apple Inc."})
+        await store.add_text(text, source="b", metadata={"company": "Shell plc"})
+
+        # Without filter — both candidates (identical embeddings → same score)
+        all_results = await store.search(text, top_k=5)
+        assert len(all_results) == 2
+
+        # With filter — only Apple
+        filtered = await store.search(text, top_k=5, metadata_filter={"company": "Apple Inc."})
+        assert len(filtered) == 1
+        assert filtered[0].document.metadata["company"] == "Apple Inc."
+
+    @pytest.mark.asyncio
+    async def test_search_metadata_filter_no_match(self, store):
+        await store.add_text("some text", source="a", metadata={"company": "X"})
+        results = await store.search("some text", metadata_filter={"company": "NonExistent"})
+        # All candidates masked to -1.0 and filtered by min_score default (0.0)
+        assert results == []

@@ -81,6 +81,10 @@ class CopilotResponse(BaseModel):
     confidence: float | None = Field(
         None, ge=0, le=1, description="Response confidence score (0-1)"
     )
+    sources: list[dict[str, Any]] | None = Field(
+        None,
+        description="Chunk-level source references from SEC filing retrieval",
+    )
 
 
 class CopilotStreamRequest(BaseModel):

@@ -162,7 +162,11 @@ async def query_emissions(sector: str | None = None, limit: int = 10) -> str:
     return json.dumps({"facilities": facilities, "count": len(facilities)}, indent=2)
 
 
-async def search_documents(query: str, top_k: int = 5) -> str:
+async def search_documents(
+    query: str,
+    top_k: int = 5,
+    company: str | None = None,
+) -> str:
     """Semantic search through uploaded documents using the vector store."""
     from ..vectorstore import get_vector_store
 
@@ -170,7 +174,8 @@ async def search_documents(query: str, top_k: int = 5) -> str:
     if store.size == 0:
         return json.dumps({"message": "No documents indexed in the vector store.", "results": []})
 
-    results = await store.search(query, top_k=top_k)
+    metadata_filter = {"company": company} if company else None
+    results = await store.search(query, top_k=top_k, metadata_filter=metadata_filter)
     return json.dumps(
         {
             "query": query,
@@ -274,11 +279,15 @@ CLIMATE_TOOLS: list[ToolDefinition] = [
     ),
     ToolDefinition(
         name="search_documents",
-        description="Semantic search through uploaded documents (PDFs, reports). Returns the most "
-        "relevant text chunks ranked by similarity to the query.",
+        description="Semantic search through uploaded documents and SEC filings. Returns the most "
+        "relevant text chunks ranked by similarity to the query. Optionally filter by company.",
         parameters={
             "query": {"type": "string", "description": "Search query text."},
             "top_k": {"type": "integer", "description": "Number of results (default 5)."},
+            "company": {
+                "type": "string",
+                "description": "Filter results to a specific company name (e.g., 'Apple Inc.').",
+            },
         },
         execute=search_documents,
     ),
