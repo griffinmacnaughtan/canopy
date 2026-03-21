@@ -249,8 +249,8 @@ REAL_ASSETS: list[dict[str, Any]] = [
 # Pre-built sample portfolios using real assets
 SAMPLE_PORTFOLIOS = [
     {
-        "name": "Tech Leaders",
-        "description": "Large-cap technology companies with strong ESG profiles",
+        "name": "Tech Leaders ESG",
+        "description": "Large-cap technology companies — Apple, Microsoft, Alphabet, NVIDIA",
         "asset_names": [
             "Apple Inc.",
             "Microsoft Corporation",

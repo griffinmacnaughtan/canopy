@@ -89,7 +89,7 @@ class TestGroundTruthComputation:
         assert case.expected_values["nextera_green_pct"] == nextera["green_revenue_pct"]
 
     def test_tech_avg_intensity_computed_correctly(self):
-        tech_assets = _assets_for_portfolio("Tech Leaders")
+        tech_assets = _assets_for_portfolio("Tech Leaders ESG")
         manual_avg = sum(_emissions_intensity(a) for a in tech_assets) / len(tech_assets)
         case = next(c for c in DOMAIN_ACCURACY_CASES if c.id == "domain_004")
         assert abs(case.expected_values["avg_intensity"] - round(manual_avg, 2)) < 0.01
@@ -112,7 +112,7 @@ class TestPortfolioContexts:
     """Verify context strings are well-formed and contain expected data."""
 
     def test_tech_context_has_portfolio_header(self):
-        assert "## Portfolio: Tech Leaders" in TECH_CONTEXT
+        assert "## Portfolio: Tech Leaders ESG" in TECH_CONTEXT
 
     def test_energy_context_has_scores(self):
         assert "Overall Score:" in ENERGY_CONTEXT
@@ -128,13 +128,13 @@ class TestPortfolioContexts:
         assert "Shell" in ENERGY_CONTEXT
 
     def test_portfolio_helper_finds_correct_assets(self):
-        tech_assets = _assets_for_portfolio("Tech Leaders")
+        tech_assets = _assets_for_portfolio("Tech Leaders ESG")
         tech_names = {a["name"] for a in tech_assets}
-        portfolio = next(p for p in SAMPLE_PORTFOLIOS if p["name"] == "Tech Leaders")
+        portfolio = next(p for p in SAMPLE_PORTFOLIOS if p["name"] == "Tech Leaders ESG")
         assert tech_names == set(portfolio["asset_names"])
 
     def test_pydantic_asset_conversion(self):
-        raw = _assets_for_portfolio("Tech Leaders")
+        raw = _assets_for_portfolio("Tech Leaders ESG")
         pydantic = _pydantic_assets(raw)
         assert len(pydantic) == len(raw)
         for asset in pydantic:

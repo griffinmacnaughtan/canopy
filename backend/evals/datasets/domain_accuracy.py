@@ -93,7 +93,7 @@ _nextera = next(a for a in REAL_ASSETS if a["ticker"] == "NEE")
 _tesla = next(a for a in REAL_ASSETS if a["ticker"] == "TSLA")
 
 # Portfolio-level computations
-_tech_assets = _assets_for_portfolio("Tech Leaders")
+_tech_assets = _assets_for_portfolio("Tech Leaders ESG")
 _energy_assets = _assets_for_portfolio("Energy Transition")
 _global_assets = _assets_for_portfolio("Global Diversified")
 
@@ -112,7 +112,7 @@ _tech_scores = score_portfolio(_tech_pydantic, _baselines)
 _energy_scores = score_portfolio(_energy_pydantic, _baselines)
 
 # Context strings
-TECH_CONTEXT = _build_portfolio_context("Tech Leaders")
+TECH_CONTEXT = _build_portfolio_context("Tech Leaders ESG")
 ENERGY_CONTEXT = _build_portfolio_context("Energy Transition")
 GLOBAL_CONTEXT = _build_portfolio_context("Global Diversified")
 
@@ -162,7 +162,7 @@ DOMAIN_ACCURACY_CASES: list[EvalCase] = [
     EvalCase(
         id="domain_004",
         category="domain_accuracy",
-        prompt="What is the Tech Leaders portfolio's average emissions intensity (tCO2e per $M revenue)?",
+        prompt="What is the Tech Leaders ESG portfolio's average emissions intensity (tCO2e per $M revenue)?",
         context=TECH_CONTEXT,
         criteria={
             "factuality": "Must compute average intensity from the four tech stocks",
@@ -215,7 +215,7 @@ DOMAIN_ACCURACY_CASES: list[EvalCase] = [
     EvalCase(
         id="domain_008",
         category="domain_accuracy",
-        prompt="Which asset in the Tech Leaders portfolio has the highest emissions intensity?",
+        prompt="Which asset in the Tech Leaders ESG portfolio has the highest emissions intensity?",
         context=TECH_CONTEXT,
         criteria={"factuality": "Must identify the correct highest-intensity asset"},
         expected_entities=[
@@ -240,7 +240,7 @@ DOMAIN_ACCURACY_CASES: list[EvalCase] = [
         category="domain_accuracy",
         prompt=(
             "Which portfolio has a higher transition risk score: "
-            "Tech Leaders or Energy Transition? By how much?"
+            "Tech Leaders ESG or Energy Transition? By how much?"
         ),
         context=TECH_CONTEXT + "\n\n" + ENERGY_CONTEXT,
         criteria={
@@ -251,14 +251,14 @@ DOMAIN_ACCURACY_CASES: list[EvalCase] = [
             "tech_transition": _tech_scores[2],
             "energy_transition": _energy_scores[2],
         },
-        expected_entities=["Tech Leaders", "Energy Transition"],
+        expected_entities=["Tech Leaders ESG", "Energy Transition"],
         pass_threshold=2.5,
     ),
     EvalCase(
         id="domain_011",
         category="domain_accuracy",
         prompt=(
-            "Compare the overall portfolio scores of Tech Leaders and Energy Transition. "
+            "Compare the overall portfolio scores of Tech Leaders ESG and Energy Transition. "
             "Which is better positioned for the climate transition?"
         ),
         context=TECH_CONTEXT + "\n\n" + ENERGY_CONTEXT,
@@ -270,7 +270,7 @@ DOMAIN_ACCURACY_CASES: list[EvalCase] = [
             "tech_overall": _tech_scores[0],
             "energy_overall": _energy_scores[0],
         },
-        expected_entities=["Tech Leaders", "Energy Transition"],
+        expected_entities=["Tech Leaders ESG", "Energy Transition"],
         pass_threshold=2.5,
     ),
     # ── Category E: Sector Benchmark Awareness ───────────────────────

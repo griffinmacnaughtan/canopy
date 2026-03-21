@@ -82,7 +82,7 @@ def score_portfolio(
     # Overall score: base 100 minus climate risk, plus a conservative opportunity
     # uplift. The 0.35 weight follows TCFD's principle that downside risk should
     # anchor the headline score rather than upside optionality.
-    overall = max(0, 100 - climate_risk + (opportunity * 0.35))
+    overall = max(0, min(100, 100 - climate_risk + (opportunity * 0.35)))
 
     top_risks = _build_top_risks(assets, transition_risk, physical_risk)
     quick_wins = _build_quick_wins(assets)

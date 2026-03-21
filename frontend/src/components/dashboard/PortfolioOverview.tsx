@@ -175,13 +175,18 @@ export function PortfolioOverview() {
     return val >= 70 ? "emerald" as const : val >= 50 ? "amber" as const : "red" as const;
   };
 
+  const ratingLabel = (val: number, inverse = false) => {
+    if (inverse) return val <= 30 ? "Low" : val <= 60 ? "Moderate" : "High";
+    return val >= 70 ? "Strong" : val >= 50 ? "Moderate" : "Weak";
+  };
+
   return (
     <TooltipProvider delayDuration={200}>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <MetricTile
           label="Overall"
-          value={score.overall_score.toFixed(0)}
-          subtitle="0–100 · Higher is better"
+          value={`${score.overall_score.toFixed(0)}/100`}
+          subtitle={`${ratingLabel(score.overall_score)} climate resilience`}
           icon={<TrendingUp className="h-3.5 w-3.5" />}
           tooltip={TOOLTIPS.overall}
           color={scoreColor(score.overall_score)}
@@ -189,8 +194,8 @@ export function PortfolioOverview() {
         />
         <MetricTile
           label="Climate Risk"
-          value={score.climate_risk.toFixed(0)}
-          subtitle="0–100 · Lower is better"
+          value={`${score.climate_risk.toFixed(0)}/100`}
+          subtitle={`${ratingLabel(score.climate_risk, true)} risk exposure`}
           icon={<Flame className="h-3.5 w-3.5" />}
           tooltip={TOOLTIPS.climate}
           color={scoreColor(score.climate_risk, true)}
@@ -198,8 +203,8 @@ export function PortfolioOverview() {
         />
         <MetricTile
           label="Transition"
-          value={score.transition_risk.toFixed(0)}
-          subtitle="Carbon exposure"
+          value={`${score.transition_risk.toFixed(0)}/100`}
+          subtitle={`${ratingLabel(score.transition_risk, true)} carbon exposure`}
           icon={<Zap className="h-3.5 w-3.5" />}
           tooltip={TOOLTIPS.transition}
           color={scoreColor(score.transition_risk, true)}

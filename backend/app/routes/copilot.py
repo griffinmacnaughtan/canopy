@@ -384,7 +384,13 @@ async def generate_stream(
             temperature=0.7,
         ):
             chunk_count += 1
-            yield f"data: {chunk}\n\n"
+            # SSE spec: newlines inside data must be sent as separate
+            # "data:" lines.  The client joins them back with "\n".
+            if "\n" in chunk:
+                encoded = "\n".join(f"data: {line}" for line in chunk.split("\n"))
+                yield f"{encoded}\n\n"
+            else:
+                yield f"data: {chunk}\n\n"
 
         logger.info(
             "copilot_stream_complete",

@@ -43,7 +43,7 @@ function Dashboard() {
             {portfolio?.name || "Portfolio"}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Climate risk analytics and AI-powered insights
+            {portfolio?.description || "Climate risk analytics and AI-powered insights"}
           </p>
         </div>
       </motion.section>
