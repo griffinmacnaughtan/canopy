@@ -1,0 +1,139 @@
+Company: Shell plc
+Ticker: SHEL
+Filing: 20-F Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2026-03-12
+Source: SEC EDGAR (CIK: 0001306965)
+---
+Our approach to sustainability119
+
+Sustainability Committee
+157
+
+4.Climate change and energy transition
+228
+
+5.Emission schemes and related environmental plans
+240
+
+CMFcarbon management framework
+CO2
+carbon dioxide
+CO2e
+carbon dioxide equivalent
+
+CRC
+Carbon Reporting Committee
+
+CSRD
+Corporate Sustainability Reporting Directive
+
+ECExecutive Committee
+EMTNEuro medium-term note
+EPSearnings per share
+ESRS
+European Sustainability Reporting Standards
+
+FCFfree cash flow
+FIDfinal investment decision
+GAAPgenerally accepted accounting principles
+GHGgreenhouse gas
+HSSEhealth, safety, security and environment
+IASInternational Accounting Standards
+IEAInternational Energy Agency
+IFRSInternational Financial Reporting Standard(s)
+IOGPInternational Association of Oil & Gas Producers
+IPCCIntergovernmental Panel on Climate Change
+Ipieca
+International Petroleum Industry Environmental Conservation Association 
+ISSB
+International Sustainability Standards Board
+
+KPIKey performance indicator
+LGBT+Lesbian, gay, bisexual and transgender
+LTIPLong-term Incentive Plan
+NBS
+Nature-Based Solutions
+NCInet carbon intensity
+NGO
+Non-governmental organisation
+
+NOMCONomination and Succession Committee
+NZENet zero emissions
+OECDOrganisation for Economic Co-operation and Development
+OMLoil mining lease
+OP 25
+Operating Plan 2025
+OPECOrganization of the Petroleum Exporting Countries
+OPEC+12 members of the OPEC and 11 other non-OPEC members
+OPLoil prospecting licence
+PSCproduction-sharing contract
+PSPPerformance Share Plan
+R&DResearch and development
+REMCORemuneration Committee
+RNGRenewable natural gas
+RTreal terms
+SEAMSafety, Environment and Asset Management
+SECUS Securities and Exchange Commission
+SGBPShell General Business Principles
+SIAIShell Internal Audit and Investigations
+SPsocial perfo
+
+timates, forecasts, projections and assumptions. These forward-looking statements are identified by their use of terms and phrases such as "aim", "ambition", "anticipate", "aspire", "aspiration", "believe", "commit", "commitment", "could", "desire", "estimate", "expect", "goals", "intend", "may", "milestones", "objectives", "outlook", "plan", "probably", "project", "risks", "schedule", "seek", "should", "target", "vision", "will", "would" and similar terms and phrases. There are a number of factors that could affect the future operations of Shell and could cause those results to differ materially from those expressed in the forward-looking statements included in this Report, including (without limitation): (a) price fluctuations in crude oil and natural gas; (b) changes in demand for Shell's products; (c) currency fluctuations; (d) drilling and production results; (e) reserves estimates; (f) loss of market share and industry competition; (g) environmental and physical risks, including climate change; (h) risks associated with the identification of suitable potential acquisition properties and targets, and successful negotiation and completion of such transactions; (i) the risk of doing business in developing countries and countries subject to international sanctions; (j) legislative, judicial, fiscal and regulatory developments including tariffs and regulatory measures addressing climate change; (k) economic and financial market conditions in various countries and regions; (l) political risks, including the risks of expropriation and renegotiation of
+
+Our task is to manage oil and gas production responsibly and competitively, with a focus on reducing the emissions from our operations. We also believe that gas, including LNG, can play a vital role through the energy transition — as a flexible and reliable lower-carbon alternative to coal in power generation and industry, as a solution for heavy-duty transport and shipping, and as a complement to renewables, helping balance grids as wind and solar scale.
+June 2025 saw the first cargo from the new LNG Canada facility. It was a proud moment for Shell and our partners, not only because of its significant technical achievements, but because it was designed to be among the lowest carbon intensity LNG facilities in the world — with many cargoes going to meet growing energy demand in Asia. 
+At the same time, climate change remains a real challenge. We have a target to become a net-zero emissions energy business by 2050, and we are committed to playing our part in helping to decarbonise the global energy system.
+Low-carbon energy options are advancing on multiple tracks. Technologies such as wind and solar are now well established, while others — including biofuels like sustainable aviation fuel, renewable hydrogen and carbon capture and storage (CCS) — will be best able to scale if policy frameworks develop, markets evolve and demand builds.
+Even as the energy mix changes, overall demand continues to grow. Moving from a global energy system built on coal, oil and gas to one that is increasingly electrified means redesigning the infrastructure that underpins modern life. We must change how we power industry, heat homes, move people and goods, build cities and balance grids. 
+Despite these challenging objectives, there is progress to point to. In October, I visited China where I saw the pace
+
+Scope 1 and 2 emissions CO2e
+Net carbon intensity (NCI)
+
+We are in a world defined by more uncertainty -- from increasingly fragmented geopolitics, to the rapid rise of artificial intelligence and the pressures of climate change. Energy sits at the heart of this changing world, highlighting the critical role of our sector. 
+As I write this message, amid the turmoil of the conflict in the Middle East, we feel that critical role more than ever. We are focusing first and foremost on the safety and well-being of our colleagues. I would like to thank all our staff for their professionalism, commitment and the care they continue to show for each other.
+Shell has an important role to play in the evolving energy system. We provide the oil and gas people need today, including liquefied natural gas (LNG). We are also helping to build the energy system of the future, with low-carbon energy products and solutions.
+We are transforming into a more competitive and resilient business so that we are in the best possible position to support the around a billion people we serve, directly or indirectly, every year. We are building trust in Shell as the investment case and partner of choice in a complex and changing
+
+Shell is a global group of energy and petrochemical companies, employing around 85,000 people [A] across more than 70 countries. Our activities include oil and gas exploration and production, and the marketing of fuels, lubricants and chemical products. We also offer low-carbon energy products and solutions. 
+For more than a century, Shell has been at the heart of the global energy system, fuelling people's homes, industries and transport from cars to planes and ships. Shell provides energy, directly or indirectly, to around a billion people every year.
+Our purpose is to power progress together by working with each other, our customers and our partners to provide the energy products people need to power their lives and businesses. Our vision [B] is to become the world's leading integrated energy company -- delivering impact at scale, connecting energy and people, matching supply to demand. 
+With global demand for energy increasing, coupled with the challenge of climate change, we will continue to focus on our strategy to deliver more value with less emissions. We are positioning Shell to become a leaner, more competitive organisation to succeed through a multi-decade energy transition.
+As the energy system evolves, at different paces in different places, we will continue to earn trust in Shell by providing stability through an uncertain and complex energy transition. 
+We seek to build strong, trusted relationships with all our stakeholders. Our stakeholders include: our employees, contractors and pensioners; the investor community; customers, comprising commercial and industrial customers, as well as the millions we serve daily at our retail sites; our suppliers and strategic partners; regulators and governments; non-governmental organisations, civil society, academia and think tanks; and the communities where we work.
+Partner of choice
+We will leverage our global footprint, trust in our brand, trading and technology capabilities, and our ass
+
+tegy. We operate in environments where advanced technologies are used. In developing new technologies, products and solutions, unknown or unforeseeable technological failures or environmental and health effects could harm our reputation and licence to operate or expose us to litigation or sanctions. The associated costs of new technology are sometimes underestimated, impacting their expected returns. We have faced delays in developing new technology in the past, and such delays could happen again in the future. If we are unable to develop our technology and products in a timely and cost-effective manner, we may fail to realise commercially viable products.
+If any of the risks above materialise, it could have a material adverse effect on our earnings, cash flows and financial condition.
+
+2.Climate change and the energy transition
+
+Climate change and the energy transition pose multiple risks to Shell, including declines in the demand for and prices of our products, commercial risks from growing our low-carbon business, and adverse litigation and regulatory developments. The physical impacts of climate change could also adversely affect our assets and supply chains.
+Risk description
+The risks and impacts include the following:
+a. Commercial risks: 
+￮Changing customer sentiment in some markets favouring the use of renewable and sustainable energy products may reduce demand for our oil and gas products. An excess of fossil fuel supply over demand could result in reduced fossil fuel prices. This could result in lower earnings, cancelled projects, debooking of reserves and the potential impairment of certain assets.
+￮If we fail to stay in step with customers' and other stakeholders' demand for low-carbon p
+
+2.Climate change and the energy transition
+
+Climate change and the energy transition pose multiple risks to Shell, including declines in the demand for and prices of our products, commercial risks from growing our low-carbon business, and adverse litigation and regulatory developments. The physical impacts of climate change could also adversely affect our assets and supply chains.
+Risk description
+The risks and impacts include the following:
+a. Commercial risks: 
+￮Changing customer sentiment in some markets favouring the use of renewable and sustainable energy products may reduce demand for our oil and gas products. An excess of fossil fuel supply over demand could result in reduced fossil fuel prices. This could result in lower earnings, cancelled projects, debooking of reserves and the potential impairment of certain assets.
+￮If we fail to stay in step with customers' and other stakeholders' demand for low-carbon products, this could adversely affect our reputation and future earnings. If we move much faster than society, we risk investing in technologies, markets or low-carbon products for which there may be insufficient demand. If we are slower than society, or if low-carbon technology advances faster than we expect, customers may prefer a different supplier. This would reduce demand fo
+
+could have a material adverse effect on the price of our securities and our ability to access capital markets. Some financial institutions have been aligning their portfolios to low-carbon opportunities, driven by both regulatory and broader stakeholder pressures. A failure to decarbonise our business portfolios in line with investor and lender expectations could have a material adverse effect on our ability to access financing for certain types of projects. This could also adversely affect our partners' ability to finance their portion of costs, either through equity or debt.
+[A]Electric vehicle charging services, renewable power generation, nature-based solutions, green hydrogen, CCS. We define low-carbon energy products as those that have an average carbon intensity that is lower than that of conventional hydrocarbon products, assessed on a life-cycle basis.
+b. Societal risks, including litigation: 
+￮Societal expectations around energy security, energy affordability and mitigating climate change continue to shift with uncertain implications for businesses with regard to mix and quality of products, safety and minimising damage to the environment. The role of the oil and gas sector in the context of climate change and the energy transition has been, and continues to be, an area of focus and public debate. This has negatively affected, and in the future could negatively affect, our licence to operate; our brand, reputation and competitive position; and could reduce consumer demand for our products, harm our ability to secure new energy partnerships and contracts, and restrict our ability to access capital markets or attract employees. 
+￮In some countries, governments, regulators, non-governmental organisations (NGOs) and individuals have filed lawsuits seeking to hold fossil fuel companies liable for costs associated with climate change. If successful, these claims may have wide-ranging consequences, including forcing entities to hand over strategic autonomy in pa
+
+racts, and restrict our ability to access capital markets or attract employees. 
+￮In some countries, governments, regulators, non-governmental organisations (NGOs) and individuals have filed lawsuits seeking to hold fossil fuel companies liable for costs associated with climate change. If successful, these claims may have wide-ranging consequences, including forcing entities to hand over strategic autonomy in part to regulators, or to divest from hydrocarbon assets and technologies. In the Netherlands, a group of environmental NGOs and individual claimants (referred to herein as "Milieudefensie") have filed an appeal with the Dutch Supreme Court against the Court of Appeal judgment of November 12, 2024, which overturned a lower court finding that Shell had an obligation to reduce certain aggregate annual volumes of CO2 emissions by 2030. We have also been subjected to climate activism that has caused disruptions to our operations, and such disruptions could happen again in the future. Climate change lawsuits that have been filed against us could have a material adverse effect on our business and reputation.
+
+c. Regulatory risks:
+￮Divergence in regulatory direction has created, and continues to create, uncertainty and complexity for multinational companies operating globally. The renewed focus on the competitive agenda in the EU aims to simplify current and incoming climate regulations and disclosure requirements, with the USA moving towards deregulation at the federal level, even as some states adopt stricter rules. The lack of consistent government policy needed to provide a conducive regulatory environment for low-carbon products and solutions could make it more challenging to take investment decisions on projects that we and society need to reach our respective decarbonisation goals as policy is critical for creating sustained demand for new low-carbon solutions. Similarly, cli

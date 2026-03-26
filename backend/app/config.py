@@ -85,6 +85,12 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-sonnet-4-20250514"
     openai_model: str = "gpt-4o"
 
+    # Data Pipeline
+    noaa_api_token: str = ""
+    sec_user_agent: str = "Canopy Climate Risk Platform research@canopy-demo.com"
+    pipeline_on_startup: bool = True  # Run live pipeline on first boot if DB is empty
+    pipeline_schedule: str = "0 6 * * *"  # Daily at 6 AM UTC
+
     # Logging
     log_level: str = "INFO"
     log_format: str = "json"

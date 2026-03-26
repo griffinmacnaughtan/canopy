@@ -3,7 +3,7 @@
 import csv
 import io
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import structlog
 from fastapi import APIRouter, Depends, File, Query, UploadFile
@@ -82,6 +82,7 @@ def db_asset_to_pydantic(asset: AssetDB) -> Asset:
         revenue_usd_m=asset.revenue_usd_m,
         scope1_tco2e=asset.scope1_tco2e,
         scope2_tco2e=asset.scope2_tco2e,
+        scope3_tco2e=getattr(asset, "scope3_tco2e", 0),
         green_revenue_pct=asset.green_revenue_pct,
         controversies=asset.controversies,
     )
@@ -221,6 +222,7 @@ async def create_portfolio(
             revenue_usd_m=asset.revenue_usd_m,
             scope1_tco2e=asset.scope1_tco2e,
             scope2_tco2e=asset.scope2_tco2e,
+            scope3_tco2e=asset.scope3_tco2e,
             green_revenue_pct=asset.green_revenue_pct,
             controversies=asset.controversies,
         )
@@ -426,7 +428,7 @@ async def export_portfolio_report(
     ]
 
     return PortfolioExportReport(
-        generated_at=datetime.now(UTC).isoformat(),
+        generated_at=datetime.now(timezone.utc).isoformat(),
         portfolio_id=str(portfolio.id),
         portfolio_name=portfolio.name,
         description=portfolio.description,
@@ -522,6 +524,12 @@ async def import_portfolio_from_csv(
             rows_skipped += 1
             continue
 
+        # Scope 3 is optional in CSV (defaults to 0 if absent)
+        try:
+            scope3 = float(row.get("scope3_tco2e", 0) or 0)
+        except (ValueError, TypeError):
+            scope3 = 0.0
+
         if revenue <= 0:
             warnings.append(f"Row {row_num} ({asset_name!r}): skipped — revenue_usd_m must be > 0.")
             rows_skipped += 1
@@ -532,6 +540,7 @@ async def import_portfolio_from_csv(
         controversies = max(0, min(5, controversies))
         scope1 = max(0.0, scope1)
         scope2 = max(0.0, scope2)
+        scope3 = max(0.0, scope3)
 
         sector = row.get("sector", "")
         if sector not in VALID_SECTORS:
@@ -549,6 +558,7 @@ async def import_portfolio_from_csv(
             revenue_usd_m=revenue,
             scope1_tco2e=scope1,
             scope2_tco2e=scope2,
+            scope3_tco2e=scope3,
             green_revenue_pct=green_pct,
             controversies=controversies,
         )

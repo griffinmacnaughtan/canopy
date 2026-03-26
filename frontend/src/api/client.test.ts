@@ -81,6 +81,7 @@ describe("api — demo mode", () => {
           revenue_usd_m: 383_000,
           scope1_tco2e: 55_000,
           scope2_tco2e: 22_000,
+          scope3_tco2e: 25_100_000,
           green_revenue_pct: 0,
           controversies: 1,
         },

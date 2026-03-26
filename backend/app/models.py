@@ -12,6 +12,7 @@ class Asset(BaseModel):
     revenue_usd_m: float = Field(..., gt=0, description="Annual revenue in USD millions")
     scope1_tco2e: float = Field(..., ge=0, description="Scope 1 emissions in tCO2e")
     scope2_tco2e: float = Field(..., ge=0, description="Scope 2 emissions in tCO2e")
+    scope3_tco2e: float = Field(0, ge=0, description="Scope 3 emissions in tCO2e (value chain)")
     green_revenue_pct: float = Field(
         ..., ge=0, le=100, description="Percentage of green revenue (0-100)"
     )

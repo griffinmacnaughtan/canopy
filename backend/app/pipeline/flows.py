@@ -47,7 +47,7 @@ except ImportError:
 
 
 from .config import PipelineConfig
-from .extractors import EPAExtractor, NOAAExtractor, WorldBankClimateExtractor
+from .extractors import EPAExtractor, NOAAExtractor, SECEdgarExtractor, WorldBankClimateExtractor
 from .loaders import DatabaseLoader, PostgresLoader, StagingLoader
 from .transformers import ClimateDataTransformer, EmissionsDataTransformer
 from .validators import DataQualityValidator, SchemaValidator
@@ -174,6 +174,37 @@ async def extract_worldbank_data(
     )
 
     log.info(f"World Bank extraction complete: {result.record_count} records")
+
+    return {
+        "source": result.source,
+        "records": result.records,
+        "watermark": result.watermark,
+        "errors": result.errors,
+        "status": "success" if not result.errors else "partial",
+    }
+
+
+@task(
+    name="extract_sec_filings",
+    retries=2,
+    retry_delay_seconds=30,
+)
+async def extract_sec_filings(
+    config: PipelineConfig,
+    tickers: list | None = None,
+):
+    """Extract climate risk sections from SEC 10-K/20-F filings."""
+    log = get_run_logger() if PREFECT_AVAILABLE else logger
+
+    extractor = SECEdgarExtractor(config)
+
+    if not await extractor.health_check():
+        log.warning("SEC EDGAR API unavailable, skipping extraction")
+        return {"source": "SEC_EDGAR", "records": [], "status": "skipped"}
+
+    result = await extractor.extract(tickers=tickers)
+
+    log.info(f"SEC EDGAR extraction complete: {result.record_count} filings")
 
     return {
         "source": result.source,
@@ -447,6 +478,7 @@ async def climate_data_flow(
     include_noaa: bool = True,
     include_epa: bool = True,
     include_worldbank: bool = True,
+    include_sec: bool = True,
     days_back: int = 30,
 ):
     """
@@ -460,6 +492,7 @@ async def climate_data_flow(
         include_noaa: Include NOAA climate data
         include_epa: Include EPA emissions data
         include_worldbank: Include World Bank climate projections
+        include_sec: Include SEC EDGAR filing extraction
         days_back: Number of days of historical data to fetch
 
     Returns:
@@ -493,6 +526,9 @@ async def climate_data_flow(
 
     if include_worldbank:
         extraction_tasks.append(("WorldBank", extract_worldbank_data(config)))
+
+    if include_sec:
+        extraction_tasks.append(("SEC", extract_sec_filings(config)))
 
     extracted_data = {}
     for name, coro in extraction_tasks:
@@ -529,6 +565,10 @@ async def climate_data_flow(
         if data.get("records"):
             if name == "EPA":
                 transformed_data[name] = transform_emissions_data(data)
+            elif name == "SEC":
+                # SEC filings go to the vector store, not the DB pipeline.
+                # Pass through without transformation.
+                transformed_data[name] = data
             else:
                 transformed_data[name] = transform_climate_data(data)
         else:
@@ -641,6 +681,7 @@ def run_pipeline(
     include_noaa: bool = True,
     include_epa: bool = True,
     include_worldbank: bool = True,
+    include_sec: bool = True,
 ):
     """Run the pipeline from the command line."""
     return asyncio.run(
@@ -649,6 +690,7 @@ def run_pipeline(
             include_noaa=include_noaa,
             include_epa=include_epa,
             include_worldbank=include_worldbank,
+            include_sec=include_sec,
         )
     )
 
@@ -661,6 +703,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-noaa", action="store_true", help="Skip NOAA extraction")
     parser.add_argument("--no-epa", action="store_true", help="Skip EPA extraction")
     parser.add_argument("--no-worldbank", action="store_true", help="Skip World Bank extraction")
+    parser.add_argument("--no-sec", action="store_true", help="Skip SEC EDGAR extraction")
     parser.add_argument("--days-back", type=int, default=30, help="Days of historical data")
 
     args = parser.parse_args()
@@ -671,6 +714,7 @@ if __name__ == "__main__":
             include_noaa=not args.no_noaa,
             include_epa=not args.no_epa,
             include_worldbank=not args.no_worldbank,
+            include_sec=not args.no_sec,
             days_back=args.days_back,
         )
     )

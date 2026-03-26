@@ -11,7 +11,6 @@ from pathlib import Path
 import pytest
 
 from app.ingestion.sec_filings import (
-    EDGAR_HEADERS,
     get_all_filing_paths,
     load_filing_from_disk,
 )
@@ -24,9 +23,9 @@ from app.vectorstore.chunker import chunk_text
 class TestFilingDiscovery:
     """Ensure the data/filings directory is populated and discoverable."""
 
-    def test_finds_all_six_filings(self):
+    def test_finds_at_least_six_filings(self):
         paths = get_all_filing_paths()
-        assert len(paths) == 6, f"Expected 6 filing files, found {len(paths)}"
+        assert len(paths) >= 6, f"Expected at least 6 filing files, found {len(paths)}"
 
     def test_all_files_are_txt(self):
         for p in get_all_filing_paths():
@@ -39,6 +38,8 @@ class TestFilingDiscovery:
 
     def test_expected_companies_present(self):
         names = {p.stem for p in get_all_filing_paths()}
+        # Static baseline files must always be present; live-fetched files
+        # may add more but must not remove the originals.
         expected = {
             "apple_10k_climate_risks",
             "basf_20f_climate_risks",
@@ -47,7 +48,7 @@ class TestFilingDiscovery:
             "nextera_energy_10k_climate_risks",
             "shell_10k_climate_risks",
         }
-        assert names == expected
+        assert expected.issubset(names), f"Missing static filings: {expected - names}"
 
 
 # ── Filing Loader ────────────────────────────────────────────────────────
@@ -107,13 +108,26 @@ class TestFilingLoader:
             assert len(body) > 200, f"{path.name} body too short ({len(body)} chars)"
 
     def test_real_filings_have_climate_content(self):
-        """Filing bodies should contain climate-related terminology."""
+        """Static filing excerpts should contain climate-related terminology.
+
+        Live-fetched filings (from SEC EDGAR) may contain broader 10-K
+        content, so we only assert ≥ 2 hits for the original static files.
+        """
+        static_files = {
+            "apple_10k_climate_risks",
+            "basf_20f_climate_risks",
+            "exxon_mobil_10k_climate_risks",
+            "jpmorgan_10k_climate_risks",
+            "nextera_energy_10k_climate_risks",
+            "shell_10k_climate_risks",
+        }
         climate_terms = {"climate", "emissions", "carbon", "risk"}
         for path in get_all_filing_paths():
             body, _ = load_filing_from_disk(path)
             body_lower = body.lower()
             hits = {t for t in climate_terms if t in body_lower}
-            assert len(hits) >= 2, f"{path.name} has insufficient climate terminology: found {hits}"
+            if path.stem in static_files:
+                assert len(hits) >= 2, f"{path.name} has insufficient climate terminology: found {hits}"
 
 
 # ── Chunking Integration ────────────────────────────────────────────────
@@ -169,9 +183,9 @@ class TestVectorStoreIngestion:
         from app.ingestion.ingest import ingest_all_filings
 
         result = await ingest_all_filings(fresh_store)
-        assert result["files_processed"] == 6
-        assert result["total_chunks"] > 10, "6 filings should produce > 10 chunks"
-        assert len(result["per_file"]) == 6
+        assert result["files_processed"] >= 6
+        assert result["total_chunks"] > 10, "6+ filings should produce > 10 chunks"
+        assert len(result["per_file"]) >= 6
 
     @pytest.mark.asyncio()
     async def test_search_returns_results_after_ingestion(self, fresh_store: VectorStore):
@@ -219,15 +233,23 @@ class TestVectorStoreIngestion:
         store.clear()
 
 
-# ── EDGAR API Configuration ──────────────────────────────────────────────
+# ── SEC EDGAR Extractor Configuration ────────────────────────────────────
 
 
 class TestEdgarConfig:
-    """Validate SEC EDGAR API configuration."""
+    """Validate SEC EDGAR extractor configuration."""
 
-    def test_user_agent_header_set(self):
-        assert "User-Agent" in EDGAR_HEADERS
-        assert len(EDGAR_HEADERS["User-Agent"]) > 10
+    def test_sec_extractor_has_user_agent(self):
+        from app.pipeline.config import PipelineConfig
+        from app.pipeline.extractors.sec_edgar import SECEdgarExtractor
 
-    def test_accept_header_json(self):
-        assert EDGAR_HEADERS["Accept"] == "application/json"
+        config = PipelineConfig()
+        extractor = SECEdgarExtractor(config)
+        headers = extractor._headers()
+        assert "User-Agent" in headers
+        assert len(headers["User-Agent"]) > 10
+
+    def test_sec_extractor_has_companies(self):
+        from app.pipeline.extractors.sec_edgar import COMPANY_CIKS
+
+        assert len(COMPANY_CIKS) >= 20

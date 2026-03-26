@@ -1,22 +1,25 @@
 """SEC EDGAR filing loader.
 
-Loads pre-downloaded 10-K climate risk excerpts from ``backend/data/filings/``.
-Also exposes :func:`fetch_10k_climate_section` to demonstrate the capability
-of fetching live filings from the SEC EDGAR full-text search (EFTS) API.
+Loads 10-K climate risk excerpts from two sources:
+
+1. **Live EDGAR EFTS** — the :class:`SECEdgarExtractor` searches the SEC
+   full-text search API, downloads filings, and extracts climate risk
+   sections via HTML parsing.  Results are cached as ``.txt`` files in
+   ``backend/data/filings/`` so subsequent restarts are instant.
+
+2. **Static fallback** — if the live fetch is unavailable (no network,
+   rate-limited, etc.) the loader falls back to pre-downloaded excerpts
+   already on disk.
 
 SEC EDGAR EFTS API reference:
     - Base URL: ``https://efts.sec.gov/LATEST/search-index``
     - No authentication required; only a descriptive ``User-Agent`` header
     - Rate limit: 10 requests / second
-    - Returns JSON with accession numbers and filing metadata
-    - Full text of filings available at
-      ``https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/{filename}``
-
-For the demo we use static files to avoid runtime network dependency.
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import structlog
@@ -26,15 +29,9 @@ logger = structlog.get_logger()
 # Static filings live alongside the SQLite database
 _DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "filings"
 
-# SEC EDGAR requires a descriptive User-Agent header
-EDGAR_HEADERS = {
-    "User-Agent": "Canopy Climate Risk Platform research@canopy-demo.com",
-    "Accept": "application/json",
-}
-
 
 def get_all_filing_paths() -> list[Path]:
-    """Return paths to all static filing excerpts.
+    """Return paths to all filing excerpts (both static and live-fetched).
 
     Returns:
         Sorted list of ``.txt`` file paths in ``data/filings/``.
@@ -91,49 +88,79 @@ def load_filing_from_disk(filepath: Path) -> tuple[str, dict[str, str]]:
     return body, metadata
 
 
-async def fetch_10k_climate_section(
-    ticker: str,
-    cik: str,
-) -> str | None:
-    """Fetch climate risk disclosures from SEC EDGAR EFTS (capability demo).
+def _ticker_to_filename(ticker: str) -> str:
+    """Convert a ticker symbol to a safe filename slug."""
+    return re.sub(r"[^a-z0-9]", "_", ticker.lower())
 
-    This function demonstrates live fetching from the SEC EDGAR full-text
-    search API.  In production it would be called by a scheduled pipeline;
-    for the demo the app uses pre-downloaded static excerpts instead.
 
-    Args:
-        ticker: Stock ticker symbol (e.g. ``"XOM"``).
-        cik: SEC Central Index Key, zero-padded to 10 digits.
+async def fetch_live_filings() -> list[dict]:
+    """Fetch live filings from SEC EDGAR for all tracked companies.
+
+    Downloads 10-K/20-F climate risk sections and caches them as .txt
+    files in the data/filings directory so the vector store can ingest
+    them alongside any pre-existing static files.
 
     Returns:
-        Extracted climate risk text, or ``None`` on failure.
+        List of dicts with filing metadata for each successful fetch.
     """
-    try:
-        import httpx
-    except ImportError:
-        logger.warning("httpx_not_installed", msg="pip install httpx for live EDGAR fetching")
-        return None
+    from ..pipeline.config import PipelineConfig
+    from ..pipeline.extractors.sec_edgar import SECEdgarExtractor
 
-    search_url = "https://efts.sec.gov/LATEST/search-index"
-    params = {
-        "q": '"climate" OR "greenhouse gas" OR "carbon emissions"',
-        "forms": "10-K",
-        "dateRange": "custom",
-        "startdt": "2024-01-01",
-        "enddt": "2025-03-01",
-    }
+    config = PipelineConfig.from_env()
+    extractor = SECEdgarExtractor(config)
 
-    try:
-        async with httpx.AsyncClient(headers=EDGAR_HEADERS, timeout=30) as client:
-            resp = await client.get(search_url, params=params)
-            resp.raise_for_status()
-            data = resp.json()
-            logger.info(
-                "edgar_search_complete",
-                ticker=ticker,
-                total_hits=data.get("hits", {}).get("total", {}).get("value", 0),
-            )
-            return None  # Full extraction requires HTML parsing of the filing
-    except Exception as e:
-        logger.warning("edgar_fetch_error", ticker=ticker, error=str(e))
-        return None
+    if not await extractor.health_check():
+        logger.warning("sec_edgar_unavailable", msg="Falling back to static filings")
+        return []
+
+    result = await extractor.extract()
+    saved: list[dict] = []
+
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    for record in result.records:
+        ticker = record["ticker"]
+        company = record["company"]
+        text = record["text"]
+        form_type = record.get("form_type", "10-K")
+        filing_date = record.get("filing_date", "")
+        cik = record.get("cik", "")
+
+        # Build the same metadata header format as static files
+        header = (
+            f"Company: {company}\n"
+            f"Ticker: {ticker}\n"
+            f"Filing: {form_type} Annual Report\n"
+            f"Section: Item 1A - Risk Factors (Climate-Related Excerpts)\n"
+            f"Filing Date: {filing_date}\n"
+            f"Source: SEC EDGAR (CIK: {cik})\n"
+            f"---\n"
+        )
+
+        slug = _ticker_to_filename(ticker)
+        filepath = _DATA_DIR / f"{slug}_10k_climate_risks.txt"
+        filepath.write_text(header + text, encoding="utf-8")
+
+        saved.append({
+            "ticker": ticker,
+            "company": company,
+            "filepath": str(filepath),
+            "chars": len(text),
+        })
+
+        logger.info(
+            "live_filing_saved",
+            ticker=ticker,
+            company=company,
+            chars=len(text),
+            path=filepath.name,
+        )
+
+    logger.info(
+        "live_filings_complete",
+        fetched=len(result.records),
+        saved=len(saved),
+        errors=len(result.errors),
+    )
+
+    return saved

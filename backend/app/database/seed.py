@@ -19,6 +19,7 @@ from ..benchmarks import get_sector_baselines
 
 REAL_ASSETS: list[dict[str, Any]] = [
     # Tech Giants - Generally lower emissions intensity, high green revenue potential
+    # Tech Giants - Generally lower emissions intensity, high green revenue potential
     {
         "name": "Apple Inc.",
         "ticker": "AAPL",
@@ -27,6 +28,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 383285,  # FY2023
         "scope1_tco2e": 55200,  # Direct emissions (facilities, vehicles)
         "scope2_tco2e": 0,  # 100% renewable electricity since 2018
+        "scope3_tco2e": 25100000,  # CDP 2023: purchased goods, product use, transport
         "green_revenue_pct": 45,  # Services, recycling programs, carbon neutral products
         "controversies": 1,  # Minor supply chain labor concerns
     },
@@ -38,6 +40,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 211915,  # FY2023
         "scope1_tco2e": 125195,  # CDP 2023
         "scope2_tco2e": 280000,  # Market-based, data centers
+        "scope3_tco2e": 13400000,  # CDP 2023: cloud customers, supply chain
         "green_revenue_pct": 35,  # Azure sustainability, carbon removal
         "controversies": 0,
     },
@@ -49,6 +52,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 307394,  # FY2023
         "scope1_tco2e": 65200,  # CDP disclosure
         "scope2_tco2e": 0,  # Carbon neutral since 2007
+        "scope3_tco2e": 10200000,  # CDP 2023: data centers, supply chain
         "green_revenue_pct": 28,  # Clean energy products, sustainability tools
         "controversies": 2,  # Antitrust, privacy concerns
     },
@@ -60,6 +64,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 60922,  # FY2024
         "scope1_tco2e": 8500,  # Relatively low - fabless
         "scope2_tco2e": 125000,  # Data center power
+        "scope3_tco2e": 3200000,  # Fabless: outsourced manufacturing, product use
         "green_revenue_pct": 20,  # AI for climate modeling, EV chips
         "controversies": 0,
     },
@@ -71,6 +76,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 96773,  # FY2023
         "scope1_tco2e": 352000,  # Manufacturing
         "scope2_tco2e": 680000,  # Gigafactories energy
+        "scope3_tco2e": 18900000,  # Battery supply chain, steel, aluminum
         "green_revenue_pct": 85,  # EVs, solar, storage
         "controversies": 3,  # Labor, governance, Autopilot safety
     },
@@ -83,6 +89,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 344582,  # FY2023
         "scope1_tco2e": 98000000,  # Major oil & gas producer
         "scope2_tco2e": 12000000,
+        "scope3_tco2e": 540000000,  # CDP: Cat 11 use of sold products dominates
         "green_revenue_pct": 2,  # Limited low-carbon investments
         "controversies": 4,  # Climate litigation, greenwashing allegations
     },
@@ -94,6 +101,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 200994,  # FY2023
         "scope1_tco2e": 56000000,
         "scope2_tco2e": 8000000,
+        "scope3_tco2e": 378000000,  # CDP: use of sold products
         "green_revenue_pct": 3,  # Renewable fuels, hydrogen (early stage)
         "controversies": 3,  # Ecuador litigation, emissions
     },
@@ -105,6 +113,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 28114,  # FY2023
         "scope1_tco2e": 42000000,  # Still has gas plants
         "scope2_tco2e": 1200000,
+        "scope3_tco2e": 6500000,  # Fuel supply, T&D losses
         "green_revenue_pct": 65,  # Largest wind/solar producer in US
         "controversies": 1,  # Minor permitting disputes
     },
@@ -116,6 +125,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 316620,  # FY2023
         "scope1_tco2e": 68000000,
         "scope2_tco2e": 10000000,
+        "scope3_tco2e": 1280000000,  # Shell Energy Transition Strategy: Cat 11
         "green_revenue_pct": 8,  # EV charging, renewables growing
         "controversies": 4,  # Dutch court ruling, emissions targets
     },
@@ -127,6 +137,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 218945,  # FY2023
         "scope1_tco2e": 41000000,
         "scope2_tco2e": 7000000,
+        "scope3_tco2e": 380000000,  # Sustainability report 2023: Cat 11
         "green_revenue_pct": 12,  # Largest integrated renewables capacity
         "controversies": 3,  # Uganda pipeline, human rights concerns
     },
@@ -139,6 +150,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 67060,  # FY2023
         "scope1_tco2e": 850000,
         "scope2_tco2e": 420000,
+        "scope3_tco2e": 210000000,  # Product use (heavy equipment fuel burn)
         "green_revenue_pct": 15,  # Electric equipment, mining for battery minerals
         "controversies": 1,
     },
@@ -150,6 +162,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 73847,  # FY2023 (EUR converted)
         "scope1_tco2e": 16900000,  # Chemical production
         "scope2_tco2e": 4200000,
+        "scope3_tco2e": 86000000,  # CDP: purchased goods, processing, product use
         "green_revenue_pct": 22,  # Battery materials, biodegradable plastics
         "controversies": 2,  # Scope 3 reporting gaps
     },
@@ -161,6 +174,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 53817,  # FY2023
         "scope1_tco2e": 11800000,  # Mining operations
         "scope2_tco2e": 4500000,
+        "scope3_tco2e": 310000000,  # Steel-making from iron ore (Cat 10)
         "green_revenue_pct": 18,  # Copper (EV batteries), potash
         "controversies": 2,  # Samarco dam, indigenous rights
     },
@@ -173,6 +187,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 158104,  # FY2023
         "scope1_tco2e": 78000,  # Offices, travel
         "scope2_tco2e": 245000,
+        "scope3_tco2e": 392000000,  # PCAF financed emissions (Cat 15)
         "green_revenue_pct": 8,  # Green bonds, sustainable finance
         "controversies": 2,  # Fossil fuel financing criticism
     },
@@ -184,6 +199,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 17859,  # FY2023
         "scope1_tco2e": 12000,
         "scope2_tco2e": 45000,
+        "scope3_tco2e": 290000000,  # PCAF financed emissions (AUM-based)
         "green_revenue_pct": 25,  # ESG funds, sustainable investing
         "controversies": 2,  # Greenwashing allegations, anti-ESG backlash
     },
@@ -196,6 +212,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 63896,  # FY2023 (EUR converted)
         "scope1_tco2e": 680000,
         "scope2_tco2e": 520000,
+        "scope3_tco2e": 56000000,  # CDP: purchased goods, consumer use
         "green_revenue_pct": 35,  # Sustainable brands initiative
         "controversies": 1,  # Palm oil supply chain
     },
@@ -207,6 +224,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 99315,  # FY2023 (CHF converted)
         "scope1_tco2e": 3800000,
         "scope2_tco2e": 1200000,
+        "scope3_tco2e": 110000000,  # CDP: dairy supply chain, packaging, transport
         "green_revenue_pct": 20,  # Plant-based, regenerative agriculture
         "controversies": 3,  # Water usage, infant formula
     },
@@ -218,6 +236,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 85159,  # FY2023
         "scope1_tco2e": 420000,
         "scope2_tco2e": 680000,
+        "scope3_tco2e": 12500000,  # CDP: purchased goods, product distribution
         "green_revenue_pct": 12,  # Sustainable packaging, carbon neutrality goals
         "controversies": 4,  # Talc litigation, opioid settlements
     },
@@ -230,6 +249,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 274491,  # FY2023 (JPY converted)
         "scope1_tco2e": 4200000,
         "scope2_tco2e": 2800000,
+        "scope3_tco2e": 520000000,  # CDP: use of sold products (fuel burn)
         "green_revenue_pct": 32,  # Hybrids, EVs, hydrogen fuel cells
         "controversies": 1,  # EV transition pace criticism
     },
@@ -241,6 +261,7 @@ REAL_ASSETS: list[dict[str, Any]] = [
         "revenue_usd_m": 200734,  # FY2023 (KRW converted)
         "scope1_tco2e": 3500000,  # Semiconductor fabs
         "scope2_tco2e": 12000000,  # Heavy energy use
+        "scope3_tco2e": 16000000,  # Supply chain, product energy use
         "green_revenue_pct": 18,  # Energy-efficient chips, solar panels
         "controversies": 1,  # Labor practices
     },

@@ -1,0 +1,26 @@
+Company: TotalEnergies SE
+Ticker: TTE
+Filing: 10-K Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2017-02-28
+Source: SEC EDGAR (CIK: 0000878560)
+---
+We customarily acquire unimproved or improved land zoned for residential use.  To control larger land parcels or gain access to highly desirable parcels, we sometimes form land development joint ventures with third parties that provide us the right to acquire from the joint venture a portion of the lots when developed.  If we purchase raw land or partially developed land, we will perform development work that may include negotiating with governmental agencies and local communities to obtain any necessary zoning, environmental and other regulatory approvals and permits, and constructing, as necessary, roads, water, sewer and drainage systems and recreational facilities like parks, community centers, pools, and hiking and biking trails.  With our long California heritage of creating master planned communities, we have expertise and experience in handling complex development opportunities.
+
+For a discussion of the impact of government regulations on our business, including the impact of environmental regulations, please see the risk factors included under the heading "Regulatory Risks" in the Risk Factors section.
+
+Severe weather, other natural conditions or disasters and climate change may disrupt or delay construction.
+
+Severe weather and other natural conditions or disasters, such as earthquakes, landslides, hurricanes, tornadoes, droughts, floods, heavy or prolonged rain or snow, and wildfires can negatively affect our operations by requiring us to delay or halt construction or to perform potentially costly repairs to our projects under construction and to unsold homes. Some conditions, like the severe drought California has experienced over the last several years, may cause state and local governments to take restrictive actions, including placing moratoriums on the issuance of building permits or the connection of new water meters, which may effectively halt new construction.  Finally, many scientists believe that the rising level of carbon dioxide in the atmosphere is leading to climate change and that climate change is increasing the frequency and severity of weather related disasters. If true, we may experience increasing negative weather related impacts to our operations in the future.
+
+Our homebuilding operations, including land development activities, are subject to extensive federal, state and local regulation, including environmental, construction, employment and worker health and safety, zoning and land use regulation. This regulation affects all aspects of the homebuilding process and can substantially delay or increase the costs of homebuilding activities, even on land for which we already have approvals. During the development process, we must obtain the approval of numerous governmental authorities that regulate matters such as:
+
+the level of greenhouse emissions relating to our operations and the homes we build;
+
+the preservation of habitat for endangered species and wetlands, storm water control and other environmental matters.
+
+The approval process can be lengthy, can be opposed by consumer or environmental groups, and can cause significant delays or permanently halt the development process. Delays or a permanent halt in the development process can cause substantial increases to development costs or cause us to abandon the project and to sell the affected land at a potential loss, which in turn could harm our operating results.
+
+There continues to be a variety of energy related legislation being considered for enactment around the world. For instance, for the last several years, the federal congress has considered an array of energy related initiatives, from carbon "cap and trade" to a federal energy efficiency building code that would increase energy efficiency requirements for new homes between 30 and 50 percent. And in California, where we derive a significant portion of our profits, current regulations, if not altered or delayed, will require new homebuilders like us to build "net-zero" energy homes by 2020.  These potential and actual laws, rules and regulations, if enacted or enforced, all have the potential to increase the cost of home construction significantly, which in turn could reduce our sales and/or profitability.
+
+Much of the new and proposed energy related regulation is a response to concerns about climate change. As climate change concerns grow, legislation and regulatory activity of this nature is expected to continue and become more onerous. Similarly, energy related initiatives will impact a wide variety of companies throughout the world and because our operations are heavily dependent on significant amounts of raw materials, such as lumber, steel, and concrete, these initiatives could have an indirect adverse effect on our operations and profitability to the extent the suppliers of our materials are burdened with expensive cap and trade and similar energy related regulations.
