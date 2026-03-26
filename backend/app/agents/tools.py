@@ -147,17 +147,18 @@ async def query_emissions(sector: str | None = None, limit: int = 10) -> str:
                 indent=2,
             )
 
-    facilities = []
-    for r in rows:
-        facilities.append(
-            {
-                "facility": r.facility_name or "Unknown",
-                "state": r.state,
-                "sector": r.sector,
-                "total_emissions_mt_co2e": float(r.total_emissions_mt_co2e or 0),
-                "reporting_year": r.reporting_year,
-            }
-        )
+        # Serialise ORM objects INSIDE the session to avoid DetachedInstanceError
+        facilities = []
+        for r in rows:
+            facilities.append(
+                {
+                    "facility": r.facility_name or "Unknown",
+                    "state": r.state,
+                    "sector": r.sector,
+                    "total_emissions_mt_co2e": float(r.total_emissions_mt_co2e or 0),
+                    "reporting_year": r.reporting_year,
+                }
+            )
 
     return json.dumps({"facilities": facilities, "count": len(facilities)}, indent=2)
 

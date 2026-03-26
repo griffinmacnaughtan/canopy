@@ -223,8 +223,14 @@ class SECEdgarExtractor(BaseExtractor):
         if not end_date:
             end_date = datetime.utcnow()
         if not start_date:
-            # Look back 18 months to catch the most recent annual filing
-            start_date = datetime(end_date.year - 1, max(1, end_date.month - 6), 1)
+            # Look back 18 months to catch the most recent annual filing.
+            # Manual month arithmetic to avoid dateutil dependency.
+            _m = end_date.month - 18
+            _y = end_date.year
+            while _m < 1:
+                _m += 12
+                _y -= 1
+            start_date = datetime(_y, _m, 1)
 
         target_tickers = tickers or list(COMPANY_CIKS.keys())
         all_records: list[dict[str, Any]] = []

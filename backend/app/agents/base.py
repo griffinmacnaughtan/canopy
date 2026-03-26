@@ -163,15 +163,18 @@ class AgentExecutor:
 
         # Extract ACTION and ACTION_INPUT
         action_match = re.search(r"ACTION:\s*(\S+)", text)
-        input_match = re.search(r"ACTION_INPUT:\s*(\{.+?\})", text, re.DOTALL)
 
         if action_match:
             action_name = action_match.group(1).strip()
 
-        if input_match:
+        # Use json.JSONDecoder.raw_decode to handle nested braces correctly
+        # instead of a regex that breaks on {"query": "climate {risk} factors"}
+        input_marker = re.search(r"ACTION_INPUT:\s*", text)
+        if input_marker:
             try:
-                action_input = json.loads(input_match.group(1))
-            except json.JSONDecodeError:
+                decoder = json.JSONDecoder()
+                action_input, _ = decoder.raw_decode(text, input_marker.end())
+            except (json.JSONDecodeError, ValueError):
                 action_input = {}
 
         return thought, action_name, action_input, final_answer

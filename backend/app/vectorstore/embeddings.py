@@ -115,18 +115,35 @@ class HashEmbeddingProvider(EmbeddingProvider):
 
 
 @lru_cache
-def get_embedding_provider(provider: str = "hash") -> EmbeddingProvider:
+def get_embedding_provider(provider: str | None = None) -> EmbeddingProvider:
     """Factory for embedding providers.
 
+    Auto-detects the best available provider:
+    - If ``provider`` is ``"hash"``, always returns the hash fallback.
+    - If ``provider`` is ``"openai"``, always returns OpenAI (raises on missing key).
+    - If ``provider`` is ``None`` (default), uses OpenAI when ``OPENAI_API_KEY``
+      is set, otherwise falls back to hash embeddings.
+
     Args:
-        provider: ``"openai"`` for production or ``"hash"`` for testing.
+        provider: ``"openai"``, ``"hash"``, or ``None`` for auto-detect.
 
     Returns:
         An ``EmbeddingProvider`` instance.
     """
-    if provider == "openai":
-        from ..config import get_settings
+    if provider == "hash":
+        return HashEmbeddingProvider()
 
-        settings = get_settings()
-        return OpenAIEmbeddingProvider(api_key=settings.openai_api_key)
+    # Auto-detect: use OpenAI if a key is available
+    if provider == "openai" or provider is None:
+        import os
+
+        if os.getenv("OPENAI_API_KEY", ""):
+            from ..config import get_settings
+
+            settings = get_settings()
+            return OpenAIEmbeddingProvider(api_key=settings.openai_api_key)
+
+    if provider == "openai":
+        raise ValueError("OPENAI_API_KEY is required for the OpenAI embedding provider")
+
     return HashEmbeddingProvider()

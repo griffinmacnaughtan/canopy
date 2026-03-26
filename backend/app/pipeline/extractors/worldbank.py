@@ -12,6 +12,7 @@ Example:
 No authentication required.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -150,6 +151,7 @@ class WorldBankClimateExtractor(BaseExtractor):
                             })
                     except Exception as e:
                         errors.append(f"Baseline {country}/{variable}: {e}")
+                    await asyncio.sleep(0.15)  # rate limit: ~7 req/s
 
             # Fetch projections
             for country in countries:
@@ -189,6 +191,7 @@ class WorldBankClimateExtractor(BaseExtractor):
                                 msg = f"{country}/{variable}/{scenario}/{period_str}: {e}"
                                 errors.append(msg)
                                 self.logger.warning("projection_failed", error=msg)
+                            await asyncio.sleep(0.15)  # rate limit: ~7 req/s
 
         return ExtractionResult(
             source=self.source_name,

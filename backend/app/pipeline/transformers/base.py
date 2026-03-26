@@ -84,16 +84,18 @@ class BaseTransformer(ABC):
             return value
 
         if isinstance(value, str):
-            formats = [
-                "%Y-%m-%d",
-                "%Y-%m-%dT%H:%M:%S",
-                "%Y-%m-%dT%H:%M:%SZ",
-                "%Y-%m-%d %H:%M:%S",
-                "%Y%m%d",
+            # Truncate to the expected length for each format to avoid
+            # trailing characters (e.g. timezone suffixes) causing failures.
+            _FORMAT_LENGTHS = [
+                ("%Y-%m-%dT%H:%M:%S", 19),
+                ("%Y-%m-%dT%H:%M:%SZ", 20),
+                ("%Y-%m-%d %H:%M:%S", 19),
+                ("%Y-%m-%d", 10),
+                ("%Y%m%d", 8),
             ]
-            for fmt in formats:
+            for fmt, length in _FORMAT_LENGTHS:
                 try:
-                    return datetime.strptime(value[: len(fmt) + 2], fmt)
+                    return datetime.strptime(value[:length], fmt)
                 except (ValueError, IndexError):
                     continue
 

@@ -35,6 +35,7 @@ def _pydantic_assets(raw_assets: list[dict]) -> list[Asset]:
             revenue_usd_m=a["revenue_usd_m"],
             scope1_tco2e=a["scope1_tco2e"],
             scope2_tco2e=a["scope2_tco2e"],
+            scope3_tco2e=a.get("scope3_tco2e", 0),
             green_revenue_pct=a["green_revenue_pct"],
             controversies=a["controversies"],
         )

@@ -108,7 +108,7 @@ class DatabaseLoader:
         self,
         records: list[dict[str, Any]],
     ) -> LoadResult:
-        """Load climate records to database."""
+        """Load climate records to database with upsert logic."""
         start_time = datetime.utcnow()
         loaded = 0
         failed = 0
@@ -116,27 +116,62 @@ class DatabaseLoader:
 
         for record in records:
             try:
-                db_record = ClimateData(
-                    location_id=record.get("location_id"),
-                    country_code=record.get("country_code"),
-                    state_code=record.get("state_code"),
-                    region=record.get("region"),
-                    observation_date=self._parse_datetime(record.get("observation_date")),
-                    year=record.get("year"),
-                    month=record.get("month"),
-                    metric_name=record.get("metric_name"),
-                    metric_type=record.get("metric_type"),
-                    value=record.get("value") or record.get("annual_mean"),
-                    unit=record.get("unit"),
-                    scenario=record.get("scenario"),
-                    period_start=record.get("period_start"),
-                    period_end=record.get("period_end"),
-                    station_id=record.get("station_id"),
-                    source=record.get("source", "unknown"),
-                    transformed_at=self._parse_datetime(record.get("transformed_at")),
-                    loaded_at=datetime.utcnow(),
-                )
-                self.session.add(db_record)
+                # Build a composite key for deduplication.
+                # Climate data is uniquely identified by location + metric + scenario + period + source.
+                loc_id = record.get("location_id") or record.get("country_code")
+                metric = record.get("metric_name") or record.get("metric_type")
+                scenario = record.get("scenario")
+                period_start = record.get("period_start")
+                source = record.get("source", "unknown")
+
+                existing = None
+                if loc_id and metric:
+                    query = select(ClimateData).where(
+                        ClimateData.source == source,
+                        ClimateData.scenario == scenario,
+                        ClimateData.metric_name == metric,
+                        ClimateData.period_start == period_start,
+                    )
+                    # Use location_id if available, else country_code
+                    if record.get("location_id"):
+                        query = query.where(ClimateData.location_id == loc_id)
+                    elif record.get("country_code"):
+                        query = query.where(ClimateData.country_code == loc_id)
+
+                    result = await self.session.execute(query)
+                    existing = result.scalar_one_or_none()
+
+                if existing:
+                    # Update existing record
+                    for key in ("value", "unit", "year", "month", "region", "state_code"):
+                        val = record.get(key)
+                        if val is None and key == "value":
+                            val = record.get("annual_mean")
+                        if val is not None and hasattr(existing, key):
+                            setattr(existing, key, val)
+                    existing.loaded_at = datetime.utcnow()
+                else:
+                    db_record = ClimateData(
+                        location_id=record.get("location_id"),
+                        country_code=record.get("country_code"),
+                        state_code=record.get("state_code"),
+                        region=record.get("region"),
+                        observation_date=self._parse_datetime(record.get("observation_date")),
+                        year=record.get("year"),
+                        month=record.get("month"),
+                        metric_name=record.get("metric_name"),
+                        metric_type=record.get("metric_type"),
+                        value=record.get("value") or record.get("annual_mean"),
+                        unit=record.get("unit"),
+                        scenario=record.get("scenario"),
+                        period_start=record.get("period_start"),
+                        period_end=record.get("period_end"),
+                        station_id=record.get("station_id"),
+                        source=record.get("source", "unknown"),
+                        transformed_at=self._parse_datetime(record.get("transformed_at")),
+                        loaded_at=datetime.utcnow(),
+                    )
+                    self.session.add(db_record)
                 loaded += 1
 
             except Exception as e:

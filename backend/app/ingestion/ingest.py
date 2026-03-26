@@ -123,6 +123,13 @@ async def seed_vector_store() -> dict:
     except Exception as exc:
         logger.warning("live_sec_filings_skipped", error=str(exc))
 
-    store = get_vector_store()
-    store.clear()
-    return await ingest_all_filings(store)
+    # Build the new store in an isolated instance to avoid a search blackout
+    # window.  Once ingestion is complete, atomically swap the singleton.
+    import app.vectorstore.store as _store_module
+
+    new_store = VectorStore()
+    result = await ingest_all_filings(new_store)
+
+    # Atomic swap — subsequent get_vector_store() calls return the new store
+    _store_module._store = new_store
+    return result
