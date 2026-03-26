@@ -62,8 +62,12 @@ def score_portfolio(
         # regulatory carbon pricing primarily targets Scope 1+2 today, but
         # ISSB S2 / EU CSRD require disclosure and the NGFS Delayed Transition
         # scenario models increasing Scope 3 pass-through costs from 2030.
-        scope12_risk = intensity * 0.08 * _sector_weight(asset.sector, "transition", baselines) * 100
-        scope3_risk = scope3_intensity * 0.015 * _sector_weight(asset.sector, "transition", baselines) * 100
+        scope12_risk = (
+            intensity * 0.08 * _sector_weight(asset.sector, "transition", baselines) * 100
+        )
+        scope3_risk = (
+            scope3_intensity * 0.015 * _sector_weight(asset.sector, "transition", baselines) * 100
+        )
         transition = min(100, scope12_risk + scope3_risk)
 
         # Physical risk: controversy-adjusted sector baseline, mapped to 0-100.
@@ -163,9 +167,7 @@ def scenario_impact(
     for asset in sorted(assets, key=_total_emissions_intensity, reverse=True)[:3]:
         s12 = round(_emissions_intensity(asset), 2)
         s3 = round(_total_emissions_intensity(asset) - s12, 2)
-        hotspots.append(
-            f"{asset.name}: {s12} tCO2e/$M (Scope 1+2) + {s3} tCO2e/$M (Scope 3)"
-        )
+        hotspots.append(f"{asset.name}: {s12} tCO2e/$M (Scope 1+2) + {s3} tCO2e/$M (Scope 3)")
 
     emissions_delta = -min(12, carbon_price * 0.04)
 

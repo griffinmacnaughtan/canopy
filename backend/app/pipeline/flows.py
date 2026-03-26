@@ -549,9 +549,7 @@ async def climate_data_flow(
                 "error": str(e),
             }
 
-    extraction_results = await asyncio.gather(
-        *[_safe_extract(n, c) for n, c in extraction_tasks]
-    )
+    extraction_results = await asyncio.gather(*[_safe_extract(n, c) for n, c in extraction_tasks])
     extracted_data = dict(extraction_results)
 
     # =========================================================================
