@@ -7,7 +7,20 @@ DEFAULT_SECTOR_BASELINES = get_sector_baselines()
 
 
 def _emissions_intensity(asset: Asset) -> float:
+    """Scope 1 + 2 intensity (tCO2e per $M revenue).
+
+    This is the primary metric used in transition risk scoring.
+    """
     total = asset.scope1_tco2e + asset.scope2_tco2e
+    return total / asset.revenue_usd_m if asset.revenue_usd_m > 0 else 0
+
+
+def _total_emissions_intensity(asset: Asset) -> float:
+    """Full value-chain intensity including Scope 3 (tCO2e per $M revenue).
+
+    Used for comprehensive exposure assessment and TCFD-aligned reporting.
+    """
+    total = asset.scope1_tco2e + asset.scope2_tco2e + asset.scope3_tco2e
     return total / asset.revenue_usd_m if asset.revenue_usd_m > 0 else 0
 
 
@@ -35,6 +48,7 @@ def score_portfolio(
 
     for asset in assets:
         intensity = _emissions_intensity(asset)
+        scope3_intensity = _total_emissions_intensity(asset) - intensity
 
         # Transition risk: emissions intensity × sector weight, mapped to 0-100.
         # The 0.08 scalar is calibrated so that a facility at the MSCI ACWI
@@ -42,9 +56,15 @@ def score_portfolio(
         # weight (0.5) scores ≈ 48/100, while high-carbon sectors (Energy at 0.9
         # weight) can reach 80+ before the cap. Intensity data aligned with
         # TCFD Annex 2 normalisation (revenue-based denominator).
-        transition = min(
-            100, intensity * 0.08 * _sector_weight(asset.sector, "transition", baselines) * 100
-        )
+        #
+        # Scope 3 adjustment: value-chain emissions (Scope 3) contribute to
+        # transition risk at a discounted 0.015 weight — reflecting that
+        # regulatory carbon pricing primarily targets Scope 1+2 today, but
+        # ISSB S2 / EU CSRD require disclosure and the NGFS Delayed Transition
+        # scenario models increasing Scope 3 pass-through costs from 2030.
+        scope12_risk = intensity * 0.08 * _sector_weight(asset.sector, "transition", baselines) * 100
+        scope3_risk = scope3_intensity * 0.015 * _sector_weight(asset.sector, "transition", baselines) * 100
+        transition = min(100, scope12_risk + scope3_risk)
 
         # Physical risk: controversy-adjusted sector baseline, mapped to 0-100.
         # Each controversy count adds 8% to the sector baseline — consistent with
@@ -131,15 +151,20 @@ def scenario_impact(
     if not assets:
         return 0, 0, []
 
-    total_emissions = sum(a.scope1_tco2e + a.scope2_tco2e for a in assets)
+    total_scope12 = sum(a.scope1_tco2e + a.scope2_tco2e for a in assets)
+    total_scope3 = sum(a.scope3_tco2e for a in assets)
     total_revenue = sum(a.revenue_usd_m for a in assets)
-    carbon_cost = (total_emissions / 1_000_000) * carbon_price
+    # Scope 1+2 face direct carbon pricing; Scope 3 faces partial
+    # pass-through (estimated at 20% based on NGFS modelling).
+    carbon_cost = ((total_scope12 + total_scope3 * 0.20) / 1_000_000) * carbon_price
     ebitda_impact = (carbon_cost / total_revenue) * 100 + revenue_shock_pct
 
     hotspots = []
-    for asset in sorted(assets, key=_emissions_intensity, reverse=True)[:3]:
+    for asset in sorted(assets, key=_total_emissions_intensity, reverse=True)[:3]:
+        s12 = round(_emissions_intensity(asset), 2)
+        s3 = round(_total_emissions_intensity(asset) - s12, 2)
         hotspots.append(
-            f"{asset.name} drives {round(_emissions_intensity(asset), 2)} tCO2e/$M revenue"
+            f"{asset.name}: {s12} tCO2e/$M (Scope 1+2) + {s3} tCO2e/$M (Scope 3)"
         )
 
     emissions_delta = -min(12, carbon_price * 0.04)

@@ -24,6 +24,7 @@ interface AssetInput {
   revenue_usd_m: number;
   scope1_tco2e: number;
   scope2_tco2e: number;
+  scope3_tco2e: number;
   green_revenue_pct: number;
   controversies: number;
 }
@@ -76,6 +77,7 @@ const createEmptyAsset = (): AssetInput => ({
   revenue_usd_m: 0,
   scope1_tco2e: 0,
   scope2_tco2e: 0,
+  scope3_tco2e: 0,
   green_revenue_pct: 0,
   controversies: 0,
 });
@@ -168,6 +170,7 @@ export function PortfolioBuilder({ isOpen, onClose, onSave }: PortfolioBuilderPr
         revenue_usd_m: parseFloat(getValue("revenue_usd_m")) || 0,
         scope1_tco2e: parseFloat(getValue("scope1_tco2e")) || 0,
         scope2_tco2e: parseFloat(getValue("scope2_tco2e")) || 0,
+        scope3_tco2e: parseFloat(getValue("scope3_tco2e")) || 0,
         green_revenue_pct: parseFloat(getValue("green_revenue_pct")) || 0,
         controversies: parseInt(getValue("controversies")) || 0,
       };

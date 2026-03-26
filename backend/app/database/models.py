@@ -101,6 +101,7 @@ class AssetDB(Base):
     revenue_usd_m: Mapped[float] = mapped_column(Float, nullable=False)
     scope1_tco2e: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     scope2_tco2e: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    scope3_tco2e: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     green_revenue_pct: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     controversies: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)

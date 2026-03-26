@@ -6,6 +6,7 @@ from .documents import router as documents_router
 from .evals import router as evals_router
 from .health import router as health_router
 from .pipeline import router as pipeline_router
+from .pipeline_trigger import router as pipeline_trigger_router
 from .portfolios import router as portfolios_router
 from .scoring import router as scoring_router
 
@@ -20,6 +21,7 @@ def register_routes(app):
     app.include_router(agents_router, tags=["Agent"])
     app.include_router(evals_router, tags=["Evals"])
     app.include_router(pipeline_router)
+    app.include_router(pipeline_trigger_router)
 
 
 __all__ = [

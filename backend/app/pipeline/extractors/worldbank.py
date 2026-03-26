@@ -1,4 +1,16 @@
-"""World Bank Climate API extractor."""
+"""World Bank Climate Change Knowledge Portal (CCKP) API extractor.
+
+Replaces the deprecated climatedataapi.worldbank.org with the current
+CCKP v1 API backed by CMIP6 data.
+
+API endpoint pattern (11 segments):
+    {base}/cckp/v1/{collection}_{type}_{variable}_{product}_{aggregation}_{period}_{percentile}_{scenario}_{model}_{model_calc}_{statistic}/{geo_code}?_format=json
+
+Example:
+    https://cckpapi.worldbank.org/cckp/v1/cmip6-x0.25_climatology_tas_climatology_annual_2040-2059_median_ssp245_ensemble_all_mean/USA?_format=json
+
+No authentication required.
+"""
 
 from datetime import datetime
 from typing import Any
@@ -8,39 +20,69 @@ import httpx
 from ..config import PipelineConfig
 from .base import BaseExtractor, ExtractionResult
 
+# New CCKP v1 API base
+_CCKP_BASE = "https://cckpapi.worldbank.org/cckp/v1"
+
+# CMIP6 SSP scenarios mapped from old RCP names
+_SCENARIO_MAP = {
+    "rcp26": "ssp126",
+    "rcp45": "ssp245",
+    "rcp85": "ssp585",
+    "ssp126": "ssp126",
+    "ssp245": "ssp245",
+    "ssp370": "ssp370",
+    "ssp585": "ssp585",
+}
+
+# Time periods available in CCKP
+_PROJECTION_PERIODS = [
+    ("2020-2039", 2020, 2039),
+    ("2040-2059", 2040, 2059),
+    ("2060-2079", 2060, 2079),
+    ("2080-2099", 2080, 2099),
+]
+
+_HISTORICAL_PERIOD = "1995-2014"
+
 
 class WorldBankClimateExtractor(BaseExtractor):
     """
-    Extract climate projection data from World Bank Climate API.
+    Extract climate projection data from World Bank CCKP API (CMIP6).
 
     Data includes:
-    - Temperature projections by country/region
-    - Precipitation projections
-    - Climate model ensemble data (CMIP5/CMIP6)
-    - Historical climate baselines
+    - Temperature projections by country (tas = near-surface air temperature)
+    - Precipitation projections by country (pr = precipitation)
+    - Historical baselines for anomaly calculation
+    - Multiple SSP scenarios (SSP1-2.6, SSP2-4.5, SSP5-8.5)
 
     Useful for:
-    - Physical risk scenario modeling
+    - Physical risk scenario modelling
     - Regional climate exposure analysis
     - Long-term transition planning
-
-    API Docs: https://datahelpdesk.worldbank.org/knowledgebase/articles/902061-climate-data-api
     """
 
     def __init__(self, config: PipelineConfig):
         super().__init__(config)
-        self.base_url = config.worldbank_base_url
+        self.base_url = _CCKP_BASE
 
     @property
     def source_name(self) -> str:
         return "WORLDBANK_CLIMATE"
 
     async def health_check(self) -> bool:
-        """Check World Bank Climate API availability."""
+        """Check CCKP API availability."""
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(f"{self.base_url}/country/USA/mavg/tas/1980/2000")
-                return response.status_code == 200
+                url = (
+                    f"{self.base_url}/cmip6-x0.25_climatology_tas_climatology"
+                    f"_annual_{_HISTORICAL_PERIOD}_median_historical_ensemble"
+                    f"_all_mean/USA?_format=json"
+                )
+                response = await client.get(url)
+                if response.status_code == 200:
+                    data = response.json()
+                    return data.get("metadata", {}).get("status") == "success"
+                return False
         except Exception as e:
             self.logger.error("health_check_failed", error=str(e))
             return False
@@ -55,244 +97,220 @@ class WorldBankClimateExtractor(BaseExtractor):
         **kwargs,
     ) -> ExtractionResult:
         """
-        Extract climate projection data.
+        Extract climate projection data from CCKP.
 
         Args:
-            start_date: Projection start year
-            end_date: Projection end year
-            countries: ISO 3166-1 alpha-3 country codes
-            variables: Climate variables (tas=temp, pr=precip)
-            scenarios: RCP scenarios (rcp26, rcp45, rcp85)
+            start_date: Not used (period-based API), kept for interface compat.
+            end_date: Not used.
+            countries: ISO 3166-1 alpha-3 country codes.
+            variables: Climate variables (tas=temp, pr=precip).
+            scenarios: SSP or RCP scenario names (auto-mapped to SSP).
 
         Returns:
-            ExtractionResult with climate projections
+            ExtractionResult with climate projections.
         """
-        # Defaults for climate risk analysis
         if not countries:
-            # Major economies with significant portfolio exposure
             countries = ["USA", "GBR", "DEU", "CHN", "JPN", "AUS", "IND", "BRA"]
 
         if not variables:
-            variables = ["tas", "pr"]  # Temperature and precipitation
+            variables = ["tas", "pr"]
 
         if not scenarios:
-            scenarios = ["rcp45", "rcp85"]  # Moderate and high warming
+            scenarios = ["ssp245", "ssp585"]
 
-        # Default time periods
-        start_year = start_date.year if start_date else 2020
-        end_year = end_date.year if end_date else 2100
+        # Map any old RCP names to SSP
+        mapped_scenarios = [_SCENARIO_MAP.get(s, s) for s in scenarios]
 
-        all_records = []
-        errors = []
+        all_records: list[dict[str, Any]] = []
+        errors: list[str] = []
 
         async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
+            # Fetch historical baseline
             for country in countries:
                 for variable in variables:
-                    for scenario in scenarios:
-                        try:
-                            records = await self._fetch_projection(
-                                client,
-                                country=country,
-                                variable=variable,
-                                scenario=scenario,
-                                start_year=start_year,
-                                end_year=end_year,
-                            )
-                            all_records.extend(records)
+                    try:
+                        baseline = await self._fetch_cckp(
+                            client,
+                            country=country,
+                            variable=variable,
+                            period=_HISTORICAL_PERIOD,
+                            scenario="historical",
+                        )
+                        if baseline is not None:
+                            all_records.append({
+                                "country": country,
+                                "variable": variable,
+                                "scenario": "historical",
+                                "period": _HISTORICAL_PERIOD,
+                                "period_start": 1995,
+                                "period_end": 2014,
+                                "annual_mean": baseline,
+                                "_source": self.source_name,
+                                "_extracted_at": datetime.utcnow().isoformat(),
+                            })
+                    except Exception as e:
+                        errors.append(f"Baseline {country}/{variable}: {e}")
 
-                            self.logger.info(
-                                "projection_extracted",
-                                country=country,
-                                variable=variable,
-                                scenario=scenario,
-                                record_count=len(records),
-                            )
+            # Fetch projections
+            for country in countries:
+                for variable in variables:
+                    for scenario in mapped_scenarios:
+                        for period_str, p_start, p_end in _PROJECTION_PERIODS:
+                            try:
+                                value = await self._fetch_cckp(
+                                    client,
+                                    country=country,
+                                    variable=variable,
+                                    period=period_str,
+                                    scenario=scenario,
+                                )
+                                if value is not None:
+                                    all_records.append({
+                                        "country": country,
+                                        "variable": variable,
+                                        "scenario": scenario,
+                                        "period": period_str,
+                                        "period_start": p_start,
+                                        "period_end": p_end,
+                                        "annual_mean": value,
+                                        "_source": self.source_name,
+                                        "_extracted_at": datetime.utcnow().isoformat(),
+                                    })
 
-                        except Exception as e:
-                            error_msg = f"Failed {country}/{variable}/{scenario}: {e}"
-                            errors.append(error_msg)
-                            self.logger.warning("projection_failed", error=error_msg)
+                                    self.logger.info(
+                                        "projection_extracted",
+                                        country=country,
+                                        variable=variable,
+                                        scenario=scenario,
+                                        period=period_str,
+                                        value=value,
+                                    )
+                            except Exception as e:
+                                msg = f"{country}/{variable}/{scenario}/{period_str}: {e}"
+                                errors.append(msg)
+                                self.logger.warning("projection_failed", error=msg)
 
         return ExtractionResult(
             source=self.source_name,
             records=all_records,
-            watermark=f"{end_year}",
+            watermark="2099",
             metadata={
                 "countries": countries,
                 "variables": variables,
-                "scenarios": scenarios,
-                "time_range": f"{start_year}-{end_year}",
+                "scenarios": mapped_scenarios,
+                "api": "CCKP v1 (CMIP6)",
             },
             errors=errors,
         )
 
-    async def _fetch_projection(
+    async def _fetch_cckp(
         self,
         client: httpx.AsyncClient,
         country: str,
         variable: str,
+        period: str,
         scenario: str,
-        start_year: int,
-        end_year: int,
-    ) -> list[dict[str, Any]]:
-        """Fetch climate projection for a specific combination."""
-        records = []
+    ) -> float | None:
+        """Fetch a single data point from the CCKP API.
 
-        # World Bank API uses specific time periods
-        time_periods = [
-            (2020, 2039),
-            (2040, 2059),
-            (2060, 2079),
-            (2080, 2099),
-        ]
+        URL pattern:
+            /cmip6-x0.25_climatology_{var}_climatology_annual_{period}_median_{scenario}_ensemble_all_mean/{country}?_format=json
 
-        for period_start, period_end in time_periods:
-            if period_start < start_year or period_end > end_year:
-                continue
+        Returns the annual mean value, or None if not available.
+        """
+        url = (
+            f"{self.base_url}/cmip6-x0.25_climatology_{variable}_climatology"
+            f"_annual_{period}_median_{scenario}_ensemble_all_mean"
+            f"/{country}?_format=json"
+        )
 
-            # Fetch annual projections
-            url = f"{self.base_url}/country/annualavg/{scenario}/{variable}/{period_start}/{period_end}/{country}"
+        response = await client.get(url)
 
+        if response.status_code != 200:
+            return None
+
+        data = response.json()
+        meta = data.get("metadata", {})
+        if meta.get("status") != "success":
+            return None
+
+        country_data = data.get("data", {}).get(country, {})
+        if not country_data:
+            return None
+
+        # The API returns {period-month: value} — extract the single value
+        values = list(country_data.values())
+        if values:
             try:
-                response = await client.get(url)
+                return round(float(values[0]), 2)
+            except (ValueError, TypeError):
+                return None
 
-                if response.status_code == 200:
-                    data = response.json()
-
-                    if isinstance(data, list):
-                        for item in data:
-                            record = {
-                                "country": country,
-                                "variable": variable,
-                                "scenario": scenario,
-                                "period_start": period_start,
-                                "period_end": period_end,
-                                "gcm": item.get("gcm"),  # Global Climate Model
-                                "annual_mean": item.get("annualData", [None])[0]
-                                if item.get("annualData")
-                                else None,
-                                "monthly_data": item.get("monthVals"),
-                                "_source": self.source_name,
-                                "_extracted_at": datetime.utcnow().isoformat(),
-                            }
-                            records.append(record)
-
-            except Exception as e:
-                self.logger.warning(
-                    "period_fetch_failed",
-                    country=country,
-                    period=f"{period_start}-{period_end}",
-                    error=str(e),
-                )
-
-        return records
+        return None
 
     async def extract_historical_baseline(
         self,
         countries: list[str] | None = None,
     ) -> ExtractionResult:
         """
-        Extract historical climate baseline (1980-2000).
+        Extract historical climate baseline (1995-2014, CMIP6 reference period).
 
-        Used as reference for calculating climate deltas.
+        Used as reference for calculating climate anomalies/deltas.
         """
-        if not countries:
-            countries = ["USA", "GBR", "DEU", "CHN", "JPN", "AUS"]
-
-        all_records = []
-        errors = []
-
-        async with httpx.AsyncClient(timeout=self.config.request_timeout_seconds) as client:
-            for country in countries:
-                for variable in ["tas", "pr"]:
-                    try:
-                        url = f"{self.base_url}/country/mavg/{variable}/1980/2000/{country}"
-                        response = await client.get(url)
-
-                        if response.status_code == 200:
-                            data = response.json()
-
-                            if isinstance(data, list):
-                                for item in data:
-                                    record = {
-                                        "country": country,
-                                        "variable": variable,
-                                        "period": "historical_baseline",
-                                        "period_start": 1980,
-                                        "period_end": 2000,
-                                        "monthly_data": item.get("monthVals"),
-                                        "_source": self.source_name,
-                                        "_extracted_at": datetime.utcnow().isoformat(),
-                                    }
-                                    all_records.append(record)
-
-                    except Exception as e:
-                        errors.append(f"Failed {country}/{variable}: {e}")
-
-        return ExtractionResult(
-            source=self.source_name,
-            records=all_records,
-            metadata={"type": "historical_baseline", "period": "1980-2000"},
-            errors=errors,
+        return await self.extract(
+            countries=countries,
+            variables=["tas", "pr"],
+            scenarios=["historical"],
         )
 
     async def extract_temperature_anomalies(
         self,
         countries: list[str] | None = None,
-        scenario: str = "rcp85",
+        scenario: str = "ssp585",
     ) -> ExtractionResult:
         """
-        Calculate temperature anomalies (delta from baseline).
+        Calculate temperature anomalies (delta from 1995-2014 baseline).
 
         Key metric for physical risk assessment.
         """
-        baseline_result = await self.extract_historical_baseline(countries)
-        projection_result = await self.extract(
+        full_result = await self.extract(
             countries=countries,
             variables=["tas"],
             scenarios=[scenario],
         )
 
+        # Separate baselines from projections
+        baselines: dict[str, float] = {}
+        projections: list[dict[str, Any]] = []
+
+        for record in full_result.records:
+            if record["scenario"] == "historical":
+                baselines[record["country"]] = record["annual_mean"]
+            else:
+                projections.append(record)
+
         # Calculate anomalies
         anomaly_records = []
-
-        baseline_by_country = {}
-        for record in baseline_result.records:
-            if record["variable"] == "tas":
-                country = record["country"]
-                if country not in baseline_by_country:
-                    baseline_by_country[country] = []
-                baseline_by_country[country].append(record)
-
-        for record in projection_result.records:
+        for record in projections:
             country = record["country"]
-            baseline_temps = baseline_by_country.get(country, [])
-
-            if baseline_temps and record.get("annual_mean") is not None:
-                # Average baseline temperature
-                baseline_avg = sum(
-                    sum(b.get("monthly_data", [0]) or [0]) / 12 for b in baseline_temps
-                ) / len(baseline_temps)
-
-                anomaly = record["annual_mean"] - baseline_avg
-
-                anomaly_records.append(
-                    {
-                        "country": country,
-                        "scenario": scenario,
-                        "period_start": record["period_start"],
-                        "period_end": record["period_end"],
-                        "temperature_anomaly_c": round(anomaly, 2),
-                        "baseline_temp_c": round(baseline_avg, 2),
-                        "projected_temp_c": record["annual_mean"],
-                        "_source": self.source_name,
-                        "_extracted_at": datetime.utcnow().isoformat(),
-                    }
-                )
+            baseline_temp = baselines.get(country)
+            if baseline_temp is not None and record.get("annual_mean") is not None:
+                anomaly = record["annual_mean"] - baseline_temp
+                anomaly_records.append({
+                    "country": country,
+                    "scenario": scenario,
+                    "period_start": record["period_start"],
+                    "period_end": record["period_end"],
+                    "temperature_anomaly_c": round(anomaly, 2),
+                    "baseline_temp_c": baseline_temp,
+                    "projected_temp_c": record["annual_mean"],
+                    "_source": self.source_name,
+                    "_extracted_at": datetime.utcnow().isoformat(),
+                })
 
         return ExtractionResult(
             source=self.source_name,
             records=anomaly_records,
             metadata={"type": "temperature_anomalies", "scenario": scenario},
-            errors=baseline_result.errors + projection_result.errors,
+            errors=full_result.errors,
         )

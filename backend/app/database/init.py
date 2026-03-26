@@ -45,6 +45,7 @@ async def seed_database(session: AsyncSession) -> bool:
             revenue_usd_m=asset_data["revenue_usd_m"],
             scope1_tco2e=asset_data["scope1_tco2e"],
             scope2_tco2e=asset_data["scope2_tco2e"],
+            scope3_tco2e=asset_data.get("scope3_tco2e", 0),
             green_revenue_pct=asset_data["green_revenue_pct"],
             controversies=asset_data["controversies"],
         )

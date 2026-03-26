@@ -1,0 +1,229 @@
+Company: Unilever PLC
+Ticker: UL
+Filing: 20-F Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2026-03-12
+Source: SEC EDGAR (CIK: 0000217410)
+---
+nor are they guarantees of future performance or outcomes. All forward-looking statements contained in this document are 
+expressly qualified in their entirety by the cautionary statements contained or referred to in this section. Readers should not place undue reliance on forward-looking 
+statements.
+Because these forward-looking statements involve known and unknown risks and uncertainties, a number of which may be beyond the Group’s control, there are 
+important factors that could cause actual results to differ materially from those expressed or implied by these forward-looking statements. Among other risks and 
+uncertainties, the material or principal factors which could cause actual results to differ materially from those expressed in the forward-looking statements included in 
+this document are: Unilever’s global brands not meeting consumer preferences; Unilever’s ability to innovate and remain competitive; Unilever’s investment choices 
+in its portfolio management; the effect of climate change on Unilever’s business; Unilever’s ability to find sustainable solutions to its plastic packaging; significant 
+changes or deterioration in customer relationships; the recruitment and retention of talented employees; disruptions in Unilever’s supply chain and distribution; 
+increases or volatility in the cost of raw materials and commodities; the production of safe and high-quality products; secure and reliable IT infrastructure; execution of 
+acquisitions, divestitures and business transformation projects; economic and financial risks; social and political risks and natural disasters; failure to meet high 
+and ethical standards; and managing regulatory, legal matters and practices with regard to the interpretation and application thereof and emerging and developing 
+ESG reporting standards, including differences in implementation of climate and sustainability policies in the regions where the Group operates. Also see ’Our 
+Principal Risks’ on pages 31 to 37 for addition
+
+Climate and 
+Nature
+
+Tackling climate change-related physical 
+and transitional risks and loss of nature is 
+important to increase our resilience and future-
+proof our business.
+Climate change and nature loss are inextricably 
+linked. Climate change is a key driver of 
+biodiversity loss, and nature is a key tool in 
+combating rising global temperatures and climate 
+change impacts. The risks from climate and 
+nature have the potential to affect supply security, 
+cost structures and consumer demand, requiring 
+continued investment in resilience and 
+sustainable practices.
+Physical risks from climate change, such as more 
+frequent and severe extreme weather events, may 
+disrupt our supply chain, manufacturing sites and 
+distribution networks. Transition risks, including 
+carbon pricing, 
+land-use restrictions and regulations on 
+GHG-intensive ingredients, could increase costs 
+and limit operational flexibility.
+Climate change, intensive agriculture and 
+land conversion are accelerating ecosystem 
+degradation, reducing
+
+ty position and borrowing facilities, as described on pages 
+1 to 29. In addition, we describe in notes 15 to 18, on pages 161 to 
+176, the Group’s objectives, policies and processes for managing 
+its capital, its financial risk management objectives, details of its 
+financial instruments and hedging activities, and its exposures to credit 
+and liquidity risk. Unilever announced the demerger of the Ice Cream 
+business, which completed in December 2025. The Directors have 
+considered the ability of the remaining Group to continue in its current 
+form to remain viable. 
+ASSESSMENT
+In order to report on the long-term viability of the Group, the Directors 
+reviewed the overall funding capacity and headroom available to 
+withstand severe events and carried out a robust assessment of the 
+principal risks facing the Group, 
+including those that would threaten its business model, future 
+performance, solvency or liquidity. This includes consideration 
+of external factors such as the impact of climate change, changing 
+consumer preferences and a slowdown in economic growth.
+We have also reviewed the mitigating factors in respect of each 
+principal risk. The risks and mitigating factors are summarised on 
+pages 32 to 37.
+The viability assessment has three parts:
+■First, the Directors considered the period over which they have a 
+reasonable expectation that the Group will continue to operate and 
+meet its liabilities;
+■Second, they considered the current debt facilities and debt 
+headroom over the viability period, assuming that any debt maturing 
+can be re-financed at commercially acceptable terms; and
+■Third, they considered the potential impact of severe but plausible 
+scenarios over this period:
+■assessing scenarios for each individual principal risk, and their 
+impact on profits and cash; and
+■assessing scenarios that involve more than one principal risk, 
+including the following multi-risk scenarios:
+
+Climate change-related extreme weather 
+events impacting crop yield and failure 
+to capitalise on changing consumer 
+perceptions and demands.
+
+■Climate and nature
+■Business operations
+■Consumer and channel
+
+place, ensuring that both Unilever’s direct employees 
+and those working within the Company’s value chain comply with the 
+expected standards of conduct.
+The Committee’s discussions are informed by the experience of the 
+Unilever Leadership Executive, which is accountable for driving 
+responsible and sustainable growth through Unilever’s operations, 
+Business Groups, value chain and brands. The Chief R&D Officer 
+leads on behalf of management, with further senior leaders invited to 
+the Committee as relevant to share their perspectives and insights on 
+key issues, challenges and external developments.
+The Committee’s terms of reference are set out at: www.unilever.com/
+investors/corporate-governance. 
+HOW THE COMMITTEE HAS DISCHARGED ITS 
+RESPONSIBILITIES 
+In 2025, the Committee’s principal activities were as follows:
+Navigating a changing external landscape 
+As a business, we continue to navigate growing economic, 
+environmental and social challenges. Many of the challenges, such as 
+climate change, nature degradation and plastic pollution, are 
+compounded by growing geopolitical divides and economic difficulties. At 
+the same time, there is an increase in the nature and complexity of 
+litigation matters requiring the utmost diligence and awareness of 
+emerging risks, and capacity to respond. 
+Overseeing Code of Business Principles compliance
+Our consumers trust us to do business with integrity. Maintaining our 
+reputation and continued business success requires the highest 
+standards of behaviour and compliance. The Code and associated 
+Code Policies set out the ethical standards of conduct expected of all 
+Unilever employees. Any breach is classified as a legal and 
+compliance risk to the business (see page 37). 
+The Corporate Responsibility Committee oversees the Code and Code 
+Policies, including those related to anti-corruption and bribery, ensuring 
+they remain fit for purpose and are appropriately applied, including the 
+mechanisms for implementing the Code
+
+bution in 
+December 2025, following the Board’s formal approval of the demerger. At that 
+point, the distribution was considered highly probable and the internal separation 
+of the Ice Cream territories had been completed, meaning the business was 
+available for distribution in its current condition. As a former reportable segment 
+and major line of business, all Ice Cream activities have been treated as 
+discontinued operations in both current and comparative periods. 
+In line with IFRS 5, we have disclosed separately in the income statement, 
+statement of comprehensive income and cash flow statement results arising from 
+continuing and discontinued operations. 2023 and 2024 comparatives have been 
+re-presented on the same basis. There has been no change to the 2023 and 
+2024 balance sheet related amounts, including where balance sheet line item 
+reconciliations have been disclosed within the notes. Further details and a 
+breakdown of discontinued operations are provided in note 21. 
+CLIMATE CHANGE
+In preparing these consolidated financial statements, we have considered the 
+impact of both physical and transition climate change risks, and any planned 
+mitigations, on the current valuation of our assets and liabilities. We have 
+identified risks and opportunities that could in the future be material to our 
+business, for example carbon tax or land use regulations. Where possible we 
+have performed quantitative assessments of these risks and opportunities based 
+on various scenarios for the years 2030, 2039 and 2050. These potential 
+financial impacts are based on high-level quantitative assessments and do not 
+include any assumptions on the impact of actions that we would undertake to 
+mitigate against these climate-related risks. Therefore, these quantifications do 
+not represent any type of financial forecast and thus are not directly incorporated 
+into any projections of long-term cash flows.
+To determine if there is a material impact on the financial reporting j
+
+tifications do 
+not represent any type of financial forecast and thus are not directly incorporated 
+into any projections of long-term cash flows.
+To determine if there is a material impact on the financial reporting judgements and 
+estimates as of the reporting period, we have reviewed each balance sheet line item 
+and identified those line items that have the potential to be significantly impacted by 
+climate-related risks and our plans to mitigate against these risks. Those line items 
+that have the potential to be significantly impacted have then been reviewed in detail 
+to confirm:
+■that the growth rates and projected cash flows, used in assessing whether our 
+goodwill and indefinite-life intangibles are impaired, are consistent with our climate-
+related risk assumptions and the actions we are taking to mitigate against those 
+risks; and
+■that the useful lives of our property, plant and equipment are appropriate given the 
+potential physical and obsolescence risks associated with climate change and the 
+actions we are taking to mitigate against those risks. 
+In addition, it should be noted that climate-related risks could affect the financial 
+position of our defined benefit pension plan assets. The Trustees operate 
+diversified investment strategies and are continuously assessing investment 
+risks. The Trustees consider climate risk as one of the key investment risks and 
+are continually evolving their investments to lower the overall climate risk.
+From our review of key financial statement areas, including impairment 
+assessments, cash flow forecasts and asset valuations, we have not identified 
+any material impact on financial reporting judgements or estimates as at 31 
+December 2025. Based on the Group’s overall financial position, its exposure to 
+principal risks which include climate change, and its future business forecasts, 
+the Group is well placed to manage these risks and meet its obligations. 
+Consequently, we have not identified any significant imp
+
+9. GOODWILL AND INTANGIBLE ASSETS continued
+KEY ASSUMPTIONS
+In performing our annual impairment testing, the recoverable amount of each CGU has been calculated based on its value in use, estimated as the present value of 
+projected future cash flows. Each GCGU’s value in use is based on the aggregated value in use of the CGUs grouped under the respective GCGU.
+Projected cash flows include specific estimates for one-year at the CGU level. The growth rates and operating margins applied for the one‑year period are based on 
+the Group’s strategic plan, which reflects expected economic conditions and incorporates the potential future impact of climate change. The CGU‑specific one‑year 
+cash flows are taken directly from the Group's strategic plan, which includes both the initiatives underway to reduce carbon emissions in line with our CTAP and 
+management’s assessment of the potential impact of climate change on operations. The growth rates used for GCGUs and significant CGUs are set out below:
+For the year 2025
+
+nted to Fernando Fernandez and Srinivas Phatak on 10 March 
+2023.
+Performance outcomes for the 2023–2025 PSP are shown in the ’At a glance’ section on page 84. Further detail on the outcome for the SPI 
+measure is below. 
+Outcome of SPI for 2023–2025 PSP: 
+The SPI is an assessment of the business’s sustainability performance, made jointly by the Corporate Responsibility Committee (CRC) and the 
+Committee, that captures quantitative and qualitative elements. The SPI is assessed against four metrics aligned to priority areas. For 2025, the 
+CRC and the Committee agreed on an in-year SPI outcome taking into account performance in the areas of climate, nature, plastics and livelihoods. 
+For the 2023–2025 PSP, the SPI outcome is calculated by taking a simple average of the SPI outcomes across the three years of the performance 
+period. The in-year and 2023–2025 SPI outcomes are set out below.
+
+Climate(c)
+
+The percentage change in greenhouse gas (GHG) emissions from energy and 
+refrigerant use in our operations in the given period in 2025, in comparison to the 
+same period in 2015.
+
+15% on Sustainability Progress Index (SPI):(e)
+
+■Climate: percentage change in greenhouse gas emissions from energy 
+and refrigerant use in operations vs 2015
+
+where we can deliver the most impact. The Corporate Responsibility Committee and Remuneration 
+Committee agreed four SPI targets to assess progress towards a number of related sustainability goals (see page 
+30 for more details). These targets support Unilever’s overall strategy (see page 5) and address principal risks such 
+as climate and nature, plastic packaging and business operations (see pages 33 to 34). SPI targets are set over a 
+three-year period and disclosed prospectively.
+
+Unilever Sustainability Progress Index (SPI)(b)
+
+Climate: The percentage change in greenhouse gas (GHG) emissions from energy and refrigerant use in our operations 
+in the given period in the reporting year, in comparison to the same period in 2015.(c)

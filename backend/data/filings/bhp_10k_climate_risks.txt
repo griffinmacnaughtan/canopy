@@ -1,0 +1,95 @@
+Company: BHP Group Limited
+Ticker: BHP
+Filing: 20-F Annual Report
+Section: Item 1A - Risk Factors (Climate-Related Excerpts)
+Filing Date: 2025-08-22
+Source: SEC EDGAR (CIK: 0000811809)
+---
+er, nickel, iron ore, steelmaking coal, potash and steel and our intentions, commitments or expectations with respect to our supply of certain commodities, including copper, nickel, iron ore, potash, uranium and gold; (iii) our future exploration and partnership plans and perceived benefits and opportunities, including our focus to grow our copper and potash assets; (iv) our business outlook, including our outlook for long-term economic growth and other macroeconomic and industry trends; (v) our projected and expected production and performance levels and development projects; (vi) our expectations regarding our investments, including in potential growth options and technology and innovation, and perceived benefits and opportunities; (vii) our reserves and resources estimates; (viii) our plans for our major projects and related budget and capital allocations; (ix) our expectations, commitments and objectives with respect to sustainability, decarbonisation, natural resource management, climate change and portfolio resilience and timelines and plans to seek to achieve or implement such objectives, including our approach to equitable change and transitions, our Climate Transition Action Plan, climate change adaptation strategy and goals, targets, pathways and strategies to seek to reduce or support the reduction of greenhouse gas emissions, and related perceived costs, benefits and opportunities for BHP; (x) the assumptions, beliefs and conclusions in our climate change related statements and strategies, for example, in respect of future temperatures, energy consumption and greenhouse gas emissions, and climate-related impacts; (xi) our commitment to social value and our 2030 goals; (xii) our commitments to sustainability reporting, frameworks, standards and initiatives; (xiii) our commitments to improve or maintain safe tailings storage management; (xiv) our commitments to achieve certain inclusion and diversity targets, aspirations and outcomes; (xv) our commitments
+
+ndustry trends; (v) our projected and expected production and performance levels and development projects; (vi) our expectations regarding our investments, including in potential growth options and technology and innovation, and perceived benefits and opportunities; (vii) our reserves and resources estimates; (viii) our plans for our major projects and related budget and capital allocations; (ix) our expectations, commitments and objectives with respect to sustainability, decarbonisation, natural resource management, climate change and portfolio resilience and timelines and plans to seek to achieve or implement such objectives, including our approach to equitable change and transitions, our Climate Transition Action Plan, climate change adaptation strategy and goals, targets, pathways and strategies to seek to reduce or support the reduction of greenhouse gas emissions, and related perceived costs, benefits and opportunities for BHP; (x) the assumptions, beliefs and conclusions in our climate change related statements and strategies, for example, in respect of future temperatures, energy consumption and greenhouse gas emissions, and climate-related impacts; (xi) our commitment to social value and our 2030 goals; (xii) our commitments to sustainability reporting, frameworks, standards and initiatives; (xiii) our commitments to improve or maintain safe tailings storage management; (xiv) our commitments to achieve certain inclusion and diversity targets, aspirations and outcomes; (xv) our commitments to achieve certain targets and outcomes with respect to Indigenous peoples and the communities where we operate; (xvi) our commitments to achieve certain water-related targets and outcomes; and (xvii) our commitments to achieve certain health and safety targets and outcomes. 
+ Forward-looking statements are based on management’s expectations and reflect judgements, assumptions, estimates and other information available, as at the date of this Report. These statements do no
+
+construction or production commencement dates, revenues, costs or production output and anticipated lives of assets, mines or facilities include: (i) our ability to profitably produce and deliver the products extracted to applicable markets; (ii) the development and use of new technologies and related risks; (iii) the impact of economic and geopolitical factors, including foreign currency exchange rates on the market prices of the commodities we produce and competition in the markets in which we operate; (iv) activities of government authorities in or impacting the countries where we sell our products and in the countries where we are exploring or developing projects, facilities or mines, including increases in taxes and royalties or implementation or expansion of trade or export restrictions; (v) changes in environmental and other regulations; (vi) political or geopolitical uncertainty and conflicts; (vii) labour unrest; (viii) weather, climate variability or other manifestations of climate change; and (ix) other factors identified in the risk factors set out in OFR 11. 
+ In addition, there are limitations with respect to scenario analysis, including any climate-related scenario analysis, and it is difficult to predict which, if any, of the scenarios might eventuate. Scenario analysis is not an indication of probable outcomes and relies on assumptions that may or may not prove to be correct or eventuate. 
+ Except as required by applicable regulations or by law, BHP does not undertake to publicly update or review any forward-looking statements, whether as a result of new information or future events. 
+ Past performance cannot be relied on as a guide to future performance. 
+ Emissions and energy consumption data 
+ Due to the inherent uncertainty and limitations in measuring GHG emissions and operational energy consumption under the calculation methodologies used in the preparation of such data, all GHG emissions and operational energy consumption data or references
+
+9.
+ 
+ Sustainability
+
+9.1
+ 
+ Our sustainability approach
+
+9.2
+ 
+ Sustainability governance
+
+9.3
+ 
+ Material sustainability topics (including human rights)
+
+9.8
+ 
+ Climate Change
+
+9.9
+ 
+ Nature and environmental performance
+
+9.13
+ 
+ Value chain sustainability
+
+ormance of the ships loading BHP cargo and partners with reliable vessel owners with excellent operational, safety and crew welfare standards. 
+ Procurement 
+ Our global Procurement team plays a critical role in connecting our operated assets, projects and functions with the suppliers that help enable safe, efficient and reliable operations. We partner strategically across our supply chain to optimise performance, reduce operating costs, manage risk and generate long-term value. Through collaboration and innovation, we support BHP’s sustainability objectives, including the reduction of GHG emissions, and we are committed to fostering enduring relationships with both global suppliers and local businesses in the communities where we operate. 
+ Market Analysis and Economics 
+ Our Market Analysis and Economics team develops BHP’s proprietary view on the outlook for commodity demand and prices, as well as our input costs, the world economy and financial markets, and the potential impact of climate change in those contexts. The team works with our Procurement, Maritime and Sales and Marketing sub-functions to help optimise end-to-end commercial value and with the Portfolio Strategy and Development and External Affairs functions to identify and respond to long-run strategic changes in our operating environment. 
+ Risk, Governance and Analytics 
+ The role of our Risk, Governance and Analytics team is to provide oversight of material risks, manage commodity price risk and counterparty risk, and optimise value for Commercial through insights, data analytics and solutions. This enables functional integrity and protection of BHP’s licence to operate. 
+ Global Business Services 
+ The Global Business Services team integrates repeatable process activity across the Group into a single shared services operation. With the BHP Operating System and digital process transformation capabilities at its core, the team has the mandate to aggregate, operate and improve end-to-end processes on
+
+has been excluded from this Report (as well as from pre-FY2025 comparative periods, as described above). 
+ Sustainability-related data and information relating to the OZ Minerals Brazil assets has been excluded from this Report unless expressly stated otherwise in the relevant section. Where data from OZ Minerals Brazil assets is included as required to meet legal and regulatory requirements or as necessary to meet applicable voluntary standards and benchmarks, that data has been prepared in accordance with former OZ Minerals standards (i) for the Centro Gold assets until completion of its divestment of 20 December 2024 and such data is included up until that date only; and (ii) for all remaining assets while we considered strategic options for divestment of these assets. 
+ 9.2 Sustainability governance 
+ Board 
+ The BHP Board is responsible for overseeing our approach to sustainability and sustainability performance, including the topics of safety, health, community, environment and climate change. All four standing Board Committees support the Board’s oversight of sustainability-related issues, including climate-related risks (threats and opportunities). 
+ Sustainability topics considered by the Board during FY2025 included climate change and environment-related topics, which were regularly on the agenda for Board meetings and considered as part of strategic discussions. In FY2025, the Board reviewed and approved public sustainability targets, goals and disclosures, progress against our social value scorecard 2030 goals (including climate-related), key metrics and milestones, received progress updates against our public climate-related targets and goals, and considered applicable sustainability-related issues when assessing corporate strategy and portfolio options, certain investment requests, risk and policy settings. The Board and each of its Committees, as relevant, are informed on sustainability-related matters through Board papers, progress updates from mana
+
+viewed and approved public sustainability targets, goals and disclosures, progress against our social value scorecard 2030 goals (including climate-related), key metrics and milestones, received progress updates against our public climate-related targets and goals, and considered applicable sustainability-related issues when assessing corporate strategy and portfolio options, certain investment requests, risk and policy settings. The Board and each of its Committees, as relevant, are informed on sustainability-related matters through Board papers, progress updates from management, material risk reports and presentations. The Board receives reports from the Chair of each Committee following Committee meetings. Sustainability-related topics are also incorporated into Director induction programs, ongoing training and site visits to assist Directors in their oversight. 
+ >For information on BHP’s governance structure, including the work of the Board and each its Committees with respect to climate change, refer to the Corporate Governance Statement 
+ Management 
+ Management plays a key role in assessing and managing sustainability-related matters, which includes:
+
+•
+ 
+ The CEO and ELT execute sustainability-related policies and strategy approved by the Board and are accountable for performance and achievement of BHP’s sustainability-related commitments, targets and goals, including our climate change targets and goals.
+
+•
+ 
+ Oversight of sustainability-related topics transitioned from the ESG and Sustainability Steering Committee in early FY2025 to the ELT, assisted by the OpCo. On a quarterly basis, ESG and sustainability-related topics are discussed at either the ELT and/or the OpCo.
+
+•
+ 
+ Group Officers, including the Group Sustainability and Social Value Officer and Group Health, Safety and Security Officer, are direct reports of relevant ELT members and are responsible for monitoring and driving our sustainability strategy, including safety, climate change and environment-related considerations, within the broader BHP strategy and portfolio evaluation.
+
+•
+ 
+ Management is supported by BHP’s asset and function teams such as the Group Sustainability and Social Value team and the Risk team.
+
+The ELT, the OpCo and relevant members of management receive regular progress and performance reports from asset and function teams on sustainability-related matters. For climate change and environment-related matters, this includes operational greenhouse gas (GHG) emissions, operational and value chain GHG emission reduction activities, adaptation strategy-related activities, management of climate-related risks (threats and opportunities), water stewardship and implementation of the BHP Healthy environment goal roadmap. In addition, sustainability-related matters, including progress towards our climate change targets and goals, are discussed by the ELT and OpCo throughout the year as specific agenda items and as part of strategic discussions. 
+ 9.3 Material sustainability topics (including human rights) 
+ Annual sustainability materiality assessment 
+ Each year we undertake an impact materiality assessment in alignment with GRI recommendations to determine which sustainability topics are most material to our business, partners and stakeholders for the purpose of our sustainability-related reporting (which may differ from the materiality standards appli
+
+requirements and other expectations for EITI supporting companies. We publish information about how we use beneficial ownership information in our anti-corruption processes (refer to bhp.com/sustainability/ethics-business-conduct). In parallel, we continued to publish our list of entities in which BHP Group Limited’s effective interest is 100 per cent and certain entities in which BHP Group Limited’s effective interest is less than 100 per cent, including all controlled subsidiaries operating in the mining sectors, all mining operations joint ventures generating material revenue for BHP (and available information in relation to the other legal owners in these joint ventures) and entities in which we hold a partial interest (with some exclusions – refer to bhp.com/sustainability/ethics-business-conduct). 
+ Other initiatives include our representation on the Board of the EITI and financial support for Steering Committee membership of the Bribery Prevention Network (in Australia). 
+ 9.8 Climate Change 
+ We believe the warming of the climate is unequivocal, human influence is clear and physical climate-related impacts are unavoidable. We recognise the role we play in supporting the net zero transition the world must make. 
+ This 9.8 Climate Change reflects extracts from the corresponding disclosure in the Australian Annual Report have been omitted from this Form 20-F. Only information that is included in, or expressly incorporated by reference into, this Form 20-F shall be deemed to form a part of this Annual Report.

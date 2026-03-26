@@ -7,6 +7,7 @@ export interface Asset {
   revenue_usd_m: number;
   scope1_tco2e: number;
   scope2_tco2e: number;
+  scope3_tco2e: number;
   green_revenue_pct: number;
   controversies: number;
 }

@@ -37,14 +37,46 @@ async def _init_db_background() -> None:
         logger.info("db_init_start")
         await init_db()
         async with async_session_factory() as session:
-            await seed_database(session)
-        logger.info("db_init_complete")
+            seeded = await seed_database(session)
+        logger.info("db_init_complete", seeded=seeded)
     except Exception as exc:
         # Log but don't crash — the app still serves requests; DB-dependent
         # endpoints will return 500s until the database becomes reachable.
         logger.error("db_init_failed", error=str(exc), error_type=type(exc).__name__)
+        seeded = False
 
-    # Seed the vector store with SEC filing excerpts for RAG
+    # Run live data pipelines on first boot if the DB was just seeded
+    # and PIPELINE_ON_STARTUP is enabled.  This populates the emissions
+    # and climate data tables with real EPA GHGRP / NOAA / World Bank
+    # data instead of relying only on the small seed dataset.
+    if seeded and settings.pipeline_on_startup:
+        try:
+            logger.info("pipeline_startup_run_begin")
+            from .pipeline.flows import climate_data_flow
+
+            result = await climate_data_flow(
+                load_to_db=True,
+                include_noaa=bool(settings.noaa_api_token),
+                include_epa=True,
+                include_worldbank=True,
+                include_sec=True,
+                days_back=365,
+            )
+            logger.info(
+                "pipeline_startup_run_complete",
+                status=result.get("status"),
+                totals=result.get("totals"),
+            )
+        except Exception as exc:
+            logger.warning(
+                "pipeline_startup_run_failed",
+                error=str(exc),
+                msg="Seed data remains available; live data will be fetched on next trigger.",
+            )
+
+    # Seed the vector store with SEC filing excerpts for RAG.
+    # If the live SEC EDGAR pipeline ran above, fresh filings were cached
+    # to disk and will be ingested alongside any pre-existing static files.
     try:
         from .ingestion import seed_vector_store
 

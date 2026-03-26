@@ -103,12 +103,26 @@ async def ingest_all_filings(
 async def seed_vector_store() -> dict:
     """Clear and re-seed the global vector store with filing excerpts.
 
-    Designed to be called at app startup so the RAG pipeline has
-    authoritative content from day one.
+    On startup this first attempts to fetch **live** filings from SEC
+    EDGAR (EFTS full-text search → filing download → HTML parsing).
+    Successfully fetched filings are cached as .txt files alongside the
+    static excerpts so that subsequent restarts are instant.
+
+    If the live fetch fails or returns nothing the existing static files
+    are used as a fallback.
 
     Returns:
         Summary dict from :func:`ingest_all_filings`.
     """
+    # Attempt live EDGAR fetch — results are cached to disk
+    try:
+        from .sec_filings import fetch_live_filings
+
+        live_results = await fetch_live_filings()
+        logger.info("live_sec_filings_fetched", count=len(live_results))
+    except Exception as exc:
+        logger.warning("live_sec_filings_skipped", error=str(exc))
+
     store = get_vector_store()
     store.clear()
     return await ingest_all_filings(store)
