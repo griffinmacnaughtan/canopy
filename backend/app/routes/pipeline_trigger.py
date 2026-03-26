@@ -12,7 +12,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..config import get_settings
 from ..database.connection import get_db
 from ..database.pipeline_models import PipelineRun
 
