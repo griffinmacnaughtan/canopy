@@ -272,6 +272,12 @@ def validate_quality(data: dict):
     elif "NOAA" in source:
         key_fields = ["station", "date", "datatype"]
         numeric_fields = ["value"]
+    elif "WORLDBANK" in source:
+        key_fields = ["country", "variable", "scenario", "period"]
+        numeric_fields = ["annual_mean"]
+    elif "SEC" in source:
+        key_fields = ["ticker", "form_type"]
+        numeric_fields = ["char_count"]
     else:
         key_fields = None
         numeric_fields = None
@@ -530,18 +536,21 @@ async def climate_data_flow(
     if include_sec:
         extraction_tasks.append(("SEC", extract_sec_filings(config)))
 
-    extracted_data = {}
-    for name, coro in extraction_tasks:
+    async def _safe_extract(name: str, coro):
+        """Run a single extractor, catching errors to avoid aborting the whole batch."""
         try:
-            extracted_data[name] = await coro
+            return name, await coro
         except Exception as e:
             log.error(f"Extraction failed for {name}: {e}")
-            extracted_data[name] = {
+            return name, {
                 "source": name,
                 "records": [],
                 "status": "error",
                 "error": str(e),
             }
+
+    extraction_results = await asyncio.gather(*[_safe_extract(n, c) for n, c in extraction_tasks])
+    extracted_data = dict(extraction_results)
 
     # =========================================================================
     # VALIDATION
@@ -583,39 +592,49 @@ async def climate_data_flow(
     total_extracted = 0
     total_transformed = 0
 
-    for name, data in transformed_data.items():
-        # Stage all data
-        staged = load_to_staging(data, batch_id)
+    # Create a single PostgresLoader to reuse across all sources (avoids
+    # creating one engine + connection pool per source).
+    _prod_loader: PostgresLoader | None = None
+    if load_to_db and config.database_url and "sqlite" not in config.database_url:
+        _prod_loader = PostgresLoader(config.database_url)
 
-        # Load to app database (works with SQLite and PostgreSQL)
-        db_loaded = await load_to_database(staged, name)
+    try:
+        for name, data in transformed_data.items():
+            # Stage all data
+            staged = load_to_staging(data, batch_id)
 
-        # Optionally load to production PostgreSQL
-        if load_to_db:
-            final = await load_to_production(db_loaded, config)
-        else:
-            final = db_loaded
+            # Load to app database (works with SQLite and PostgreSQL)
+            db_loaded = await load_to_database(staged, name)
 
-        final_results[name] = final
+            # Optionally load to production PostgreSQL
+            if _prod_loader:
+                final = await load_to_production(db_loaded, config)
+            else:
+                final = db_loaded
 
-        extracted_count = len(extracted_data.get(name, {}).get("records", []))
-        transformed_count = len(data.get("records", []))
-        loaded_count = final.get("database", {}).get("records_loaded", 0)
+            final_results[name] = final
 
-        total_extracted += extracted_count
-        total_transformed += transformed_count
-        total_loaded += loaded_count
+            extracted_count = len(extracted_data.get(name, {}).get("records", []))
+            transformed_count = len(data.get("records", []))
+            loaded_count = final.get("database", {}).get("records_loaded", 0)
 
-        results["sources"][name] = {
-            "records_extracted": extracted_count,
-            "records_transformed": transformed_count,
-            "records_loaded": loaded_count,
-            "staging_status": final.get("staging", {}).get("status"),
-            "database_status": final.get("database", {}).get("status"),
-            "production_status": final.get("production", {}).get("status")
-            if load_to_db
-            else "skipped",
-        }
+            total_extracted += extracted_count
+            total_transformed += transformed_count
+            total_loaded += loaded_count
+
+            results["sources"][name] = {
+                "records_extracted": extracted_count,
+                "records_transformed": transformed_count,
+                "records_loaded": loaded_count,
+                "staging_status": final.get("staging", {}).get("status"),
+                "database_status": final.get("database", {}).get("status"),
+                "production_status": final.get("production", {}).get("status")
+                if load_to_db
+                else "skipped",
+            }
+    finally:
+        if _prod_loader:
+            await _prod_loader.close()
 
     results["completed_at"] = datetime.utcnow().isoformat()
     results["status"] = "success"
@@ -624,6 +643,15 @@ async def climate_data_flow(
         "transformed": total_transformed,
         "loaded": total_loaded,
     }
+
+    # Clean up staging files older than 7 days
+    try:
+        staging = StagingLoader()
+        cleared = staging.clear_staged(before_date=datetime.utcnow() - timedelta(days=7))
+        if cleared:
+            log.info(f"Cleared {cleared} old staging files")
+    except Exception:
+        pass
 
     # Record pipeline run in database
     session_factory = get_db_session_factory()

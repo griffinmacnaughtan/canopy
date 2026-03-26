@@ -12,6 +12,7 @@ Example:
 No authentication required.
 """
 
+import asyncio
 from datetime import datetime
 from typing import Any
 
@@ -137,19 +138,22 @@ class WorldBankClimateExtractor(BaseExtractor):
                             scenario="historical",
                         )
                         if baseline is not None:
-                            all_records.append({
-                                "country": country,
-                                "variable": variable,
-                                "scenario": "historical",
-                                "period": _HISTORICAL_PERIOD,
-                                "period_start": 1995,
-                                "period_end": 2014,
-                                "annual_mean": baseline,
-                                "_source": self.source_name,
-                                "_extracted_at": datetime.utcnow().isoformat(),
-                            })
+                            all_records.append(
+                                {
+                                    "country": country,
+                                    "variable": variable,
+                                    "scenario": "historical",
+                                    "period": _HISTORICAL_PERIOD,
+                                    "period_start": 1995,
+                                    "period_end": 2014,
+                                    "annual_mean": baseline,
+                                    "_source": self.source_name,
+                                    "_extracted_at": datetime.utcnow().isoformat(),
+                                }
+                            )
                     except Exception as e:
                         errors.append(f"Baseline {country}/{variable}: {e}")
+                    await asyncio.sleep(0.15)  # rate limit: ~7 req/s
 
             # Fetch projections
             for country in countries:
@@ -165,17 +169,19 @@ class WorldBankClimateExtractor(BaseExtractor):
                                     scenario=scenario,
                                 )
                                 if value is not None:
-                                    all_records.append({
-                                        "country": country,
-                                        "variable": variable,
-                                        "scenario": scenario,
-                                        "period": period_str,
-                                        "period_start": p_start,
-                                        "period_end": p_end,
-                                        "annual_mean": value,
-                                        "_source": self.source_name,
-                                        "_extracted_at": datetime.utcnow().isoformat(),
-                                    })
+                                    all_records.append(
+                                        {
+                                            "country": country,
+                                            "variable": variable,
+                                            "scenario": scenario,
+                                            "period": period_str,
+                                            "period_start": p_start,
+                                            "period_end": p_end,
+                                            "annual_mean": value,
+                                            "_source": self.source_name,
+                                            "_extracted_at": datetime.utcnow().isoformat(),
+                                        }
+                                    )
 
                                     self.logger.info(
                                         "projection_extracted",
@@ -189,6 +195,7 @@ class WorldBankClimateExtractor(BaseExtractor):
                                 msg = f"{country}/{variable}/{scenario}/{period_str}: {e}"
                                 errors.append(msg)
                                 self.logger.warning("projection_failed", error=msg)
+                            await asyncio.sleep(0.15)  # rate limit: ~7 req/s
 
         return ExtractionResult(
             source=self.source_name,
@@ -296,17 +303,19 @@ class WorldBankClimateExtractor(BaseExtractor):
             baseline_temp = baselines.get(country)
             if baseline_temp is not None and record.get("annual_mean") is not None:
                 anomaly = record["annual_mean"] - baseline_temp
-                anomaly_records.append({
-                    "country": country,
-                    "scenario": scenario,
-                    "period_start": record["period_start"],
-                    "period_end": record["period_end"],
-                    "temperature_anomaly_c": round(anomaly, 2),
-                    "baseline_temp_c": baseline_temp,
-                    "projected_temp_c": record["annual_mean"],
-                    "_source": self.source_name,
-                    "_extracted_at": datetime.utcnow().isoformat(),
-                })
+                anomaly_records.append(
+                    {
+                        "country": country,
+                        "scenario": scenario,
+                        "period_start": record["period_start"],
+                        "period_end": record["period_end"],
+                        "temperature_anomaly_c": round(anomaly, 2),
+                        "baseline_temp_c": baseline_temp,
+                        "projected_temp_c": record["annual_mean"],
+                        "_source": self.source_name,
+                        "_extracted_at": datetime.utcnow().isoformat(),
+                    }
+                )
 
         return ExtractionResult(
             source=self.source_name,

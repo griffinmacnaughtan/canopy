@@ -98,6 +98,17 @@ WORLDBANK_CLIMATE_SCHEMA = [
     FieldSchema("_extracted_at", FieldType.STRING, required=True),
 ]
 
+SEC_EDGAR_SCHEMA = [
+    FieldSchema("ticker", FieldType.STRING, required=True),
+    FieldSchema("company", FieldType.STRING, required=True),
+    FieldSchema("text", FieldType.STRING, required=True),
+    FieldSchema("form_type", FieldType.STRING, required=False),
+    FieldSchema("filing_date", FieldType.STRING, required=False),
+    FieldSchema("char_count", FieldType.INTEGER, required=False, min_value=200),
+    FieldSchema("_source", FieldType.STRING, required=True),
+    FieldSchema("_extracted_at", FieldType.STRING, required=True),
+]
+
 
 class SchemaValidator:
     """
@@ -268,6 +279,7 @@ class SchemaValidator:
             "NOAA_CDO": NOAA_SCHEMA,
             "EPA_ENVIROFACTS": EPA_EMISSIONS_SCHEMA,
             "WORLDBANK_CLIMATE": WORLDBANK_CLIMATE_SCHEMA,
+            "SEC_EDGAR": SEC_EDGAR_SCHEMA,
         }
 
         schema = schemas.get(source, [])

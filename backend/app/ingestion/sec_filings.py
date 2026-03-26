@@ -141,12 +141,14 @@ async def fetch_live_filings() -> list[dict]:
         filepath = _DATA_DIR / f"{slug}_10k_climate_risks.txt"
         filepath.write_text(header + text, encoding="utf-8")
 
-        saved.append({
-            "ticker": ticker,
-            "company": company,
-            "filepath": str(filepath),
-            "chars": len(text),
-        })
+        saved.append(
+            {
+                "ticker": ticker,
+                "company": company,
+                "filepath": str(filepath),
+                "chars": len(text),
+            }
+        )
 
         logger.info(
             "live_filing_saved",

@@ -12,7 +12,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..config import get_settings
 from ..database.connection import get_db
 from ..database.pipeline_models import PipelineRun
 
@@ -57,6 +56,9 @@ async def trigger_pipeline(
     Only one pipeline can run at a time. If a pipeline is already
     running, returns 409 Conflict.
     """
+    # Atomic check-and-acquire: if the lock is already held, reject immediately.
+    # Both the check and the run-record creation happen inside the lock to
+    # prevent TOCTOU races and orphaned "running" records.
     if _pipeline_lock.locked():
         raise HTTPException(
             status_code=409,
@@ -66,17 +68,17 @@ async def trigger_pipeline(
     req = request or PipelineTriggerRequest()
     batch_id = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
-    # Record the run as started
-    run = PipelineRun(
-        run_id=f"manual-{batch_id}",
-        status="running",
-        started_at=datetime.utcnow(),
-        triggered_by="manual",
-    )
-    db.add(run)
-    await db.commit()
-
     async with _pipeline_lock:
+        # Record the run INSIDE the lock so it can't be orphaned
+        run = PipelineRun(
+            run_id=f"manual-{batch_id}",
+            status="running",
+            started_at=datetime.utcnow(),
+            triggered_by="manual",
+        )
+        db.add(run)
+        await db.commit()
+
         try:
             from ..pipeline.flows import climate_data_flow
 

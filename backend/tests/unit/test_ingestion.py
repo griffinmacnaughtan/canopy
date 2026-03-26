@@ -127,7 +127,9 @@ class TestFilingLoader:
             body_lower = body.lower()
             hits = {t for t in climate_terms if t in body_lower}
             if path.stem in static_files:
-                assert len(hits) >= 2, f"{path.name} has insufficient climate terminology: found {hits}"
+                assert len(hits) >= 2, (
+                    f"{path.name} has insufficient climate terminology: found {hits}"
+                )
 
 
 # ── Chunking Integration ────────────────────────────────────────────────

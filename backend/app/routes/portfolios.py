@@ -3,7 +3,7 @@
 import csv
 import io
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 from fastapi import APIRouter, Depends, File, Query, UploadFile
@@ -428,7 +428,7 @@ async def export_portfolio_report(
     ]
 
     return PortfolioExportReport(
-        generated_at=datetime.now(timezone.utc).isoformat(),
+        generated_at=datetime.now(UTC).isoformat(),
         portfolio_id=str(portfolio.id),
         portfolio_name=portfolio.name,
         description=portfolio.description,

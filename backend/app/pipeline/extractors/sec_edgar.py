@@ -52,8 +52,7 @@ COMPANY_CIKS: dict[str, dict[str, str]] = {
 
 # Climate-related keywords for EFTS full-text search
 _CLIMATE_QUERY = (
-    '"climate change" OR "greenhouse gas" OR "carbon emissions" '
-    'OR "climate risk" OR "net zero"'
+    '"climate change" OR "greenhouse gas" OR "carbon emissions" OR "climate risk" OR "net zero"'
 )
 
 # Regex patterns for extracting Item 1A from HTML filings
@@ -124,10 +123,23 @@ def _extract_climate_section(text: str, max_chars: int = 15_000) -> str:
     # Further filter to climate-relevant paragraphs
     paragraphs = section.split("\n\n")
     climate_keywords = {
-        "climate", "carbon", "greenhouse", "emissions", "ghg",
-        "net zero", "transition risk", "physical risk", "renewable",
-        "decarboni", "paris agreement", "scope 1", "scope 2", "scope 3",
-        "tcfd", "sustainability", "environmental",
+        "climate",
+        "carbon",
+        "greenhouse",
+        "emissions",
+        "ghg",
+        "net zero",
+        "transition risk",
+        "physical risk",
+        "renewable",
+        "decarboni",
+        "paris agreement",
+        "scope 1",
+        "scope 2",
+        "scope 3",
+        "tcfd",
+        "sustainability",
+        "environmental",
     }
     relevant = []
     char_count = 0
@@ -223,8 +235,14 @@ class SECEdgarExtractor(BaseExtractor):
         if not end_date:
             end_date = datetime.utcnow()
         if not start_date:
-            # Look back 18 months to catch the most recent annual filing
-            start_date = datetime(end_date.year - 1, max(1, end_date.month - 6), 1)
+            # Look back 18 months to catch the most recent annual filing.
+            # Manual month arithmetic to avoid dateutil dependency.
+            _m = end_date.month - 18
+            _y = end_date.year
+            while _m < 1:
+                _m += 12
+                _y -= 1
+            start_date = datetime(_y, _m, 1)
 
         target_tickers = tickers or list(COMPANY_CIKS.keys())
         all_records: list[dict[str, Any]] = []
@@ -306,9 +324,7 @@ class SECEdgarExtractor(BaseExtractor):
         )
 
         if resp.status_code != 200:
-            self.logger.warning(
-                "efts_search_error", ticker=ticker, status=resp.status_code
-            )
+            self.logger.warning("efts_search_error", ticker=ticker, status=resp.status_code)
             return None
 
         data = resp.json()
@@ -342,14 +358,18 @@ class SECEdgarExtractor(BaseExtractor):
 
         # Step 3: Download the filing document
         await asyncio.sleep(self.rate_limit)
-        full_url = f"https://www.sec.gov/{filing_url}" if not filing_url.startswith("http") else filing_url
+        full_url = (
+            f"https://www.sec.gov/{filing_url}" if not filing_url.startswith("http") else filing_url
+        )
         doc_resp = await client.get(full_url)
 
         if doc_resp.status_code != 200:
             return None
 
         # Step 4: Parse HTML to extract climate risk content
-        raw_text = _html_to_text(doc_resp.text) if "<html" in doc_resp.text.lower() else doc_resp.text
+        raw_text = (
+            _html_to_text(doc_resp.text) if "<html" in doc_resp.text.lower() else doc_resp.text
+        )
         climate_text = _extract_climate_section(raw_text)
 
         if len(climate_text) < 200:
