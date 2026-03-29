@@ -4,7 +4,7 @@
  */
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   Database,
@@ -16,11 +16,12 @@ import {
   MapPin,
   Calendar,
   RefreshCw,
+  Play,
 } from "lucide-react";
 import { api } from "@/api/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { EmissionsFacility, SectorEmissionsSummary } from "@/types";
+import type { EmissionsFacility, PipelineRunInfo, SectorEmissionsSummary } from "@/types";
 
 function formatNumber(num: number | null | undefined): string {
   if (num == null) return "N/A";
@@ -44,13 +45,44 @@ function formatDate(dateStr: string | null): string {
 export function PipelineExplorer() {
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [showAllEmitters, setShowAllEmitters] = useState(false);
+  const queryClient = useQueryClient();
 
-  // Fetch pipeline stats
+  // Fetch pipeline runs — polls every 5s while a run is active
+  const { data: runs } = useQuery<PipelineRunInfo[]>({
+    queryKey: ["pipelineRuns"],
+    queryFn: () => api.getPipelineRuns(5),
+    staleTime: 5_000,
+    refetchInterval: (query) => {
+      const data = query.state.data as PipelineRunInfo[] | undefined;
+      const hasRunning = data?.some((r: PipelineRunInfo) => r.status === "running");
+      return hasRunning ? 5_000 : false;
+    },
+  });
+
+  const isRunning = runs?.some((r: PipelineRunInfo) => r.status === "running") ?? false;
+
+  // Trigger mutation
+  const triggerMutation = useMutation({
+    mutationFn: () => api.triggerPipeline(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pipelineRuns"] });
+    },
+  });
+
+  // Fetch pipeline stats — refetch when no longer running
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["pipelineStats"],
     queryFn: () => api.getPipelineStats(),
     staleTime: 60_000,
+    refetchInterval: isRunning ? false : undefined,
   });
+
+  // Refetch stats once after a run finishes
+  const prevRunning = runs?.some((r: PipelineRunInfo) => r.status === "running");
+  if (!prevRunning && triggerMutation.isSuccess) {
+    queryClient.invalidateQueries({ queryKey: ["pipelineStats"] });
+    queryClient.invalidateQueries({ queryKey: ["topEmitters"] });
+  }
 
   // Fetch top emitters
   const { data: topEmitters, isLoading: emittersLoading } = useQuery({
@@ -64,13 +96,6 @@ export function PipelineExplorer() {
     queryKey: ["sectorEmissions", selectedSector],
     queryFn: () => api.getEmissionsData({ sector: selectedSector || undefined, limit: 10 }),
     enabled: !!selectedSector,
-    staleTime: 60_000,
-  });
-
-  // Fetch pipeline runs
-  const { data: runs } = useQuery({
-    queryKey: ["pipelineRuns"],
-    queryFn: () => api.getPipelineRuns(5),
     staleTime: 60_000,
   });
 
@@ -91,15 +116,42 @@ export function PipelineExplorer() {
               </p>
             </div>
           </div>
-          {isDemo && (
-            <span className="px-3 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
-              Demo Data
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {isDemo && (
+              <span className="px-3 py-1 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
+                Demo Data
+              </span>
+            )}
+            <button
+              onClick={() => triggerMutation.mutate()}
+              disabled={isRunning || triggerMutation.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isRunning || triggerMutation.isPending ? (
+                <>
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  Running…
+                </>
+              ) : (
+                <>
+                  <Play className="h-3 w-3" />
+                  Run Pipeline
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </CardHeader>
 
       <CardContent className="pt-6 space-y-6">
+        {/* Running banner */}
+        {isRunning && (
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+            <RefreshCw className="h-4 w-4 animate-spin flex-shrink-0" />
+            Pipeline is running — fetching EPA, NOAA, World Bank and SEC data. This takes a few minutes. Stats will refresh automatically.
+          </div>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard

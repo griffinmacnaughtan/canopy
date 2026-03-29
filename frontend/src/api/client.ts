@@ -438,6 +438,23 @@ export const api = {
     return handleResponse<PipelineRunInfo[]>(response);
   },
 
+  async triggerPipeline(options?: {
+    include_epa?: boolean;
+    include_noaa?: boolean;
+    include_worldbank?: boolean;
+    include_sec?: boolean;
+  }): Promise<{ status: string; batch_id: string; message: string }> {
+    if (isDemoMode()) {
+      return { status: "started", batch_id: "demo", message: "Demo mode: pipeline not triggered" };
+    }
+    const response = await fetchWithTimeout(`${API_BASE}/pipeline/trigger`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(options ?? {}),
+    });
+    return handleResponse(response);
+  },
+
   async getSectors(): Promise<SectorInfo[]> {
     if (isDemoMode()) {
       return MOCK_SECTORS;
