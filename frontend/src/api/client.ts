@@ -348,7 +348,12 @@ export const api = {
       return MOCK_PIPELINE_STATS;
     }
     const response = await fetchWithTimeout(`${API_BASE}/pipeline/stats`);
-    return handleResponse<PipelineStats>(response);
+    const data = await handleResponse<PipelineStats>(response);
+    // Fall back to mock data when the pipeline has never run
+    if (data.total_emissions_records === 0 && data.total_climate_records === 0) {
+      return MOCK_PIPELINE_STATS;
+    }
+    return data;
   },
 
   async getEmissionsData(params?: {
@@ -375,7 +380,14 @@ export const api = {
 
     const url = `${API_BASE}/pipeline/emissions${searchParams.toString() ? `?${searchParams}` : ""}`;
     const response = await fetchWithTimeout(url);
-    return handleResponse<EmissionsFacility[]>(response);
+    const data = await handleResponse<EmissionsFacility[]>(response);
+    if (data.length === 0) {
+      let mock = [...MOCK_EMISSIONS_DATA];
+      if (params?.sector) mock = mock.filter((d) => d.sector === params.sector);
+      if (params?.state) mock = mock.filter((d) => d.state === params.state);
+      return mock.slice(0, params?.limit || 50);
+    }
+    return data;
   },
 
   async getTopEmitters(limit: number = 10): Promise<EmissionsFacility[]> {
@@ -385,7 +397,13 @@ export const api = {
       ).slice(0, limit);
     }
     const response = await fetchWithTimeout(`${API_BASE}/pipeline/emissions/top-emitters?limit=${limit}`);
-    return handleResponse<EmissionsFacility[]>(response);
+    const data = await handleResponse<EmissionsFacility[]>(response);
+    if (data.length === 0) {
+      return [...MOCK_EMISSIONS_DATA]
+        .sort((a, b) => (b.total_emissions_mt_co2e || 0) - (a.total_emissions_mt_co2e || 0))
+        .slice(0, limit);
+    }
+    return data;
   },
 
   async getClimateData(params?: {
