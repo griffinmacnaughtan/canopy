@@ -129,9 +129,7 @@ async def trigger_pipeline(
 
 
 @router.post("/trigger/epa-only", response_model=PipelineTriggerResponse)
-async def trigger_epa_only(
-    background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)
-):
+async def trigger_epa_only(background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)):
     """Quick trigger for EPA emissions data only."""
     return await trigger_pipeline(
         background_tasks,
