@@ -288,7 +288,7 @@ export function PipelineExplorer() {
               {runs.map((run) => (
                 <div
                   key={run.run_id}
-                  className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-white border border-border rounded-lg"
                 >
                   <div className="flex items-center gap-3">
                     <RefreshCw
@@ -389,10 +389,10 @@ function SectorBar({
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05 }}
       onClick={onClick}
-      className={`w-full text-left p-3 rounded-lg transition-all ${
+      className={`w-full text-left p-3 rounded-lg border transition-all ${
         isSelected
-          ? "bg-blue-100 dark:bg-blue-900/30 ring-1 ring-blue-500"
-          : "bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800"
+          ? "bg-blue-50 border-blue-200 ring-1 ring-blue-400"
+          : "bg-white border-border hover:bg-slate-50"
       }`}
     >
       <div className="flex items-center justify-between mb-1.5">
@@ -439,27 +439,25 @@ function EmitterCard({ facility, rank }: { facility: EmissionsFacility; rank: nu
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: rank * 0.03 }}
-      className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl"
+      className="p-4 bg-white border border-border rounded-xl shadow-sm"
     >
       <div className="flex items-start gap-3">
         <span
-          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-            rank <= 3
-              ? "bg-red-100 text-red-600 dark:bg-red-900/30"
-              : "bg-slate-200 text-slate-600 dark:bg-slate-700"
+          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+            rank <= 3 ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-500"
           }`}
         >
           {rank}
         </span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">
+          <p className="text-sm font-semibold text-foreground truncate">
             {facility.facility_name || "Unknown Facility"}
           </p>
-          <p className="text-xs text-muted-foreground">
-            {facility.city}, {facility.state} | {facility.sector}
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            {facility.city}, {facility.state} · {facility.sector}
           </p>
-          <p className="text-sm font-bold text-red-600 mt-1">
-            {formatNumber(facility.total_emissions_mt_co2e)} tCO2e
+          <p className="text-sm font-bold text-red-600 mt-1.5">
+            {formatNumber(facility.total_emissions_mt_co2e)} tCO₂e
           </p>
         </div>
       </div>

@@ -45,45 +45,57 @@ class PipelineTriggerResponse(BaseModel):
 
 
 async def _run_pipeline_background(run_id: str, req: PipelineTriggerRequest) -> None:
-    """Run the pipeline in the background and update the run record on completion."""
+    """Run the pipeline in the background and update the run record on completion.
+
+    The session is intentionally NOT held open during the pipeline run — that
+    can take several minutes of idle time (HTTP calls to external APIs) which
+    causes Railway to drop the connection.  Instead we run the flow first, then
+    open a short-lived session just to persist the result.
+    """
+    status = "failed"
+    errors: str | None = None
+    records_extracted = records_transformed = records_loaded = 0
+    sources: list[str] = []
+
+    try:
+        from ..pipeline.flows import climate_data_flow
+
+        flow_result = await climate_data_flow(
+            load_to_db=req.load_to_db,
+            include_noaa=req.include_noaa,
+            include_epa=req.include_epa,
+            include_worldbank=req.include_worldbank,
+            include_sec=req.include_sec,
+            days_back=req.days_back,
+        )
+
+        status = flow_result.get("status", "success")
+        totals = flow_result.get("totals", {})
+        records_extracted = totals.get("extracted", 0)
+        records_transformed = totals.get("transformed", 0)
+        records_loaded = totals.get("loaded", 0)
+        sources = list(flow_result.get("sources", {}).keys())
+        logger.info("pipeline_completed", run_id=run_id, records_loaded=records_loaded)
+    except Exception as e:
+        logger.error("pipeline_background_failed", run_id=run_id, error=str(e))
+        errors = str(e)
+    finally:
+        _pipeline_lock.release()
+
+    # Persist result in a fresh, short-lived session
     async with async_session_factory() as db:
         result = await db.execute(select(PipelineRun).where(PipelineRun.run_id == run_id))
         run = result.scalar_one_or_none()
-        if not run:
-            return
-
-        try:
-            from ..pipeline.flows import climate_data_flow
-
-            flow_result = await climate_data_flow(
-                load_to_db=req.load_to_db,
-                include_noaa=req.include_noaa,
-                include_epa=req.include_epa,
-                include_worldbank=req.include_worldbank,
-                include_sec=req.include_sec,
-                days_back=req.days_back,
-            )
-
-            run.status = flow_result.get("status", "success")
+        if run:
+            run.status = status
             run.completed_at = datetime.utcnow()
-            run.records_extracted = flow_result.get("totals", {}).get("extracted", 0)
-            run.records_transformed = flow_result.get("totals", {}).get("transformed", 0)
-            run.records_loaded = flow_result.get("totals", {}).get("loaded", 0)
-            run.sources = str(list(flow_result.get("sources", {}).keys()))
+            run.records_extracted = records_extracted
+            run.records_transformed = records_transformed
+            run.records_loaded = records_loaded
+            run.sources = str(sources)
+            if errors:
+                run.errors = errors
             await db.commit()
-            logger.info(
-                "pipeline_completed",
-                run_id=run_id,
-                records_loaded=run.records_loaded,
-            )
-        except Exception as e:
-            logger.error("pipeline_background_failed", run_id=run_id, error=str(e))
-            run.status = "failed"
-            run.completed_at = datetime.utcnow()
-            run.errors = str(e)
-            await db.commit()
-        finally:
-            _pipeline_lock.release()
 
 
 @router.post("/trigger", response_model=PipelineTriggerResponse)

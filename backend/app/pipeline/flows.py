@@ -592,10 +592,19 @@ async def climate_data_flow(
     total_extracted = 0
     total_transformed = 0
 
-    # Create a single PostgresLoader to reuse across all sources (avoids
-    # creating one engine + connection pool per source).
+    # Only use the raw PostgresLoader when the app's ORM session factory is NOT
+    # available (i.e. running the flow as a standalone CLI script).  When called
+    # from the background task the ORM session is always present, so
+    # load_to_database covers the write and the raw loader would double-insert
+    # the same rows, causing constraint violations that fail the pipeline.
+    _has_app_session = get_db_session_factory() is not None
     _prod_loader: PostgresLoader | None = None
-    if load_to_db and config.database_url and "sqlite" not in config.database_url:
+    if (
+        load_to_db
+        and not _has_app_session
+        and config.database_url
+        and "sqlite" not in config.database_url
+    ):
         _prod_loader = PostgresLoader(config.database_url)
 
     try:
@@ -606,7 +615,7 @@ async def climate_data_flow(
             # Load to app database (works with SQLite and PostgreSQL)
             db_loaded = await load_to_database(staged, name)
 
-            # Optionally load to production PostgreSQL
+            # Standalone mode only: also push to production PostgreSQL via raw SQL
             if _prod_loader:
                 final = await load_to_production(db_loaded, config)
             else:
